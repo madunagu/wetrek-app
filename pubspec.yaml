@@ -1,0 +1,94 @@
+name: wetrek
+description: A Social Media where people who walk can conect
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  json_serializable: ^3.3.0
+  json_to_model: ^1.3.13
+  animations: ^1.1.0
+  http: ^0.12.1  
+  flutter_secure_storage: ^3.3.3
+  bloc: ^4.0.0
+  flutter_bloc: ^4.0.0
+  meta: ^1.1.6
+#  equatable: ^1.0.0
+#  datetime_picker_formfield: ^1.0.0
+  google_maps_flutter:
+  geolocator:
+  search_map_place:
+#  flutter_polyline_points: ^0.1.0
+#  firebase_core: ^0.4.4+3
+#  firebase_auth: ^0.16.0
+#  cloud_firestore: ^0.13.5
+#  flutter_spinkit: ^4.1.2+1
+#  geoflutterfire:
+  geocoder:
+#  fluttertoast: ^4.0.0
+
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^1.0.0
+  flutter_launcher_icons: "^0.7.3"
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "images/logo.png"
+# The following section is specific to Flutter.
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+     - images/map.png
+     - images/dark_map.png
+     - images/sushi.jpg
+     - images/ice_cream.jpg
+     - images/museum.jpg
+     - images/avatar1.jpg
+     - images/avatar2.jpg
+     - images/avatar3.jpg
+     - images/avatar4.jpg
+
+  fonts:
+    - family:  MyFlutterApp
+      fonts:
+        - asset: fonts/MyFlutterApp.ttf
+    - family:  Gibson
+      fonts:
+        - asset: fonts/Gibson-Regular.ttf
+        - asset: fonts/gibson-bold.ttf
+          weight: 700
+        - asset: fonts/Gibson-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: fonts/Gibson-RegularItalic.ttf
+          style: italic
+    - family: Martel Sans
+      fonts:
+              - asset: fonts/MartelSans-Regular.ttf
+              - asset: fonts/MartelSans-Bold.ttf
+                weight: 700
+              - asset: fonts/MartelSans-ExtraBold.ttf
+                weight: 800
+              - asset: fonts/MartelSans-ExtraLight.ttf
+                weight: 200
+              - asset: fonts/MartelSans-Light.ttf
+                weight: 300
+              - asset: fonts/MartelSans-SemiBold.ttf
+                weight: 500

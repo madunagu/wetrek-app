@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="clip-path">
+      <rect width="24" height="24" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="Path_2" data-name="Path 2" d="M2.5,4.091A1.575,1.575,0,0,1,4.091,2.5H14.909A1.575,1.575,0,0,1,16.5,4.091V14.909A1.575,1.575,0,0,1,14.909,16.5H4.091A1.575,1.575,0,0,1,2.5,14.909V4.091Zm1.273,0V14.909a.3.3,0,0,0,.318.318H14.909a.3.3,0,0,0,.318-.318V4.091a.3.3,0,0,0-.318-.318H4.091a.3.3,0,0,0-.318.318Zm7.955.955a.636.636,0,1,1,1.273,0V6.636a3.5,3.5,0,1,1-7,0V5.045a.6.6,0,0,1,.636-.636.6.6,0,0,1,.636.636V6.636a2.227,2.227,0,0,0,4.455,0V5.045Z"/>
+    </clipPath>
+  </defs>
+  <g id="icons_pac" data-name="icons/pac" clip-path="url(#clip-path)">
+    <rect id="bg" width="24" height="24" fill="none"/>
+    <g id="ico" transform="translate(2.5 2.5)" opacity="0.8" clip-path="url(#clip-path-2)">
+      <rect id="Rectangle_9" data-name="Rectangle 9" width="17.182" height="17.182" transform="translate(0.909 0.909)" fill="#fff"/>
+    </g>
+  </g>
+</svg>

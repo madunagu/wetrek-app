@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="clip-path">
+      <rect width="24" height="24" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="icons_dots" data-name="icons/dots" clip-path="url(#clip-path)">
+    <rect id="bg" width="24" height="24" fill="none"/>
+    <rect id="line" width="8" height="2" rx="1" transform="translate(8.414 8.464) rotate(45)" fill="#78849e"/>
+    <rect id="line-2" data-name="line" width="8" height="2" rx="1" transform="translate(11.3 14.121) rotate(-45)" fill="#78849e"/>
+  </g>
+</svg>

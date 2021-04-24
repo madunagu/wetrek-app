@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <clipPath id="clip-path">
+      <rect width="24" height="24" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="Path" d="M18.292,23.182h-8.25v.455a1.375,1.375,0,0,1-2.75,0v-.591A3.181,3.181,0,0,1,5,20V8.182A3.175,3.175,0,0,1,8.208,5H20.125a3.175,3.175,0,0,1,3.208,3.182V20a3.14,3.14,0,0,1-2.292,3.045v.591a1.375,1.375,0,0,1-2.75,0v-.455ZM13.25,6.818H8.208A1.345,1.345,0,0,0,6.833,8.182v5.455A1.345,1.345,0,0,0,8.208,15H13.25V6.818Zm1.833,0V15h5.042A1.345,1.345,0,0,0,21.5,13.636V8.182a1.345,1.345,0,0,0-1.375-1.364ZM21.5,16.5a3.392,3.392,0,0,1-1.375.318H8.208A2.787,2.787,0,0,1,6.833,16.5V20a1.345,1.345,0,0,0,1.375,1.364H20.125A1.345,1.345,0,0,0,21.5,20V16.5ZM9.125,20.455A1.364,1.364,0,1,1,10.5,19.091a1.345,1.345,0,0,1-1.375,1.364Zm10.083,0a1.364,1.364,0,1,1,1.375-1.364,1.345,1.345,0,0,1-1.375,1.364Z" transform="translate(-5 -5)"/>
+    </clipPath>
+  </defs>
+  <g id="icons_transport_bus" data-name="icons/transport/bus" clip-path="url(#clip-path)">
+    <rect id="back" width="24" height="24" fill="none"/>
+    <g id="icon" transform="translate(3 2)" clip-path="url(#clip-path-2)">
+      <rect id="bg" width="22.917" height="24.545" transform="translate(-2.292 -2.273)" fill="#fff"/>
+    </g>
+  </g>
+</svg>
