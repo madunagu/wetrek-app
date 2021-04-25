@@ -249,11 +249,13 @@ class SubTripRow extends StatelessWidget {
         vertical: 16,
       ),
       decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        color: Color(0xff78849E),
-        width: 1,
-      ))),
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xff78849E),
+            width: 1,
+          ),
+        ),
+      ),
       child: Row(
         children: [
           ClipRRect(
@@ -285,7 +287,7 @@ class SubTripRow extends StatelessWidget {
               color: Color(0xff353A50),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.phone, color: Colors.white, size: 16),
+            child: Icon(Icons.message, color: Colors.white, size: 16),
           ),
         ],
       ),

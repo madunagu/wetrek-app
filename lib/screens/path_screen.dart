@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/widgets.dart';
-import 'package:wetrek/widgets/maps.dart';
+import 'package:wetrek/widgets/map_widgets.dart';
 
 class TransportPathScreen extends StatelessWidget {
   @override

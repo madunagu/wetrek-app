@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/models/User.dart';
+import 'package:wetrek/models/user.dart';
 import 'package:wetrek/widgets.dart';
 
 class ChatScreen extends StatelessWidget {

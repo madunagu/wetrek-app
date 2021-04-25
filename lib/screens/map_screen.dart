@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:wetrek/widgets/maps.dart';
+import 'package:wetrek/widgets/map_widgets.dart';
 
 enum MapState {
   initialized,

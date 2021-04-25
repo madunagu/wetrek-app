@@ -14,6 +14,13 @@ class TextStyles {
     color: Color(0xffffffff),
   );
 
+  static final large = const TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w500,
+    color: Colors.white,
+    height: 32 / 24,
+  );
+
   static final title = const TextStyle(
     fontSize: 40,
     height: 44 / 40,
@@ -32,6 +39,7 @@ class TextStyles {
     height: 19 / 14,
     color: Color(0xffffffff),
   );
+
   static final darkNormal = const TextStyle(
     color: Color(0xff454F63),
     fontSize: 16,
@@ -42,5 +50,11 @@ class TextStyles {
     color: Color(0xff959DAD),
     fontSize: 12,
     height: 16 / 12,
+  );
+  static final input = const TextStyle(
+    color: Color(0x9078849E),
+    fontSize: 15,
+    height: 30 / 15,
+    fontWeight: FontWeight.bold,
   );
 }

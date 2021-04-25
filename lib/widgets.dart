@@ -5,7 +5,7 @@ import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 
 class MyButton extends StatelessWidget {
-  MyButton(this.text, {this.onTap, this.color =const Color(0xff3ACCE1)});
+  MyButton(this.text, {this.onTap, this.color = const Color(0xff3ACCE1)});
   final String text;
   final VoidCallback onTap;
   final Color color;
@@ -73,7 +73,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget child;
   final Function onPressed;
   final IconData rightIcon;
-final Color color;
+  final Color color;
   @override
   final Size preferredSize;
   MyAppBar({
@@ -244,5 +244,68 @@ class MovementPainter extends CustomPainter {
     }
 
     canvas.drawCircle(Offset(0, size.height - 4), 4, bigCirclePaint);
+  }
+}
+
+class NotificationPopup extends StatelessWidget {
+  NotificationPopup({
+    @required this.title,
+    @required this.body,
+  });
+  final String title;
+  final String body;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: 24,
+      ),
+      decoration: BoxDecoration(
+        color: Color(0xff2A2E43),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(title, style: TextStyles.large),
+          SizedBox(height: 15),
+          Text(
+            body,
+            style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
+          ),
+          SizedBox(height: 23),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(112),
+                    color: Color(0xffC840E9),
+                  ),
+                  child: Icon(Icons.cancel, color: Colors.white, size: 24),
+                ),
+                SizedBox(width: 8),
+                Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(112),
+                    color: Color(0xff3ACCE1),
+                  ),
+                  child: Icon(Icons.done, color: Colors.white, size: 24),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

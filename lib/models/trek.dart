@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 //import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:wetrek/models/User.dart';
+import 'package:wetrek/models/user.dart';
 
 //These class represents public rides. rides that you can find searching...
 //Should be used when someone click CREATE
