@@ -21,6 +21,13 @@ class TextStyles {
     height: 32 / 24,
   );
 
+  static final darkLarge = const TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w500,
+    color: Color(0xff454F63),
+    height: 32 / 24,
+  );
+
   static final title = const TextStyle(
     fontSize: 40,
     height: 44 / 40,

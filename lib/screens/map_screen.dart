@@ -9,6 +9,7 @@ enum MapState {
   initialized,
   searchFocused,
   markerClicked,
+  waiting,
 }
 
 class MapScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  MapState mapState = MapState.initialized;
+  MapState mapState = MapState.waiting;
 
   Widget switchSheet() {
     switch (mapState) {
@@ -38,6 +39,8 @@ class _MapScreenState extends State<MapScreen> {
         );
       case MapState.searchFocused:
         return PlaceDetailsPreview();
+      case MapState.waiting:
+        return MapSheet(child: TripInfo());
       case MapState.markerClicked:
         return MapSheet(
           child: MapSheetDetails(child: PlaceDetailsPreview()),

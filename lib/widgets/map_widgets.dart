@@ -215,6 +215,8 @@ class TripInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      //in addition to the 16 by the map sheet widget
+      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -222,12 +224,15 @@ class TripInfo extends StatelessWidget {
             '4 mins away',
             style: TextStyle(
               fontSize: 20,
+              color: Colors.white,
               fontWeight: FontWeight.w500,
               height: 27 / 20,
             ),
           ),
           SizedBox(height: 23),
           SubTripRow(),
+          // this is the underline
+          Container(),
           SubTripRow(),
           SizedBox(height: 12),
           MyButton(
@@ -245,22 +250,14 @@ class SubTripRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: 24,
         vertical: 16,
       ),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xff78849E),
-            width: 1,
-          ),
-        ),
-      ),
+
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset('images/avatar2.jpg'),
+            child: Image.asset('images/avatar2.jpg',width: 48,height: 48),
           ),
           SizedBox(width: 16),
           Column(children: [
@@ -268,16 +265,7 @@ class SubTripRow extends StatelessWidget {
             Text('4.5 stars', style: TextStyles.minor),
           ]),
           Spacer(),
-          Container(
-            alignment: Alignment.center,
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Color(0xff353A50),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.phone, color: Colors.white, size: 16),
-          ),
+          MyIconButton(),
           SizedBox(width: 8),
           Container(
             alignment: Alignment.center,
@@ -295,67 +283,22 @@ class SubTripRow extends StatelessWidget {
   }
 }
 
-class PlacedCard extends StatelessWidget {
-  PlacedCard({
-    @required this.title,
-    @required this.subTitle,
-    this.coverImage,
-    this.active = false,
-  });
-
-  final String title;
-  final String subTitle;
-  final String coverImage;
-  final bool active;
+class MyIconButton extends StatelessWidget {
+  const MyIconButton({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 6),
-        height: active ? 200 : 50,
-        width: 152,
-        child: Stack(
-          children: [
-            Image.asset(
-              'images/sushi.jpg',
-              height: active ? 200 : 172,
-              fit: BoxFit.cover,
-            ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                height: 60,
-                width: 152,
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 12,
-                  bottom: 6,
-                ),
-                color: active ? WeTrekColors.blue1 : Color(0xff353A50),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Opacity(
-                      opacity: 0.56,
-                      child: Text(subTitle, style: TextStyles.minor),
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
+    return Container(
+      alignment: Alignment.center,
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Color(0xff353A50),
+        borderRadius: BorderRadius.circular(8),
       ),
+      child: Icon(Icons.phone, color: Colors.white, size: 16),
     );
   }
 }

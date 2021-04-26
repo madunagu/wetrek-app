@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:wetrek/screens/categories_screen.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/history_screen.dart';
 import 'package:wetrek/screens/map_screen.dart';
+import 'package:wetrek/screens/nearby_screen.dart';
 import 'package:wetrek/screens/notifications_screen.dart';
 import 'package:wetrek/screens/profile_screen.dart';
+import 'package:wetrek/screens/terms_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +24,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Gibson',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MapScreen(),
+      home: TermsScreen(),
     );
   }
 }

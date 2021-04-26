@@ -74,6 +74,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function onPressed;
   final IconData rightIcon;
   final Color color;
+  final Color fontColor;
   @override
   final Size preferredSize;
   MyAppBar({
@@ -82,6 +83,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onPressed,
     this.rightIcon = Icons.filter_list,
     this.color = Colors.white,
+    this.fontColor = const Color(0xff454F63),
   }) : preferredSize = Size.fromHeight(child == null ? 136.0 : 176);
 
   @override
@@ -111,17 +113,22 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.arrow_back, color: Color(0xff454F63)),
+                        child: Icon(Icons.arrow_back, color: fontColor),
                       ),
                       GestureDetector(
                         onTap: onPressed,
-                        child: Icon(rightIcon, color: Color(0xff454F63)),
+                        child: Icon(rightIcon, color: fontColor),
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 14),
-                Text(title, style: TextStyles.title),
+                Text(
+                  title,
+                  style: TextStyles.title.copyWith(
+                    color: fontColor,
+                  ),
+                ),
               ],
             ),
           ),
@@ -305,6 +312,71 @@ class NotificationPopup extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PlacedCard extends StatelessWidget {
+  PlacedCard({
+    @required this.title,
+    @required this.subTitle,
+    this.coverImage,
+    this.active = false,
+  });
+
+  final String title;
+  final String subTitle;
+  final String coverImage;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: EdgeInsets.only(right: 12),
+        height: active ? 200 : 50,
+        width: 152,
+        child: Stack(
+          children: [
+            Image.asset(
+              'images/sushi.jpg',
+              height: active ? 200 : 172,
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                height: 60,
+                width: 152,
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 12,
+                  bottom: 6,
+                ),
+                color: active ? WeTrekColors.blue1 : Color(0xff353A50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Opacity(
+                      opacity: 0.56,
+                      child: Text(subTitle, style: TextStyles.minor),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
