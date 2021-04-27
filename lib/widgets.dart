@@ -106,21 +106,10 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: 26,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.arrow_back, color: fontColor),
-                      ),
-                      GestureDetector(
-                        onTap: onPressed,
-                        child: Icon(rightIcon, color: fontColor),
-                      ),
-                    ],
-                  ),
+                MyAppBarNavigation(
+                  fontColor: fontColor,
+                  onPressed: onPressed,
+                  rightIcon: rightIcon,
                 ),
                 SizedBox(height: 14),
                 Text(
@@ -134,6 +123,61 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           SizedBox(height: 19),
           child ?? Container(),
+        ],
+      ),
+    );
+  }
+}
+
+class ReviewBar extends StatelessWidget {
+  ReviewBar({
+    this.max,
+    this.num,
+  });
+  final int max;
+  final int num;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          for (var i = 0; i < num; i++)
+            Icon(Icons.star, color: Color(0xffFFB900)),
+          for (var i = 0; i < max - num; i++)
+            Icon(Icons.star, color: Color(0x5affffff)),
+        ],
+      ),
+    );
+  }
+}
+
+class MyAppBarNavigation extends StatelessWidget {
+  const MyAppBarNavigation({
+    Key key,
+    this.onPressed,
+    this.rightIcon = Icons.filter_list,
+    this.fontColor = const Color(0xff454F63),
+  }) : super(key: key);
+
+  final Color fontColor;
+  final Function onPressed;
+  final IconData rightIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 26,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back, color: fontColor),
+          ),
+          GestureDetector(
+            onTap: onPressed,
+            child: Icon(rightIcon, color: fontColor),
+          ),
         ],
       ),
     );
@@ -317,6 +361,79 @@ class NotificationPopup extends StatelessWidget {
   }
 }
 
+class OverlayPlacedCard extends StatelessWidget {
+  OverlayPlacedCard({
+    @required this.title,
+    @required this.subTitle,
+    this.coverImage,
+    this.active = false,
+  });
+
+  final String title;
+  final String subTitle;
+  final String coverImage;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 152,
+      height: 200,
+      margin: EdgeInsets.only(right: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            Image.asset(
+              'images/sushi.jpg',
+              fit: BoxFit.cover,
+              width: 152,
+              height: 200,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x002A2E43),
+                    Color(0x8408090D),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(subTitle, style: TextStyles.minor),
+                        SizedBox(width: 2),
+                        Icon(Icons.star, color: Color(0x89ffffff), size: 16),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class PlacedCard extends StatelessWidget {
   PlacedCard({
     @required this.title,
@@ -377,6 +494,30 @@ class PlacedCard extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MyInput extends StatelessWidget {
+  MyInput();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xff455B63),
+            offset: Offset(0, 4),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: TextField(
+        style: TextStyles.input,
       ),
     );
   }

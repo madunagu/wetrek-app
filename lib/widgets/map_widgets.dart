@@ -5,6 +5,7 @@ import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/option.dart';
 import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/avatar_list.dart';
 
 class SearchBar extends StatelessWidget {
   @override
@@ -216,7 +217,7 @@ class TripInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       //in addition to the 16 by the map sheet widget
-      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,12 +253,11 @@ class SubTripRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(
         vertical: 16,
       ),
-
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset('images/avatar2.jpg',width: 48,height: 48),
+            child: Image.asset('images/avatar2.jpg', width: 48, height: 48),
           ),
           SizedBox(width: 16),
           Column(children: [
@@ -286,8 +286,9 @@ class SubTripRow extends StatelessWidget {
 class MyIconButton extends StatelessWidget {
   const MyIconButton({
     Key key,
+    this.icon = Icons.phone
   }) : super(key: key);
-
+final IconData icon;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -298,7 +299,7 @@ class MyIconButton extends StatelessWidget {
         color: Color(0xff353A50),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.phone, color: Colors.white, size: 16),
+      child: Icon(icon, color: Colors.white, size: 16),
     );
   }
 }
@@ -506,50 +507,75 @@ class LocationPairInputCard extends StatelessWidget {
 }
 
 class LocationPairCard extends StatelessWidget {
+  LocationPairCard({this.onTap});
+  final Function onTap;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x15455B63),
-            spreadRadius: 1,
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          )
-        ],
-      ),
-      height: 133,
-      padding: EdgeInsets.only(left: 20, right: 16, top: 13, bottom: 15),
-      child: Row(
-        children: [
-          MovementDrawing(height: 73, width: 10),
-          SizedBox(width: 20),
-          Expanded(
-            child: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('pickup Location', style: TextStyles.darkMinor),
-                  Text('Fresh Market', style: TextStyles.darkNormal),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 15),
-                    height: 1,
-                    color: Color(0xffF4F4F6),
-                  ),
-                  Text(
-                    'Destination Location',
-                    style: TextStyles.darkMinor,
-                  ),
-                  Text('My Home', style: TextStyles.darkNormal),
-                ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x15455B63),
+              spreadRadius: 1,
+              blurRadius: 16,
+              offset: Offset(0, 4),
+            )
+          ],
+        ),
+        height: 183,
+        padding: EdgeInsets.only(left: 20, right: 16, top: 13, bottom: 15),
+        child: Row(
+          children: [
+            MovementDrawing(height: 73, width: 10),
+            SizedBox(width: 20),
+            Expanded(
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('pickup Location', style: TextStyles.darkMinor),
+                    Text('Fresh Market', style: TextStyles.darkNormal),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Color(0xffF4F4F6),
+                    ),
+                    Text(
+                      'Destination Location',
+                      style: TextStyles.darkMinor,
+                    ),
+                    Text('My Home', style: TextStyles.darkNormal),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 6),
+                      height: 1,
+                      color: Color(0xffF4F4F6),
+                    ),
+                    Container(
+                      child: Row(
+                        children: [
+                          AvatarList(
+                            imgSrcs: [
+                              'images/avatar1.jpg',
+                              'images/avatar2.jpg',
+                              'images/avatar3.jpg',
+                            ],
+                          ),
+                          Text('Ekene is attending',
+                              style: TextStyles.darkMinor),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

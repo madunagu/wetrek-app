@@ -2,27 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/avatar_list.dart';
 
-class HistoryScren extends StatefulWidget {
+class HistoryScreen extends StatefulWidget {
   @override
-  _HistoryScrenState createState() => _HistoryScrenState();
+  _HistoryScreenState createState() => _HistoryScreenState();
 }
 
-class _HistoryScrenState extends State<HistoryScren> {
+class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+      appBar: MyAppBar(title: 'Trek Path'),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child: Stack(
-          children: [
-            Image.asset('images/dark_map.png'),
-            Positioned(
-              bottom: 0,
-              height: 456,
-              child: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Image.asset('images/dark_map.png'),
+              Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -68,9 +67,9 @@ class _HistoryScrenState extends State<HistoryScren> {
                     ],
                   ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -135,33 +134,10 @@ class HistoryItem extends StatelessWidget {
               ),
               SizedBox(height: 11),
               AvatarList(imgSrcs: imgSrcs),
-              SizedBox(height:53),
+              SizedBox(height: 53),
             ],
           )
         ],
-      ),
-    );
-  }
-}
-
-class AvatarList extends StatelessWidget {
-  AvatarList({@required this.imgSrcs});
-  final List<String> imgSrcs;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: imgSrcs
-            .map(
-              (String src) => Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
-                  child: Image.asset(src, width: 32, height: 32),
-                ),
-              ),
-            )
-            .toList(),
       ),
     );
   }

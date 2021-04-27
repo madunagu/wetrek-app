@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
 class TripsScreen extends StatelessWidget {
@@ -66,46 +68,46 @@ class TripsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'JAN 10 - 12:30 PM',
-                style: TextStyles.darkMinor.copyWith(
-                  color: Color(0x9278849E),
-                ),
-              ),
-              SizedBox(height: 12),
-              LocationPairCard(),
-              SizedBox(height: 24),
-              Text(
-                'JAN 10 - 12:30 PM',
-                style: TextStyles.darkMinor.copyWith(
-                  color: Color(0x9278849E),
-                ),
-              ),
-              SizedBox(height: 12),
-              LocationPairCard(),
-              SizedBox(height: 24),
-              Text(
-                'JAN 10 - 12:30 PM',
-                style: TextStyles.darkMinor.copyWith(
-                  color: Color(0x9278849E),
-                ),
-              ),
-              SizedBox(height: 12),
-              LocationPairCard(),
-              SizedBox(height: 24),
-              Text(
-                'JAN 10 - 12:30 PM',
-                style: TextStyles.darkMinor.copyWith(
-                  color: Color(0x9278849E),
-                ),
-              ),
-              SizedBox(height: 12),
-              LocationPairCard(),
-              SizedBox(height: 24),
+              SingleTrek(),
+              SingleTrek(),
+              SingleTrek(),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class SingleTrek extends StatelessWidget {
+  const SingleTrek({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'JAN 10 - 12:30 PM',
+          style: TextStyles.darkMinor.copyWith(
+            color: Color(0x9278849E),
+          ),
+        ),
+        SizedBox(height: 12),
+        LocationPairCard(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TrekScreen(),
+              ),
+            );
+          },
+        ),
+        SizedBox(height: 24),
+      ],
     );
   }
 }

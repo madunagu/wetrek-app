@@ -44,7 +44,7 @@ class TextStyles {
 
   static final base = const TextStyle(
     height: 19 / 14,
-    color: Color(0xffffffff),
+    color: Color(0xa6ffffff),
   );
 
   static final darkNormal = const TextStyle(
