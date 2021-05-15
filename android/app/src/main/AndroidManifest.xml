@@ -9,7 +9,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="wetrek"
         android:icon="@mipmap/ic_launcher">
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCFKxUDr1DScDo40kwXrwnPbD7UJNYzvpI"/>
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAXYH6jQZSQ6vr6WWgTVpx_Bph2TzEYOY8"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

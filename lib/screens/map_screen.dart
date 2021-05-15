@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
+import 'package:wetrek/widgets/place/place.dart';
 
 enum MapState {
   initialized,
   searchFocused,
+  searchCompleted,
   markerClicked,
   waiting,
 }
@@ -20,7 +22,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  MapState mapState = MapState.waiting;
+  MapState mapState = MapState.searchCompleted;
 
   Widget switchSheet() {
     switch (mapState) {
@@ -38,7 +40,9 @@ class _MapScreenState extends State<MapScreen> {
           ),
         );
       case MapState.searchFocused:
-        return PlaceDetailsPreview();
+        return Container();
+      case MapState.searchCompleted:
+        return SearchResults();
       case MapState.waiting:
         return MapSheet(child: TripInfo());
       case MapState.markerClicked:
@@ -66,8 +70,9 @@ class _MapScreenState extends State<MapScreen> {
             Positioned(
               top: 36,
               width: view.width,
-              height: 52,
-              child: SearchBar(),
+//              height: 52,
+              child: PlaceSearchBar(
+              ),
             ),
             Positioned(
               bottom: 0,

@@ -1,33 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:search_map_place/search_map_place.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/controllers/search_bar.controller.dart';
 import 'package:wetrek/models/option.dart';
+import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
-
-class SearchBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: EdgeInsets.only(top: 0),
-        child: SearchMapPlaceWidget(
-          apiKey: '_googleAPiKey',
-
-          placeholder: 'Where to',
-          icon: IconData(0xe55f, fontFamily: 'MaterialIcons'),
-//              iconColor: Colors.red,
-          // The position used to give better recommendations. In this case we are using the user position
-          location: LatLng(37.9931036, 23.7301123),
-          radius: 30000,
-        ),
-      ),
-    );
-  }
-}
+import 'package:wetrek/widgets/place/search_map_place.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlaceDetailsPreview extends StatelessWidget {
   @override
@@ -284,11 +265,8 @@ class SubTripRow extends StatelessWidget {
 }
 
 class MyIconButton extends StatelessWidget {
-  const MyIconButton({
-    Key key,
-    this.icon = Icons.phone
-  }) : super(key: key);
-final IconData icon;
+  const MyIconButton({Key key, this.icon = Icons.phone}) : super(key: key);
+  final IconData icon;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -439,73 +417,6 @@ class _SelectCardGroupState extends State<SelectCardGroup> {
   }
 }
 
-class LocationPairInputCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x15455B63),
-            spreadRadius: 1,
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          )
-        ],
-      ),
-      height: 133,
-      padding: EdgeInsets.only(left: 20, right: 16, top: 13, bottom: 15),
-      child: Row(
-        children: [
-          MovementDrawing(height: 73, width: 10),
-          SizedBox(width: 20),
-          Expanded(
-            child: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    style: TextStyles.darkNormal,
-                    decoration: InputDecoration(
-                      hintStyle: TextStyles.darkNormal.copyWith(
-                        color: Color(0xff78849E),
-                      ),
-                      labelStyle: TextStyles.darkMinor,
-                      labelText: 'Pickup Location',
-                      hintText: 'Fresh Market',
-                      suffixIcon: Icon(Icons.add),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 15),
-                    height: 1,
-                    color: Color(0xffF4F4F6),
-                  ),
-                  TextField(
-                    style: TextStyles.darkNormal,
-                    decoration: InputDecoration(
-                      hintStyle: TextStyles.darkNormal.copyWith(
-                        color: Color(0xff78849E),
-                      ),
-                      labelStyle: TextStyles.darkMinor,
-                      labelText: 'Pickup Location',
-                      hintText: 'Fresh Market',
-                      suffixIcon: Icon(Icons.cancel_sharp),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 class LocationPairCard extends StatelessWidget {
   LocationPairCard({this.onTap});
   final Function onTap;
@@ -576,6 +487,217 @@ class LocationPairCard extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PlaceSearchBar extends StatefulWidget {
+  PlaceSearchBar({
+    this.onTap,
+  });
+  final Function onTap;
+
+  @override
+  _PlaceSearchBarState createState() => _PlaceSearchBarState();
+}
+
+class _PlaceSearchBarState extends State<PlaceSearchBar> {
+  bool isDouble = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: isDouble
+          ? DoubleSearchBar(
+              onCancel: () {
+                setState(() {
+                  isDouble = false;
+                });
+              },
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isDouble = true;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Icon(
+                      CustomIcons.icons_dark_menu,
+                      color: Color(0xff454F63),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 24,
+                  margin: EdgeInsets.only(top: 16, bottom: 16),
+                  color: Color(0xffF4F4F6),
+                  width: 1,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 6.0, left: 16, bottom: 6),
+                    child: TextField(
+                      onTap: widget.onTap,
+                      style: TextStyles.darkNormal,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Where To?',
+                        hintStyle: TextStyles.darkNormal
+                            .copyWith(color: Color(0xff78849E)),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Icon(CustomIcons.icons_dark_close,
+                      color: Color(0xff454F63)),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class CollapsingSearchBar extends StatefulWidget {
+  CollapsingSearchBar({this.controller});
+  final SearchBarController controller;
+
+  @override
+  _CollapsingSearchBarState createState() => _CollapsingSearchBarState();
+}
+
+class _CollapsingSearchBarState extends State<CollapsingSearchBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 133,
+      padding: EdgeInsets.only(
+        left: 24,
+      ),
+      child: Row(
+        children: [
+          MovementDrawing(height: 73, width: 10),
+          SizedBox(width: 20),
+          Expanded(
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    style: TextStyles.darkNormal,
+                    decoration: InputDecoration(
+                      labelText: 'From',
+                      labelStyle: TextStyles.darkMinor,
+                      border: InputBorder.none,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    height: 1,
+                    color: Color(0xffF4F4F6),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: TextStyles.darkNormal,
+                          decoration: InputDecoration(
+                            labelText: 'To',
+                            labelStyle: TextStyles.darkMinor,
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: onCancel,
+                        child: Container(
+                          color: Colors.transparent,
+                          padding: EdgeInsets.all(16),
+                          child: Icon(
+                            CustomIcons.icons_dark_close,
+                            color: Color(0xff454F63),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SearchResults extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color(0xffF7F7FA),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SEARCH RESULTS',
+            style: TextStyle(
+              color: Color(0x9278849E),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SearchResultRow(),
+          SearchResultRow(),
+          SearchResultRow(),
+          SearchResultRow(),
+        ],
+      ),
+    );
+  }
+}
+
+class SearchResultRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 10, bottom: 16),
+      decoration: BoxDecoration(
+          border: Border(
+        bottom: BorderSide(
+          color: Color(0x1578849E),
+        ),
+      )),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('View All Sushi Restaurants',
+                    style: TextStyles.darkNormal),
+                Text('2Km.', style: TextStyles.darkMinor),
+              ],
+            ),
+          ),
+          Icon(Icons.arrow_forward_ios, color: Color(0xff454F63)),
+        ],
       ),
     );
   }

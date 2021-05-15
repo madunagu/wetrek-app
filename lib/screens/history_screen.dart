@@ -86,7 +86,7 @@ class HistoryItem extends StatelessWidget {
       @required this.icon,
       @required this.subTitle,
       @required this.title,
-      @required this.imgSrcs})
+      @required this.imgSrcs,})
       : super(key: key);
 
   @override

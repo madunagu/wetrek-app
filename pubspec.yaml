@@ -19,11 +19,13 @@ dependencies:
   bloc: ^4.0.0
   flutter_bloc: ^4.0.0
   meta: ^1.1.6
+#  pull_to_refresh:
+  fluttericon:
+  flutter_dotenv: ^3.1.0
 #  equatable: ^1.0.0
 #  datetime_picker_formfield: ^1.0.0
   google_maps_flutter:
   geolocator:
-  search_map_place:
 #  flutter_polyline_points: ^0.1.0
 #  firebase_core: ^0.4.4+3
 #  firebase_auth: ^0.16.0
@@ -64,6 +66,7 @@ flutter:
      - images/avatar2.jpg
      - images/avatar3.jpg
      - images/avatar4.jpg
+     - .env
 
   fonts:
     - family:  MyFlutterApp

@@ -1,0 +1,12 @@
+{
+  "bounds":"$Bounds",
+  "copyrights": "Map data ©2021 Google, INEGI",
+  "legs": "$[]Leg",
+  "overview_polyline":"$Polyline",
+  "summary": "I-55 S and I-44",
+  "warnings": [],
+  "waypoint_order": [
+    0,
+    1
+  ]
+}

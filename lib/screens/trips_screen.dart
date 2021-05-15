@@ -5,7 +5,33 @@ import 'package:wetrek/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
-class TripsScreen extends StatelessWidget {
+class TripsScreen extends StatefulWidget {
+  @override
+  _TripsScreenState createState() => _TripsScreenState();
+}
+
+class _TripsScreenState extends State<TripsScreen> {
+  List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
+//  RefreshController _refreshController =
+//      RefreshController(initialRefresh: false);
+
+  void _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use refreshFailed()
+//    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    items.add((items.length + 1).toString());
+    if (mounted) setState(() {});
+//    _refreshController.loadComplete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,27 +78,61 @@ class TripsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Color(0xffF7F7FA),
-              ],
+      body: DefaultTabController(
+        length: 2,
+        child: TabBarView(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Color(0xffF7F7FA),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                  ],
+                ),
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleTrek(),
-              SingleTrek(),
-              SingleTrek(),
-            ],
-          ),
+            SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Color(0xffF7F7FA),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                    SingleTrek(),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

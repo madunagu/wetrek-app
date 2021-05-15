@@ -12,8 +12,9 @@ import 'package:wetrek/screens/statistics_screen.dart';
 import 'package:wetrek/screens/terms_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/screens/trips_screen.dart';
-
-void main() {
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
+void main() async {
+  await DotEnv.load(fileName: '.env');
   runApp(MyApp());
 }
 
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Gibson',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: TripsScreen(),
+      home: MapScreen(),
     );
   }
 }

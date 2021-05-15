@@ -1,0 +1,12 @@
+{
+  "distance": "$Detail",
+  "duration": "$Detail",
+  "end_address": "Joplin, MO, USA",
+  "end_location": "$Location",
+  "start_address": "Chicago, IL, USA",
+  "start_location": "$Location",
+  "steps": "$[]Step",
+  "traffic_speed_entry": [],
+  "via_waypoint": []
+}
+ 
