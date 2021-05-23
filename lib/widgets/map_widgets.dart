@@ -503,7 +503,23 @@ class PlaceSearchBar extends StatefulWidget {
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
-  bool isDouble = false;
+  SearchBarController controller;
+
+  @override
+  void initState() {
+    controller = SearchBarController();
+    controller.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+  
+@override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -512,73 +528,65 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: isDouble
-          ? DoubleSearchBar(
-              onCancel: () {
-                setState(() {
-                  isDouble = false;
-                });
-              },
-            )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isDouble = true;
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Icon(
-                      CustomIcons.icons_dark_menu,
-                      color: Color(0xff454F63),
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 24,
-                  margin: EdgeInsets.only(top: 16, bottom: 16),
-                  color: Color(0xffF4F4F6),
-                  width: 1,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 6.0, left: 16, bottom: 6),
-                    child: TextField(
-                      onTap: widget.onTap,
-                      style: TextStyles.darkNormal,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Where To?',
-                        hintStyle: TextStyles.darkNormal
-                            .copyWith(color: Color(0xff78849E)),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Icon(CustomIcons.icons_dark_close,
-                      color: Color(0xff454F63)),
-                ),
-              ],
-            ),
+      child: controller.isOpen()
+          ? OpenedSearchBar(controller: controller)
+          : CollapsedSearchBar(controller: controller),
     );
   }
 }
 
-class CollapsingSearchBar extends StatefulWidget {
-  CollapsingSearchBar({this.controller});
+class CollapsedSearchBar extends StatelessWidget {
+  CollapsedSearchBar({this.controller});
   final SearchBarController controller;
-
   @override
-  _CollapsingSearchBarState createState() => _CollapsingSearchBarState();
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: controller.open(),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Icon(
+              CustomIcons.icons_dark_menu,
+              color: Color(0xff454F63),
+            ),
+          ),
+        ),
+        Container(
+          height: 24,
+          margin: EdgeInsets.only(top: 16, bottom: 16),
+          color: Color(0xffF4F4F6),
+          width: 1,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 6.0, left: 16, bottom: 6),
+            child: TextField(
+              style: TextStyles.darkNormal,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Where To?',
+                hintStyle: TextStyles.darkNormal.copyWith(
+                  color: Color(0xff78849E),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(CustomIcons.icons_dark_close, color: Color(0xff454F63)),
+        ),
+      ],
+    );
+  }
 }
 
-class _CollapsingSearchBarState extends State<CollapsingSearchBar> {
+class OpenedSearchBar extends StatelessWidget {
+  OpenedSearchBar({this.controller});
+  final SearchBarController controller;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -623,7 +631,7 @@ class _CollapsingSearchBarState extends State<CollapsingSearchBar> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: onCancel,
+                        onTap: controller.close(),
                         child: Container(
                           color: Colors.transparent,
                           padding: EdgeInsets.all(16),

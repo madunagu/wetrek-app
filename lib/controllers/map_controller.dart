@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SearchBarController extends ChangeNotifier {
+class MapController extends ChangeNotifier {
   SearchBarState _searchBarState = SearchBarState.initialized;
   bool _isOpen = false;
 

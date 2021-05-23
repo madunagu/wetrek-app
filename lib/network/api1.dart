@@ -5,13 +5,13 @@ import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:wetrek/network/exceptions.dart';
 
-class Server {
+class API {
   String _rootURL = 'https://devotion.wakabout.com.ng/api';
   // String _rootURL = 'http://10.0.2.2:8000/api';
   String token;
   bool isTokenGotten = false;
 
-  Server() {
+  API() {
 //    getToken();
   }
 

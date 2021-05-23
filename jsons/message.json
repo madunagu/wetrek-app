@@ -1,0 +1,6 @@
+{
+    "message":"this is a string",
+    "from": "$User",
+    "created_at": "@datetime",
+    "modified_at": "@datetime"
+}

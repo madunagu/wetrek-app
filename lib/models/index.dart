@@ -1,9 +1,14 @@
+export 'address.dart';
 export 'bounds.dart';
+export 'chat.dart';
 export 'detail.dart';
 export 'directions.dart';
 export 'leg.dart';
 export 'location.dart';
+export 'message.dart';
 export 'polyline.dart';
 export 'step.dart';
 export 'track.dart';
+export 'trek.dart';
+export 'user.dart';
 export 'waypoint.dart';

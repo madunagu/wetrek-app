@@ -1,0 +1,8 @@
+{
+    "@ignore data": [
+        {
+            "random_object": "value"
+        }
+    ],
+    "pagination": "$Pagination"
+}
