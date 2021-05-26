@@ -1,86 +1,75 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
+import 'Field.dart';
+import 'Geometry.dart';
+import 'plus_code.dart';
 
-
-part 'address.g.dart';
-
-@JsonSerializable()
+@immutable
 class Address {
-      Address();
 
-  @JsonKey(name: 'address_components') List<dynamic> addressComponents;
-  @JsonKey(name: 'formatted_address') String formattedAddress;
-  Geometry geometry;
-  @JsonKey(name: 'place_id') String placeId;
-  @JsonKey(name: 'plus_code') PlusCode plusCode;
-  List<dynamic> types;
+  const Address({
+    required this.addressComponents,
+    required this.formattedAddress,
+    required this.geometry,
+    required this.placeId,
+    required this.plusCode,
+    required this.types,
+  });
 
-  factory Address.fromJson(Map<String,dynamic> json) => _$AddressFromJson(json);
-  Map<String, dynamic> toJson() => _$AddressToJson(this);
-}
+  final List<Field> addressComponents;
+  final String formattedAddress;
+  final Geometry geometry;
+  final String placeId;
+  final PlusCode plusCode;
+  final List<String> types;
 
-@JsonSerializable()
-class Geometry {
-      Geometry();
+  factory Address.fromJson(Map<String,dynamic> json) => Address(
+    addressComponents: (json['address_components'] as List? ?? []).map((e) => e as Field).toList(),
+    formattedAddress: json['formatted_address'] as String,
+    geometry: json['geometry'] as Geometry,
+    placeId: json['place_id'] as String,
+    plusCode: PlusCode.fromJson(json['plus_code'] as Map<String, dynamic>),
+    types: (json['types'] as List? ?? []).map((e) => e as String).toList()
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'address_components': addressComponents.map((e) => e.toString()).toList(),
+    'formatted_address': formattedAddress,
+    'geometry': geometry,
+    'place_id': placeId,
+    'plus_code': plusCode.toJson(),
+    'types': types.map((e) => e.toString()).toList()
+  };
 
-  Location location;
-  @JsonKey(name: 'location_type') String locationType;
-  Viewport viewport;
+  Address clone() => Address(
+    addressComponents: addressComponents.toList(),
+    formattedAddress: formattedAddress,
+    geometry: geometry,
+    placeId: placeId,
+    plusCode: plusCode.clone(),
+    types: types.toList()
+  );
 
-  factory Geometry.fromJson(Map<String,dynamic> json) => _$GeometryFromJson(json);
-  Map<String, dynamic> toJson() => _$GeometryToJson(this);
-}
 
-@JsonSerializable()
-class Location {
-      Location();
+  Address copyWith({
+    List<Field>? addressComponents,
+    String? formattedAddress,
+    Geometry? geometry,
+    String? placeId,
+    PlusCode? plusCode,
+    List<String>? types
+  }) => Address(
+    addressComponents: addressComponents ?? this.addressComponents,
+    formattedAddress: formattedAddress ?? this.formattedAddress,
+    geometry: geometry ?? this.geometry,
+    placeId: placeId ?? this.placeId,
+    plusCode: plusCode ?? this.plusCode,
+    types: types ?? this.types,
+  );
 
-  double lat;
-  double lng;
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is Address && addressComponents == other.addressComponents && formattedAddress == other.formattedAddress && geometry == other.geometry && placeId == other.placeId && plusCode == other.plusCode && types == other.types;
 
-  factory Location.fromJson(Map<String,dynamic> json) => _$LocationFromJson(json);
-  Map<String, dynamic> toJson() => _$LocationToJson(this);
-}
-
-@JsonSerializable()
-class Viewport {
-      Viewport();
-
-  Northeast northeast;
-  Southwest southwest;
-
-  factory Viewport.fromJson(Map<String,dynamic> json) => _$ViewportFromJson(json);
-  Map<String, dynamic> toJson() => _$ViewportToJson(this);
-}
-
-@JsonSerializable()
-class Northeast {
-      Northeast();
-
-  double lat;
-  double lng;
-
-  factory Northeast.fromJson(Map<String,dynamic> json) => _$NortheastFromJson(json);
-  Map<String, dynamic> toJson() => _$NortheastToJson(this);
-}
-
-@JsonSerializable()
-class Southwest {
-      Southwest();
-
-  double lat;
-  double lng;
-
-  factory Southwest.fromJson(Map<String,dynamic> json) => _$SouthwestFromJson(json);
-  Map<String, dynamic> toJson() => _$SouthwestToJson(this);
-}
-
-@JsonSerializable()
-class PlusCode {
-      PlusCode();
-
-  @JsonKey(name: 'compound_code') String compoundCode;
-  @JsonKey(name: 'global_code') String globalCode;
-
-  factory PlusCode.fromJson(Map<String,dynamic> json) => _$PlusCodeFromJson(json);
-  Map<String, dynamic> toJson() => _$PlusCodeToJson(this);
+  @override
+  int get hashCode => addressComponents.hashCode ^ formattedAddress.hashCode ^ geometry.hashCode ^ placeId.hashCode ^ plusCode.hashCode ^ types.hashCode;
 }

@@ -7,28 +7,16 @@ import 'package:meta/meta.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
-import 'package:wetrek/repositories/trek_repository.dart';
-
-enum Method {
-  GET,
-  POST,
-  PUT,
-  DELETE,
-}
+import 'package:wetrek/models/paginated.dart';
+import 'package:wetrek/models/parameters.dart';
+import 'package:wetrek/repositories/repository.dart';
 
 class ListBloc extends Bloc<ListEvent, ListState> {
   ListBloc({
-    @required this.feedType,
-    @required this.resource,
-    this.method = Method.GET,
-    this.params,
-  }) : assert(resource != null);
-  final String feedType;
-  final String resource;
-  final Method method;
-  final dynamic params;
-  @override
-  ListState get initialState => ListInitial();
+    required this.repository,
+  }) : super(ListInitial());
+  final Repository repository;
+
   //TODO: work on navigation in infinite list
   @override
   Stream<ListState> mapEventToState(ListEvent event) async* {
@@ -36,22 +24,32 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     if (event is ListFetched && !_hasReachedMax(currentState)) {
       try {
         if (currentState is ListInitial) {
-          final ServerResponse serverResponse = await _fetchList(0, 20);
-          final models = TrekRepository.list();
-          yield ListSuccess(
-            models: serverResponse.data,
-            totalPages: serverResponse.totalPages,
-            currentPage: serverResponse.currentPage,
+          final Paginated paginatedList = await repository.list(
+            Parameters(
+              page: 0,
+              length: 20,
+            ),
           );
-          return;
-        }
-        if (currentState is ListSuccess) {
-          final ServerResponse serverResponse =
-              await _fetchList(currentState.currentPage + 1, 20);
+
           yield ListSuccess(
-            models: currentState.models + serverResponse.data,
-            totalPages: serverResponse.totalPages,
-            currentPage: serverResponse.currentPage,
+            models: paginatedList.data,
+            totalPages: paginatedList.pagination.totalPages,
+            currentPage: paginatedList.pagination.currentPage,
+          );
+        }
+
+        if (currentState is ListSuccess) {
+          final Paginated paginatedList = await repository.list(
+            Parameters(
+              page: currentState.currentPage + 1,
+              length: 20,
+            ),
+          );
+
+          yield ListSuccess(
+            models: paginatedList.data,
+            totalPages: paginatedList.pagination.totalPages,
+            currentPage: paginatedList.pagination.currentPage,
           );
         }
       } catch (_) {
@@ -61,16 +59,16 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     }
   }
 
-  @override
-  Stream<Transition<ListEvent, ListState>> transformEvents(
-    Stream<ListEvent> events,
-    TransitionFunction<ListEvent, ListState> transitionFn,
-  ) {
-    return super.transformEvents(
-      events.debounceTime(const Duration(milliseconds: 500)),
-      transitionFn,
-    );
-  }
+  // @override
+  // Stream<Transition<ListEvent, ListState>> transformEvents(
+  //   Stream<ListEvent> events,
+  //   TransitionFunction<ListEvent, ListState> transitionFn,
+  // ) {
+  //   return super.transformEvents(
+  //     events.debounceTime(const Duration(milliseconds: 500)),
+  //     transitionFn,
+  //   );
+  // }
 
   bool _hasReachedMax(ListState state) =>
       state is ListSuccess && state.currentPage >= state.totalPages;

@@ -6,20 +6,26 @@ import 'package:http/http.dart' as http;
 import 'package:wetrek/network/exceptions.dart';
 
 class API {
-  static String _rootURL = 'https://devotion.wakabout.com.ng/api';
+  static String host = 'https://devotion.wakabout.com.ng/api';
   // String _rootURL = 'http://10.0.2.2:8000/api';
-  static String token;
-  static bool isTokenGotten = false;
+  late String _token;
+  static Uri base = Uri(
+    host: 'devotion.wakabout.com',
+    scheme: 'https',
+    path: '/api',
+  );
 
-  static Future<dynamic> getToken() async {
-//    var userRepo = UserRepository();
-//    this.token = await userRepo.getToken();
-    API.isTokenGotten = true;
+  API(token) {
+    this._token = token;
   }
 
-  static Map<String, String> headers() {
+  static Map<String, String> headerWithoutToken() {
+    return {'Accept': 'application/json', 'content-type': 'application/json'};
+  }
+
+  Map<String, String> headers() {
     return {
-      'Authorization': 'Bearer ' + token,
+      'Authorization': 'Bearer ' + _token,
       'Accept': 'application/json',
       'content-type': 'application/json'
     };
@@ -43,19 +49,22 @@ class API {
     throw UnknownException();
   }
 
-  static Future<Map<String, dynamic>> get(String url) async {
-    http.Response response =
-        await http.get(_rootURL + url, headers: API.headers());
+  Future<Map<String, dynamic>> get(String url,
+      {Map<String, String>? params}) async {
+    http.Response response = await http.get(
+      API.base.replace(path: '/api' + url, queryParameters: params),
+      headers: this.headers(),
+    );
     log(response.body.toString(), name: 'network.category');
     return prepareResponse(response);
   }
 
-  static Future<Map<String, dynamic>> post(String url, dynamic data) async {
+  Future<Map<String, dynamic>> post(String url, dynamic data) async {
     String jsonData = jsonEncode(data);
-    Map<String, String> headers = API.headers();
+    Map<String, String> headers = this.headers();
 
     http.Response response = await http.post(
-      _rootURL + url,
+      API.base.replace(path: '/api' + url),
       body: jsonData,
       headers: headers,
     );
@@ -65,28 +74,30 @@ class API {
   static Future<Map<String, dynamic>> postWithoutToken(
       String url, dynamic data) async {
     String jsonData = jsonEncode(data);
-    Map<String, String> headers = API.headers();
+    Map<String, String> headers = API.headerWithoutToken();
 
     http.Response response = await http.post(
-      _rootURL + url,
+      API.base.replace(path: '/api' + url),
       body: jsonData,
       headers: headers,
     );
     return prepareResponse(response);
   }
 
-  static Future<Map<String, dynamic>> put(String url, dynamic data) async {
+  Future<Map<String, dynamic>> put(String url, dynamic data) async {
     http.Response response = await http.put(
-      _rootURL + url,
+      API.base.replace(path: '/api' + url),
       body: jsonEncode(data),
-      headers: API.headers(),
+      headers: this.headers(),
     );
     return prepareResponse(response);
   }
 
-  static Future<Map<String, dynamic>> delete(String url) async {
-    http.Response response =
-        await http.delete(_rootURL + url, headers: API.headers());
+  Future<Map<String, dynamic>> delete(String url) async {
+    http.Response response = await http.delete(
+      API.base.replace(path: '/api' + url),
+      headers: this.headers(),
+    );
     return prepareResponse(response);
   }
 }

@@ -7,21 +7,22 @@ import 'package:wetrek/network/api.dart';
 import 'package:flutter/material.dart';
 
 class UserRepository {
+  late final API api;
   Future<User> authenticate({
-    @required String username,
-    @required String password,
+    required String username,
+    required String password,
   }) async {
     final Map<String, dynamic> res = await API.postWithoutToken(
       '/login',
       {'email': username, 'password': password},
     );
 
-    //  return res;
+    return User.fromJson(res);
   }
 
   Future<List<User>> list(Parameters params) async {
     List<User> users = [];
-    final Map<String, dynamic> res = await API.get('/users');
+    final Map<String, dynamic> res = await api.get('/users');
     for (var i = 0; i < res.length; i++) {
       users.add(User.fromJson(res[i]));
     }
@@ -29,20 +30,20 @@ class UserRepository {
   }
 
   Future<User> get(int id) async {
-    final Map<String, dynamic> res = await API.get("/user/$id");
+    final Map<String, dynamic> res = await api.get("/user/$id");
     return User.fromJson(res);
   }
 
   Future<bool> create(User user) async {
     final Map<String, dynamic> res =
-        await API.post('/users', jsonEncode(user.toJson()));
+        await api.post('/users', jsonEncode(user.toJson()));
     //TODO: chech if boolean true is parsed already
     return res['success'] == 'true';
   }
 
   Future<bool> update(User user) async {
     final Map<String, dynamic> res =
-        await API.put("/users/${user.id}", jsonEncode(user.toJson()));
+        await api.put("/users/${user.id}", jsonEncode(user.toJson()));
     //TODO: chech if boolean true is parsed already
     return res['success'] == 'true';
   }

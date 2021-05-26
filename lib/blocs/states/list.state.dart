@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:wetrek/models/model.dart';
 import 'package:wetrek/repositories/repository.dart';
 
 abstract class ListState extends Equatable {
@@ -18,15 +19,15 @@ class ListSuccess extends ListState {
   final int totalPages;
 
   const ListSuccess({
-    this.models,
-    this.currentPage,
-    this.totalPages,
+    required this.models,
+    required this.currentPage,
+    required this.totalPages,
   });
 
   ListSuccess copyWith({
-    List<dynamic> models,
-    int totalPages,
-    int currentPage,
+    List<Model>? models,
+    int? totalPages,
+    int? currentPage,
   }) {
     return ListSuccess(
       models: models ?? this.models,

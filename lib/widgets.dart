@@ -5,7 +5,7 @@ import 'package:wetrek/constants/text_styles.dart';
 class MyButton extends StatelessWidget {
   MyButton(this.text, {this.onTap, this.color = const Color(0xff3ACCE1)});
   final String text;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color color;
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class MyButton extends StatelessWidget {
 
 class GradientLine extends StatelessWidget {
   const GradientLine({
-    Key key,
+    Key? key,
     this.height = 6,
   }) : super(key: key);
   final double height;
@@ -68,15 +68,15 @@ class GradientLine extends StatelessWidget {
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final Widget child;
-  final Function onPressed;
+  final Widget? child;
+  final VoidCallback? onPressed;
   final IconData rightIcon;
   final Color color;
   final Color fontColor;
   @override
   final Size preferredSize;
   MyAppBar({
-    @required this.title,
+    required this.title,
     this.child,
     this.onPressed,
     this.rightIcon = Icons.filter_list,
@@ -106,7 +106,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 MyAppBarNavigation(
                   fontColor: fontColor,
-                  onPressed: onPressed,
+                  onPressed: onPressed!,
                   rightIcon: rightIcon,
                 ),
                 SizedBox(height: 14),
@@ -129,8 +129,8 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class ReviewBar extends StatelessWidget {
   ReviewBar({
-    this.max,
-    this.num,
+    required this.max,
+    required this.num,
   });
   final int max;
   final int num;
@@ -151,14 +151,14 @@ class ReviewBar extends StatelessWidget {
 
 class MyAppBarNavigation extends StatelessWidget {
   const MyAppBarNavigation({
-    Key key,
-    this.onPressed,
+    Key? key,
+    required this.onPressed,
     this.rightIcon = Icons.filter_list,
     this.fontColor = const Color(0xff454F63),
   }) : super(key: key);
 
   final Color fontColor;
-  final Function onPressed;
+  final VoidCallback onPressed;
   final IconData rightIcon;
 
   @override
@@ -183,7 +183,7 @@ class MyAppBarNavigation extends StatelessWidget {
 }
 
 class SingleTab extends StatelessWidget {
-  SingleTab(this.title, {this.active});
+  SingleTab(this.title, {required this.active});
   final String title;
   final bool active;
   @override
@@ -208,7 +208,7 @@ class SingleTab extends StatelessWidget {
 }
 
 class MovementDrawing extends StatelessWidget {
-  MovementDrawing({@required this.width, @required this.height});
+  MovementDrawing({required this.width, required this.height});
   final double width;
   final double height;
   @override
@@ -226,11 +226,11 @@ class MovementDrawing extends StatelessWidget {
 class BlueDashGradientDecoration extends Decoration {
   final BoxPainter _painter;
 
-  BlueDashGradientDecoration({@required double height})
+  BlueDashGradientDecoration({required double height})
       : _painter = _BlueGradientPainter(height);
 
   @override
-  BoxPainter createBoxPainter([onChanged]) => _painter;
+  BoxPainter createBoxPainter( [VoidCallback? onChanged]) => _painter;
 }
 
 class _BlueGradientPainter extends BoxPainter {
@@ -246,34 +246,33 @@ class _BlueGradientPainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration cfg) {
     _paint.color = WeTrekColors.blue4;
     canvas.drawLine(
-      offset + Offset(0, cfg.size.height),
-      offset + Offset(cfg.size.width / 4, cfg.size.height),
+      offset + Offset(0, cfg.size!.height),
+      offset + Offset(cfg.size!.width / 4, cfg.size!.height),
       _paint,
     );
     _paint.color = WeTrekColors.blue3;
     canvas.drawLine(
-      offset + Offset(cfg.size.width / 4, cfg.size.height),
-      offset + Offset(cfg.size.width / 2, cfg.size.height),
+      offset + Offset(cfg.size!.width / 4, cfg.size!.height),
+      offset + Offset(cfg.size!.width / 2, cfg.size!.height),
       _paint,
     );
     _paint.color = WeTrekColors.blue2;
     canvas.drawLine(
-      offset + Offset(cfg.size.width / 2, cfg.size.height),
-      offset + Offset(cfg.size.width / 4 * 3, cfg.size.height),
+      offset + Offset(cfg.size!.width / 2, cfg.size!.height),
+      offset + Offset(cfg.size!.width / 4 * 3, cfg.size!.height),
       _paint,
     );
     _paint.color = WeTrekColors.blue1;
     canvas.drawLine(
-      offset + Offset(cfg.size.width / 4 * 3, cfg.size.height),
-      offset + Offset(cfg.size.width, cfg.size.height),
+      offset + Offset(cfg.size!.width / 4 * 3, cfg.size!.height),
+      offset + Offset(cfg.size!.width, cfg.size!.height),
       _paint,
     );
   }
 }
 
 class MovementPainter extends CustomPainter {
-  MovementPainter({this.color});
-  final Color color;
+  MovementPainter();
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
@@ -298,8 +297,8 @@ class MovementPainter extends CustomPainter {
 
 class NotificationPopup extends StatelessWidget {
   NotificationPopup({
-    @required this.title,
-    @required this.body,
+    required this.title,
+    required this.body,
   });
   final String title;
   final String body;
@@ -361,15 +360,15 @@ class NotificationPopup extends StatelessWidget {
 
 class OverlayPlacedCard extends StatelessWidget {
   OverlayPlacedCard({
-    @required this.title,
-    @required this.subTitle,
+    required this.title,
+    required this.subTitle,
     this.coverImage,
     this.active = false,
   });
 
   final String title;
   final String subTitle;
-  final String coverImage;
+  final String? coverImage;
   final bool active;
 
   @override
@@ -434,15 +433,15 @@ class OverlayPlacedCard extends StatelessWidget {
 
 class PlacedCard extends StatelessWidget {
   PlacedCard({
-    @required this.title,
-    @required this.subTitle,
+    required this.title,
+    required this.subTitle,
     this.coverImage,
     this.active = false,
   });
 
   final String title;
   final String subTitle;
-  final String coverImage;
+  final String? coverImage;
   final bool active;
 
   @override

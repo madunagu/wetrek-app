@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
-import 'package:wetrek/widgets/place/place.dart';
 
 enum MapState {
   initialized,
@@ -15,7 +14,7 @@ enum MapState {
 }
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key key}) : super(key: key);
+  const MapScreen({Key? key}) : super(key: key);
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -88,8 +87,8 @@ class _MapScreenState extends State<MapScreen> {
 
 class MapContainer extends StatefulWidget {
   const MapContainer({
-    Key key,
-    @required this.view,
+    Key? key,
+    required this.view,
   }) : super(key: key);
 
   final Size view;
@@ -99,11 +98,11 @@ class MapContainer extends StatefulWidget {
 }
 
 class _MapContainerState extends State<MapContainer> {
-  GoogleMapController _mapController;
+  late GoogleMapController _mapController;
   Map<MarkerId, Marker> markers = {};
   Map<PolylineId, Polyline> polylines = {};
   Completer<GoogleMapController> _controller = Completer();
-  String mapStyle;
+  late String mapStyle;
   void onMapCreated(GoogleMapController controller) async {
     _mapController = controller;
     _mapController.setMapStyle(mapStyle);

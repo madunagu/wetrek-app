@@ -6,7 +6,7 @@ class DottedTabBar extends StatelessWidget {
   final Color color;
   final Color activeColor;
   const DottedTabBar({
-    Key key,
+    Key? key,
     this.count = 5,
     this.active = 0,
     this.activeColor = const Color(0xffffffff),

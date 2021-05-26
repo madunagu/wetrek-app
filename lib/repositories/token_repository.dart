@@ -17,8 +17,8 @@ class TokenRepository {
   }
 
   Future<User> getUser() async {
-    String userStr = await storage.read(key: 'user');
-    return User.fromJson(jsonDecode(userStr));
+    String? userStr = await storage.read(key: 'user');
+    return User.fromJson(jsonDecode(userStr!));
   }
 
   //TOKEN METHODS
@@ -34,7 +34,7 @@ class TokenRepository {
     return _hasToken;
   }
 
-  Future<String> get() async {
+  Future<String?> get() async {
     return await storage.read(key: 'token');
   }
 }

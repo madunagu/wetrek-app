@@ -1,14 +1,38 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
 
 
-part 'polyline.g.dart';
-
-@JsonSerializable()
+@immutable
 class Polyline {
-      Polyline();
 
-  String points;
+  const Polyline({
+    required this.points,
+  });
 
-  factory Polyline.fromJson(Map<String,dynamic> json) => _$PolylineFromJson(json);
-  Map<String, dynamic> toJson() => _$PolylineToJson(this);
+  final String points;
+
+  factory Polyline.fromJson(Map<String,dynamic> json) => Polyline(
+    points: json['points'] as String
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'points': points
+  };
+
+  Polyline clone() => Polyline(
+    points: points
+  );
+
+
+  Polyline copyWith({
+    String? points
+  }) => Polyline(
+    points: points ?? this.points,
+  );
+
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is Polyline && points == other.points;
+
+  @override
+  int get hashCode => points.hashCode;
 }

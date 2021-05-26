@@ -1,15 +1,45 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
 
 
-part 'detail.g.dart';
-
-@JsonSerializable()
+@immutable
 class Detail {
-      Detail();
 
-  double value;
-  String text;
+  const Detail({
+    required this.value,
+    required this.text,
+  });
 
-  factory Detail.fromJson(Map<String,dynamic> json) => _$DetailFromJson(json);
-  Map<String, dynamic> toJson() => _$DetailToJson(this);
+  final double value;
+  final String text;
+
+  factory Detail.fromJson(Map<String,dynamic> json) => Detail(
+    value: json['value'] as double,
+    text: json['text'] as String
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'value': value,
+    'text': text
+  };
+
+  Detail clone() => Detail(
+    value: value,
+    text: text
+  );
+
+
+  Detail copyWith({
+    double? value,
+    String? text
+  }) => Detail(
+    value: value ?? this.value,
+    text: text ?? this.text,
+  );
+
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is Detail && value == other.value && text == other.text;
+
+  @override
+  int get hashCode => value.hashCode ^ text.hashCode;
 }

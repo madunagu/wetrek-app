@@ -35,7 +35,7 @@ class NotificationScreen extends StatelessWidget {
 }
 
 class NotificationListItem extends StatelessWidget {
-  NotificationListItem({this.imageURL, this.name, this.message, this.isNew});
+  NotificationListItem({required this.imageURL, required this.name, required this.message, required this.isNew});
   final String imageURL;
   final String name;
   final String message;

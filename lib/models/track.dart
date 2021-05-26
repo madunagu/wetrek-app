@@ -1,22 +1,82 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
 import 'Bounds.dart';
 import 'Leg.dart';
 import 'Polyline.dart';
 
-part 'track.g.dart';
-
-@JsonSerializable()
+@immutable
 class Track {
-      Track();
 
-  Bounds bounds;
-  String copyrights;
-  List<Leg> legs;
-  @JsonKey(name: 'overview_polyline') Polyline overviewPolyline;
-  String summary;
-  List<dynamic> warnings;
-  @JsonKey(name: 'waypoint_order') List<dynamic> waypointOrder;
+  const Track({
+    required this.bounds,
+    required this.copyrights,
+    required this.legs,
+    required this.overviewPolyline,
+    required this.summary,
+    required this.warnings,
+    required this.waypointOrder,
+  });
 
-  factory Track.fromJson(Map<String,dynamic> json) => _$TrackFromJson(json);
-  Map<String, dynamic> toJson() => _$TrackToJson(this);
+  final Bounds bounds;
+  final String copyrights;
+  final List<Leg> legs;
+  final Polyline overviewPolyline;
+  final String summary;
+  final List<dynamic> warnings;
+  final List<int> waypointOrder;
+
+  factory Track.fromJson(Map<String,dynamic> json) => Track(
+    bounds: json['bounds'] as Bounds,
+    copyrights: json['copyrights'] as String,
+    legs: (json['legs'] as List? ?? []).map((e) => e as Leg).toList(),
+    overviewPolyline: json['overview_polyline'] as Polyline,
+    summary: json['summary'] as String,
+    warnings: (json['warnings'] as List? ?? []).map((e) => e as dynamic).toList(),
+    waypointOrder: (json['waypoint_order'] as List? ?? []).map((e) => e as int).toList()
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'bounds': bounds,
+    'copyrights': copyrights,
+    'legs': legs.map((e) => e.toString()).toList(),
+    'overview_polyline': overviewPolyline,
+    'summary': summary,
+    'warnings': warnings.map((e) => e.toString()).toList(),
+    'waypoint_order': waypointOrder.map((e) => e.toString()).toList()
+  };
+
+  Track clone() => Track(
+    bounds: bounds,
+    copyrights: copyrights,
+    legs: legs.toList(),
+    overviewPolyline: overviewPolyline,
+    summary: summary,
+    warnings: warnings.toList(),
+    waypointOrder: waypointOrder.toList()
+  );
+
+
+  Track copyWith({
+    Bounds? bounds,
+    String? copyrights,
+    List<Leg>? legs,
+    Polyline? overviewPolyline,
+    String? summary,
+    List<dynamic>? warnings,
+    List<int>? waypointOrder
+  }) => Track(
+    bounds: bounds ?? this.bounds,
+    copyrights: copyrights ?? this.copyrights,
+    legs: legs ?? this.legs,
+    overviewPolyline: overviewPolyline ?? this.overviewPolyline,
+    summary: summary ?? this.summary,
+    warnings: warnings ?? this.warnings,
+    waypointOrder: waypointOrder ?? this.waypointOrder,
+  );
+
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is Track && bounds == other.bounds && copyrights == other.copyrights && legs == other.legs && overviewPolyline == other.overviewPolyline && summary == other.summary && warnings == other.warnings && waypointOrder == other.waypointOrder;
+
+  @override
+  int get hashCode => bounds.hashCode ^ copyrights.hashCode ^ legs.hashCode ^ overviewPolyline.hashCode ^ summary.hashCode ^ warnings.hashCode ^ waypointOrder.hashCode;
 }

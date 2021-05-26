@@ -101,10 +101,10 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
 class DrawerLink extends StatelessWidget {
   final String title;
   final bool active;
-  final Function onTap;
+  final VoidCallback? onTap;
   final IconData icon;
   DrawerLink({
-    this.title,
+    required this.title,
     this.active = false,
     this.icon = Icons.home,
     this.onTap,

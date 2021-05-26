@@ -1,16 +1,46 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter/foundation.dart';
 import 'Location.dart';
 import 'Location.dart';
 
-part 'bounds.g.dart';
-
-@JsonSerializable()
+@immutable
 class Bounds {
-      Bounds();
 
-  Location northeast;
-  Location southwest;
+  const Bounds({
+    required this.northeast,
+    required this.southwest,
+  });
 
-  factory Bounds.fromJson(Map<String,dynamic> json) => _$BoundsFromJson(json);
-  Map<String, dynamic> toJson() => _$BoundsToJson(this);
+  final Location northeast;
+  final Location southwest;
+
+  factory Bounds.fromJson(Map<String,dynamic> json) => Bounds(
+    northeast: json['northeast'] as Location,
+    southwest: json['southwest'] as Location
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'northeast': northeast,
+    'southwest': southwest
+  };
+
+  Bounds clone() => Bounds(
+    northeast: northeast,
+    southwest: southwest
+  );
+
+
+  Bounds copyWith({
+    Location? northeast,
+    Location? southwest
+  }) => Bounds(
+    northeast: northeast ?? this.northeast,
+    southwest: southwest ?? this.southwest,
+  );
+
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is Bounds && northeast == other.northeast && southwest == other.southwest;
+
+  @override
+  int get hashCode => northeast.hashCode ^ southwest.hashCode;
 }

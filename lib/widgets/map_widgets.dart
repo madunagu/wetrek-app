@@ -7,8 +7,7 @@ import 'package:wetrek/models/option.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
-import 'package:wetrek/widgets/place/search_map_place.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlaceDetailsPreview extends StatelessWidget {
   @override
@@ -45,7 +44,7 @@ class PlaceDetailsPreview extends StatelessWidget {
 }
 
 class MapSheet extends StatelessWidget {
-  MapSheet({this.child, this.topBorder = const GradientLine()});
+  MapSheet({required this.child, this.topBorder = const GradientLine()});
   final Widget child;
   final Widget topBorder;
   @override
@@ -109,14 +108,14 @@ class LocationButton extends StatelessWidget {
 
 class MapSheetDetails extends StatelessWidget {
   const MapSheetDetails({
-    Key key,
+    Key? key,
     this.child,
     this.title = 'Nearby',
     this.subTitle = 'Foods, drinks, places',
     this.rightContent,
   }) : super(key: key);
-  final Widget child;
-  final Widget rightContent;
+  final Widget? child;
+  final Widget? rightContent;
   final String title;
   final String subTitle;
   @override
@@ -153,12 +152,12 @@ class MapSheetDetails extends StatelessWidget {
                   subTitle,
                   style: TextStyles.minor,
                 ),
-                if (child != null) child,
+                child!,
               ],
             ),
           ),
           if (rightContent != null) Spacer(),
-          if (rightContent != null) rightContent,
+          rightContent!,
         ],
       ),
     );
@@ -265,7 +264,7 @@ class SubTripRow extends StatelessWidget {
 }
 
 class MyIconButton extends StatelessWidget {
-  const MyIconButton({Key key, this.icon = Icons.phone}) : super(key: key);
+  const MyIconButton({Key? key, this.icon = Icons.phone}) : super(key: key);
   final IconData icon;
   @override
   Widget build(BuildContext context) {
@@ -284,13 +283,13 @@ class MyIconButton extends StatelessWidget {
 
 class OptionCard extends StatelessWidget {
   OptionCard({
-    @required this.title,
+    required this.title,
     this.subTitle,
-    @required this.value,
-    @required this.controller,
+    required this.value,
+    required this.controller,
   });
   final Widget title;
-  final String subTitle;
+  final String? subTitle;
   final TextEditingController controller;
   final String value;
   @override
@@ -312,7 +311,7 @@ class OptionCard extends StatelessWidget {
             children: [
               title,
               SizedBox(height: 5),
-              Text(subTitle, style: TextStyles.minor),
+              Text(subTitle!, style: TextStyles.minor),
             ],
           ),
         ),
@@ -380,8 +379,8 @@ class ChooseRideType extends StatelessWidget {
 
 class SelectCardGroup extends StatefulWidget {
   const SelectCardGroup({
-    Key key,
-    @required this.children,
+    Key? key,
+    required this.children,
   }) : super(key: key);
   final List<Option> children;
 
@@ -390,7 +389,7 @@ class SelectCardGroup extends StatefulWidget {
 }
 
 class _SelectCardGroupState extends State<SelectCardGroup> {
-  TextEditingController _controller;
+  late TextEditingController _controller;
 
   @override
   void initState() {
@@ -419,7 +418,7 @@ class _SelectCardGroupState extends State<SelectCardGroup> {
 
 class LocationPairCard extends StatelessWidget {
   LocationPairCard({this.onTap});
-  final Function onTap;
+  final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -496,14 +495,14 @@ class PlaceSearchBar extends StatefulWidget {
   PlaceSearchBar({
     this.onTap,
   });
-  final Function onTap;
+  final VoidCallback? onTap;
 
   @override
   _PlaceSearchBarState createState() => _PlaceSearchBarState();
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
-  SearchBarController controller;
+  late SearchBarController controller;
 
   @override
   void initState() {
@@ -513,8 +512,8 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
     });
     super.initState();
   }
-  
-@override
+
+  @override
   void dispose() {
     controller.dispose();
     super.dispose();
@@ -536,7 +535,7 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
 }
 
 class CollapsedSearchBar extends StatelessWidget {
-  CollapsedSearchBar({this.controller});
+  CollapsedSearchBar({required this.controller});
   final SearchBarController controller;
   @override
   Widget build(BuildContext context) {
@@ -584,7 +583,7 @@ class CollapsedSearchBar extends StatelessWidget {
 }
 
 class OpenedSearchBar extends StatelessWidget {
-  OpenedSearchBar({this.controller});
+  OpenedSearchBar({required this.controller});
   final SearchBarController controller;
 
   @override

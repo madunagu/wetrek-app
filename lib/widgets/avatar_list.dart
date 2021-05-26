@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AvatarList extends StatelessWidget {
-  AvatarList({@required this.imgSrcs});
+  AvatarList({required this.imgSrcs});
   final List<String> imgSrcs;
   @override
   Widget build(BuildContext context) {

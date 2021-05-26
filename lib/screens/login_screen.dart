@@ -6,7 +6,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TabController tabController;
+  late TabController tabController;
 
   @override
   void dispose() {

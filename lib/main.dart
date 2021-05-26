@@ -12,9 +12,10 @@ import 'package:wetrek/screens/statistics_screen.dart';
 import 'package:wetrek/screens/terms_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/screens/trips_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
-void main() async {
-  await DotEnv.load(fileName: '.env');
+
+// import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
+void main() {
+  // await DotEnv.load(fileName: '.env');
   runApp(MyApp());
 }
 
@@ -34,4 +35,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

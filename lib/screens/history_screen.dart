@@ -82,11 +82,11 @@ class HistoryItem extends StatelessWidget {
   final String title;
   final List<String> imgSrcs;
   const HistoryItem(
-      {Key key,
-      @required this.icon,
-      @required this.subTitle,
-      @required this.title,
-      @required this.imgSrcs,})
+      { Key? key,
+      required this.icon,
+      required this.subTitle,
+      required this.title,
+      required this.imgSrcs,})
       : super(key: key);
 
   @override

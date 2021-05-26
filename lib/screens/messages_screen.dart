@@ -36,7 +36,12 @@ class MessagesScreen extends StatelessWidget {
 }
 
 class MessageListItem extends StatelessWidget {
-  MessageListItem({this.imageURL, this.name, this.message, this.isNew});
+  MessageListItem({
+    required this.imageURL,
+    required this.name,
+    required this.message,
+    this.isNew = false,
+  });
   final String imageURL;
   final String name;
   final String message;
@@ -76,7 +81,7 @@ class MessageListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width-126,
+                  width: MediaQuery.of(context).size.width - 126,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
@@ -86,9 +91,8 @@ class MessageListItem extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Color(0xffff4f9a)
-                        ),
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color(0xffff4f9a)),
                       )
                     ],
                   ),

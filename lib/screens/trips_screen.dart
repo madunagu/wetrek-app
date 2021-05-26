@@ -141,7 +141,7 @@ class _TripsScreenState extends State<TripsScreen> {
 
 class SingleTrek extends StatelessWidget {
   const SingleTrek({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

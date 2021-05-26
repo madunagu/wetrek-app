@@ -1,0 +1,5 @@
+{
+    "location" : "$Location",
+    "location_type" : "ROOFTOP",
+    "viewport" : "$Bounds"
+ }

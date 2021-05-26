@@ -16,7 +16,7 @@ class PlaceScreen extends StatelessWidget {
               title: MyAppBarNavigation(
                 fontColor: Colors.white,
                 rightIcon: Icons.filter_list,
-                onPressed: null,
+                onPressed: (){},
               ),
               pinned: true,
               backgroundColor: Color(0xff2a2e43),
