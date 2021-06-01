@@ -205,7 +205,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'CONTINUE',
                         style: TextStyle(
-                            color: Colors.white, fontSize: 15, height: 1.333),
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.333,
+                        ),
                       ),
                     ),
                   ]),

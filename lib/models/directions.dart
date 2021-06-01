@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'Waypoint.dart';
-import 'Track.dart';
+import 'waypoint.dart';
+import 'track.dart';
 
 @immutable
 class Directions {

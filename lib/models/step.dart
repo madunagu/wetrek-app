@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'Detail.dart';
-import 'Detail.dart';
-import 'Location.dart';
-import 'Polyline.dart';
-import 'Location.dart';
+import 'detail.dart';
+import 'location.dart';
+import 'polyline.dart';
 
 @immutable
 class Step {

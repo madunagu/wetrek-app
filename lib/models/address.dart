@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'Field.dart';
-import 'Geometry.dart';
+import 'field.dart';
+import 'geometry.dart';
 import 'plus_code.dart';
 
 @immutable

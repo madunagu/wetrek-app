@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'Bounds.dart';
-import 'Leg.dart';
-import 'Polyline.dart';
+import 'bounds.dart';
+import 'leg.dart';
+import 'polyline.dart';
 
 @immutable
 class Track {

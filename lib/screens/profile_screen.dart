@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/user.dart';
+import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
+  ProfileScreen({required this.user});
+  final User user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,9 +39,14 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                      ),
                     ),
                     Icon(
                       Icons.filter_list,
@@ -54,7 +63,6 @@ class ProfileScreen extends StatelessWidget {
               height: 700,
               child: Container(
                 height: 400,
-
                 width: MediaQuery.of(context).size.width,
                 padding: EdgeInsets.symmetric(vertical: 38),
                 decoration: BoxDecoration(
@@ -79,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
                               mainAxisSize: MainAxisSize.max,
                               children: <Widget>[
                                 Text(
-                                  'Marie Winter',
+                                  user.name,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 32,
@@ -118,27 +126,38 @@ class ProfileScreen extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Expanded(
-                                flex: 1,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.chat,
-                                      color: Color(0xff9599b3),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ChatScreen(title: user.name),
                                     ),
-                                    SizedBox(
-                                      height: 12,
-                                    ),
-                                    Text(
-                                      'Chat',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xff78849e),
+                                  );
+                                },
+                                child: Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.chat,
+                                        color: Color(0xff9599b3),
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(
+                                        height: 12,
+                                      ),
+                                      Text(
+                                        'Chat',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xff78849e),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               Expanded(

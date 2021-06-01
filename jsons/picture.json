@@ -1,0 +1,7 @@
+{
+    "avatar": "string",
+    "small": "small",
+    "medium": "medium",
+    "large": "l",
+    "full": "f"
+}

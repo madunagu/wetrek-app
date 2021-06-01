@@ -5,21 +5,26 @@ import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/message.dart';
+import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
+  ChatScreen({required this.title});
+  final String title;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(
-        title: 'Marie',
+        title: title,
         rightIcon: Icons.search,
       ),
       body: BlocProvider(
         create: (BuildContext context) =>
-            ListBloc(repository: TrekRepository())..add(ListFetched()),
+            ListBloc(repository: MessageRepository())..add(ListFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -40,7 +45,7 @@ class ChatMessageList extends StatefulWidget {
 }
 
 class _ChatMessageListState extends State<ChatMessageList> {
-  List<dynamic> items = [];
+  List<Message> messages = [];
 
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
@@ -67,6 +72,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
     }
   }
 
+  void onSearch(String query) {
+    if (query.length > 3) {
+      _postBloc.add(ListFetched());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ListBloc, ListState>(
@@ -77,43 +88,37 @@ class _ChatMessageListState extends State<ChatMessageList> {
           );
         }
         if (state is ListFailure) {
+          //TODO: design widget for this particular function
+          //let the popups be for other exceptions
           return Center(
-            child: Text('failed to fetch devotionals'),
+            child: Text('fetch failed'),
           );
         }
         if (state is ListSuccess) {
           if (state.models.isEmpty) {
             return Center(
-              child: Text('no devotionals'),
+              child: Text('no messages'),
             );
           }
-          return this.chatMessages(context);
+          return this.chatMessages(state.models);
         }
         return Container();
       },
     );
   }
 
-  Widget chatMessages(BuildContext context) {
+  Widget chatMessages(messages) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Column(
         children: [
-          ChatItem(
-            message:
-                'The person who says it cannot be done should not interrupt the person who is doing it.',
-            user: User(name: 'Marie',email: "something", avatar: 'images/avatar1.jpg'),
-          ),
-          ChatItem(
-            message:
-                'Remember that not getting what you want is sometimes a wonderful stroke of luck. ',
-            user: User(name: 'Marie',email:'something', avatar: 'images/avatar1.jpg'),
-            isSender: true,
-          ),
-          ChatDateChanged(),
-          ChatItem(
-            message: 'You can\'t use us creativity',
-            user: User(name: 'Marie',email: 'something', avatar: 'images/avatar2.jpg'),
-          ),
+          for (var i = 0; i < messages.length; i++)
+            if (i > 0 &&
+                messages[i].createdAt.difference(messages[i - 1]) >
+                    Duration(days: 1))
+              ChatDateChanged(messages[i].createdAt),
+          for (var i = 0; i < messages.length; i++)
+            ChatItem(message: messages[i].message, user: messages[i].from),
           ImageChatItem(image: 'images/sushi.jpg'),
         ],
       ),
@@ -152,16 +157,19 @@ class ChatTextInput extends StatelessWidget {
 }
 
 class ChatDateChanged extends StatelessWidget {
-  const ChatDateChanged({
+  const ChatDateChanged(
+    this.dateTime, {
     Key? key,
   }) : super(key: key);
+
+  final DateTime dateTime;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         SizedBox(height: 14),
-        Text('YESTERDAY, 7:43 PM', style: TextStyles.darkMinor),
+        Text(dateTime.toString(), style: TextStyles.darkMinor),
         SizedBox(height: 11),
       ],
     );

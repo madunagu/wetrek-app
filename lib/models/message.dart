@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'User.dart';
+import 'package:wetrek/models/model.dart';
+import 'user.dart';
 
 @immutable
-class Message {
+class Message extends Model{
 
   const Message({
     required this.message,

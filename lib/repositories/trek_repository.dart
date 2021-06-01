@@ -2,10 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:wetrek/models/User.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/bounds.dart';
+import 'package:wetrek/models/field.dart';
+import 'package:wetrek/models/geometry.dart';
+import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/pagination.dart';
 import 'package:wetrek/models/parameters.dart';
+import 'package:wetrek/models/plus_code.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/api.dart';
 import 'package:flutter/material.dart';
@@ -31,18 +37,68 @@ class TrekRepository extends Repository {
     return Trek.fromJson(res);
   }
 
-  Future<bool> create(Model trek) async {
+  Future<Trek> create(Model trek) async {
     final Map<String, dynamic> res =
         await api.post('/treks', jsonEncode(trek.toJson()));
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return Trek.fromJson(res['data']);
   }
 
-  Future<bool> update(Model trek) async {
+  Future<Trek> update(Model trek) async {
     final Map<String, dynamic> res =
         await api.put('/treks', jsonEncode(trek.toJson()));
     //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return Trek.fromJson(res['data']);
+  }
+
+  static Trek dummy() {
+    return Trek(
+      createdAt: DateTime.now(),
+      locations: [],
+      startAddress: Address(
+        plusCode: PlusCode(compoundCode: 'kkk', globalCode: 'jj'),
+        formattedAddress: 'where',
+        placeId: '2343',
+        types: ['Political'],
+        addressComponents: [
+          Field(
+            longName: 'longName',
+            shortName: 'shortName',
+            types: ['political'],
+          )
+        ],
+        geometry: Geometry(
+          location: Location(lng: 133.333, lat: 133.323),
+          locationType: 'political',
+          viewport: Bounds(
+            northeast: Location(lng: 133.333, lat: 133.323),
+            southwest: Location(lng: 133.333, lat: 133.323),
+          ),
+        ),
+      ),
+      endAddress: Address(
+        plusCode: PlusCode(compoundCode: 'kkk', globalCode: 'jj'),
+        formattedAddress: 'where',
+        placeId: '2343',
+        types: ['Political'],
+        addressComponents: [
+          Field(
+            longName: 'longName',
+            shortName: 'shortName',
+            types: ['political'],
+          )
+        ],
+        geometry: Geometry(
+          location: Location(lng: 133.333, lat: 133.323),
+          locationType: 'political',
+          viewport: Bounds(
+            northeast: Location(lng: 133.333, lat: 133.323),
+            southwest: Location(lng: 133.333, lat: 133.323),
+          ),
+        ),
+      ),
+      name: 'Abule ado trek',
+      startingAt: DateTime.now(),
+    );
   }
 
   Future<bool> delete(int id) async {

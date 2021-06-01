@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'Location.dart';
-import 'Location.dart';
+import 'location.dart';
 
 @immutable
 class Bounds {

@@ -1,10 +1,10 @@
 {
     "start_address": "$Address",
     "end_address": "$Address",
-    "users": "$[]User",
+    "users?": "$[]User",
     "name": "Trek Name",
     "locations": "$[]Location",
     "starting_at": "@datetime",
-    "ending_at": "@datetime",
+    "ending_at?": "@datetime",
     "created_at": "@datetime"
 }

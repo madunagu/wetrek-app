@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
@@ -161,7 +163,7 @@ class SingleTrek extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TrekScreen(),
+                builder: (context) => TrekScreen(trek: TrekRepository.dummy()),
               ),
             );
           },

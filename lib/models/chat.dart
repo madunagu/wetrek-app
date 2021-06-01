@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'Message.dart';
-import 'User.dart';
+import 'message.dart';
+import 'user.dart';
 
 @immutable
 class Chat {

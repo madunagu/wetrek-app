@@ -21,17 +21,23 @@ class WelcomeScreen extends StatelessWidget {
             child: Container(
               child: Column(
                 children: [
-                  Text('Welcome To WeTrek',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 52,
-                          fontWeight: FontWeight.w500)),
                   Text(
-                      'The best way to navigate your world and discover new places. Let\'s get started!',
-                      style: TextStyles.base),
+                    'Welcome To WeTrek',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 52,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    'The best way to navigate your world and discover new places. Let\'s get started!',
+                    style: TextStyles.base,
+                  ),
                   SizedBox(height: 38),
-                  Text('CONTINUE WITH',
-                      style: TextStyles.minor.copyWith(color: Colors.white)),
+                  Text(
+                    'CONTINUE WITH',
+                    style: TextStyles.minor.copyWith(color: Colors.white),
+                  ),
                   MyButton('GMAIL'),
                   SizedBox(height: 12),
                   MyButton('FACEBOOK'),

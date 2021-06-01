@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/screens/history_screen.dart';
 import 'package:wetrek/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
 class TrekScreen extends StatelessWidget {
+  TrekScreen({required this.trek});
+  final Trek trek;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

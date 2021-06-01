@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'Detail.dart';
-import 'Detail.dart';
-import 'Location.dart';
-import 'Location.dart';
-import 'Step.dart';
+import 'detail.dart';
+import 'location.dart';
+import 'step.dart';
 
 @immutable
 class Leg {

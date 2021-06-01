@@ -28,6 +28,7 @@ class ListBloc extends Bloc<ListEvent, ListState> {
             Parameters(
               page: 0,
               length: 20,
+              q: event.query!,
             ),
           );
 
@@ -43,6 +44,7 @@ class ListBloc extends Bloc<ListEvent, ListState> {
             Parameters(
               page: currentState.currentPage + 1,
               length: 20,
+              q: event.query!,
             ),
           );
 
