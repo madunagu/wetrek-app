@@ -1,15 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/controllers/search_bar.controller.dart';
+import 'package:wetrek/controllers/map_controller.dart';
+import 'package:wetrek/controllers/search_controller.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/option.dart';
+import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
-import 'package:wetrek/widgets.dart';
+import 'widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlaceDetailsPreview extends StatelessWidget {
+  PlaceDetailsPreview({required this.trek});
+  final Trek trek;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -40,6 +52,38 @@ class PlaceDetailsPreview extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class CreateTrek extends StatefulWidget {
+  @override
+  _CreateTrekState createState() => _CreateTrekState();
+}
+
+class _CreateTrekState extends State<CreateTrek> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Stepper(
+        steps: [
+          Step(title: Text('Trek Details'), content: TrekForm()),
+          Step(title: Text('Select Ride'), content: ChooseRideType()),
+        ],
+        type: StepperType.horizontal,
+      ),
+    );
+  }
+}
+
+class TrekForm extends StatefulWidget {
+  @override
+  _TrekFormState createState() => _TrekFormState();
+}
+
+class _TrekFormState extends State<TrekForm> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
 
@@ -152,7 +196,7 @@ class MapSheetDetails extends StatelessWidget {
                   subTitle,
                   style: TextStyles.minor,
                 ),
-                child!,
+                child != null ? child! : Container(),
               ],
             ),
           ),
@@ -164,29 +208,99 @@ class MapSheetDetails extends StatelessWidget {
   }
 }
 
-class PlacesNearby extends StatelessWidget {
+class PlacesNearby extends StatefulWidget {
+  PlacesNearby({required this.searchController, required this.mapController});
+  final SearchController searchController;
+  final MapController mapController;
+  @override
+  _PlacesNearbyState createState() => _PlacesNearbyState();
+}
+
+class _PlacesNearbyState extends State<PlacesNearby> {
+  List<Trek> treks = [];
+
+  final _scrollController = ScrollController();
+  final _scrollThreshold = 200.0;
+  late ListBloc _postBloc;
+  late final StreamSubscription<String> subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _postBloc = BlocProvider.of<ListBloc>(context);
+//    _postBloc.add(ListFetched());
+    subscription = widget.searchController.searchStream.listen((query) {
+      onSearch(query);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    subscription.cancel();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= _scrollThreshold) {
+      _postBloc.add(ListFetched());
+    }
+  }
+
+  void onSearch(String query) {
+    if (query.length > 3) {
+      _postBloc.add(ListFetched(query: query));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<ListBloc, ListState>(
+      builder: (context, state) {
+        if (state is ListInitial) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is ListFailure) {
+          //TODO: design widget for this particular function
+          //let the popups be for other exceptions
+          return Center(
+            child: Text('fetch failed'),
+          );
+        }
+        if (state is ListSuccess) {
+          if (state.models.isEmpty) {
+            return Center(
+              child: Text('no messages'),
+            );
+          }
+          return this.cards(state.models);
+        }
+        return Container();
+      },
+    );
+  }
+
+  Widget cards(List<Model> models) {
+    models as List<Trek>;
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 200,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: [
-          PlacedCard(
-            title: 'Sushi Place',
-            subTitle: '4 stars',
-            active: true,
-          ),
-          PlacedCard(
-            title: 'Sushi Place',
-            subTitle: '4 stars',
-          ),
-          PlacedCard(
-            title: 'Sushi Place',
-            subTitle: '4 stars',
-          ),
-        ],
+        children: models
+            .map((e) => GestureDetector(
+                  onTap: () => widget.mapController.selectTrek(e),
+                  child: PlacedCard(
+                    title: e.name,
+                    subTitle: e.distance(),
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
@@ -417,8 +531,9 @@ class _SelectCardGroupState extends State<SelectCardGroup> {
 }
 
 class LocationPairCard extends StatelessWidget {
-  LocationPairCard({this.onTap});
+  LocationPairCard({this.onTap, required this.trek});
   final VoidCallback? onTap;
+  final Trek trek;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -448,7 +563,7 @@ class LocationPairCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('pickup Location', style: TextStyles.darkMinor),
+                    Text('Start Location', style: TextStyles.darkMinor),
                     Text('Fresh Market', style: TextStyles.darkNormal),
                     Container(
                       margin: EdgeInsets.symmetric(vertical: 15),
@@ -475,8 +590,10 @@ class LocationPairCard extends StatelessWidget {
                               'images/avatar3.jpg',
                             ],
                           ),
-                          Text('Ekene is attending',
-                              style: TextStyles.darkMinor),
+                          Text(
+                            'Ekene is attending',
+                            style: TextStyles.darkMinor,
+                          ),
                         ],
                       ),
                     ),
@@ -493,30 +610,24 @@ class LocationPairCard extends StatelessWidget {
 
 class PlaceSearchBar extends StatefulWidget {
   PlaceSearchBar({
-    this.onTap,
+    required this.mapController,
+    required this.searchController,
   });
-  final VoidCallback? onTap;
+  final MapController mapController;
+  final SearchController searchController;
 
   @override
   _PlaceSearchBarState createState() => _PlaceSearchBarState();
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
-  late SearchBarController controller;
-
   @override
   void initState() {
-    controller = SearchBarController();
-    controller.addListener(() {
+    super.initState();
+
+    widget.searchController.addListener(() {
       setState(() {});
     });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -527,23 +638,132 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: controller.isOpen()
-          ? OpenedSearchBar(controller: controller)
-          : CollapsedSearchBar(controller: controller),
+      child: currentSearchWidget(),
     );
+  }
+
+  Widget currentSearchWidget() {
+    switch (widget.searchController.searchBarState()) {
+      case SearchBarState.searchOpened:
+        return OpenedSearchBar(
+          searchController: widget.searchController,
+          mapController: widget.mapController,
+        );
+      case SearchBarState.searchCompressed:
+        return CompressedSearchBar(searchController: widget.searchController);
+      case SearchBarState.searchCollapsed:
+        return CollapsedSearchBar(
+          searchController: widget.searchController,
+          mapController: widget.mapController,
+        );
+
+      default:
+        return CollapsedSearchBar(
+          searchController: widget.searchController,
+          mapController: widget.mapController,
+        );
+    }
   }
 }
 
-class CollapsedSearchBar extends StatelessWidget {
-  CollapsedSearchBar({required this.controller});
-  final SearchBarController controller;
+class CompressedSearchBar extends StatelessWidget {
+  CompressedSearchBar({required this.searchController});
+  final SearchController searchController;
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: controller.open(),
+          onTap: searchController.open,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Icon(
+              CustomIcons.icons_dark_back,
+              color: Color(0xff454F63),
+            ),
+          ),
+        ),
+        Container(
+          height: 24,
+          margin: EdgeInsets.only(top: 16, bottom: 16),
+          color: Color(0xffF4F4F6),
+          width: 1,
+        ),
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: EdgeInsets.only(left: 16, top: 16, bottom: 16),
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              strutStyle: StrutStyle(fontSize: 12.0),
+              text: TextSpan(
+                style: TextStyles.darkNormal.copyWith(color: Color(0xff78849E)),
+                text: searchController.startAddress?.toString() != null
+                    ? searchController.startAddress!.formattedAddress
+                    : 'Your Location',
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Icon(CustomIcons.icons_dark_next, color: Color(0x2e78849E)),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: EdgeInsets.only(top: 16, bottom: 16),
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              strutStyle: StrutStyle(fontSize: 12.0),
+              text: TextSpan(
+                style: TextStyles.darkNormal,
+                text: searchController.endAddress?.toString() != null
+                    ? searchController.endAddress!.formattedAddress
+                    : 'Your Location',
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class CollapsedSearchBar extends StatefulWidget {
+  CollapsedSearchBar({
+    required this.searchController,
+    required this.mapController,
+  });
+  final SearchController searchController;
+  final MapController mapController;
+
+  @override
+  _CollapsedSearchBarState createState() => _CollapsedSearchBarState();
+}
+
+class _CollapsedSearchBarState extends State<CollapsedSearchBar> {
+  late final TextEditingController searchToTextController;
+
+  @override
+  void initState() {
+    searchToTextController =
+        TextEditingController(text: widget.searchController.searchQuery);
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => Scaffold.of(context).openDrawer,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Icon(
@@ -562,6 +782,9 @@ class CollapsedSearchBar extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 6.0, left: 16, bottom: 6),
             child: TextField(
+              onChanged: widget.searchController.search,
+              onTap: widget.mapController.search,
+              controller: searchToTextController,
               style: TextStyles.darkNormal,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -573,24 +796,91 @@ class CollapsedSearchBar extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Icon(CustomIcons.icons_dark_close, color: Color(0xff454F63)),
+        GestureDetector(
+          onTap: widget.searchController.open,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Icon(CustomIcons.icons_dark_add, color: Color(0xff454F63)),
+          ),
         ),
       ],
     );
   }
 }
 
-class OpenedSearchBar extends StatelessWidget {
-  OpenedSearchBar({required this.controller});
-  final SearchBarController controller;
+class OpenedSearchBar extends StatefulWidget {
+  OpenedSearchBar(
+      {required this.searchController, required this.mapController});
+  final SearchController searchController;
+  final MapController mapController;
+
+  @override
+  _OpenedSearchBarState createState() => _OpenedSearchBarState();
+}
+
+class _OpenedSearchBarState extends State<OpenedSearchBar> {
+  final TextEditingController _searchFromTextController =
+      TextEditingController();
+  final TextEditingController _searchToTextController = TextEditingController();
+  bool _fromEnabled = false;
+  bool _toEnabled = true;
+//  Address? startAddress;
+//  Address? endAddress;
+  String? _fromError;
+  String? _toError;
+  @override
+  void initState() {
+    _updateTextAddress();
+
+    widget.searchController.addListener(() {
+      _toEnabled = widget.searchController.endAddress == null;
+      _fromEnabled = widget.searchController.startAddress == null;
+      _fromError = _toError = null;
+//      showCurrentAddress();
+//      setState(() {});
+    });
+    super.initState();
+  }
+
+  _updateTextAddress() {
+    _searchFromTextController.text =
+        widget.searchController.startAddress?.formattedAddress ?? '';
+    _searchToTextController.text =
+        widget.searchController.endAddress?.formattedAddress ??
+            widget.searchController.searchQuery ??
+            '';
+  }
+
+  @override
+  void dispose() {
+    _searchToTextController.dispose();
+    _searchFromTextController.dispose();
+    super.dispose();
+  }
+
+  void _createTrek() {
+    if (widget.searchController.endAddress == null) {
+      // TODO : throw text editor error that text is required
+      _toError = 'Select a Valid Address';
+//      setState(() {});
+      return;
+    }
+    if (widget.searchController.startAddress == null) {
+      // TODO : throw text editor error that text is required
+      _fromError = 'Select a Valid Address';
+//      setState(() {});
+      return;
+    }
+    widget.mapController.createTrek(widget.searchController.startAddress!,
+        widget.searchController.endAddress!);
+    widget.searchController.compress();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 133,
+//      height: 133,
       padding: EdgeInsets.only(
         left: 24,
       ),
@@ -603,13 +893,48 @@ class OpenedSearchBar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    style: TextStyles.darkNormal,
-                    decoration: InputDecoration(
-                      labelText: 'From',
-                      labelStyle: TextStyles.darkMinor,
-                      border: InputBorder.none,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: TextStyles.darkNormal,
+                          onChanged: widget.searchController.search,
+                          onTap: () {
+                            widget.searchController.isEndAddress = false;
+                            widget.mapController.suggestAddress();
+                          },
+                          controller: _searchFromTextController,
+                          enabled: _fromEnabled,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                            labelText: 'From',
+                            labelStyle: TextStyles.darkMinor,
+                            border: InputBorder.none,
+                            fillColor: Color(0x2f3ACCE1),
+                            filled: !_fromEnabled,
+                            alignLabelWithHint: true,
+                            errorText: _fromError,
+                            errorStyle: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _fromEnabled = true;
+                          _toEnabled = true;
+                          setState(() {});
+                        },
+                        child: Container(
+                          color: Colors.transparent,
+                          padding: EdgeInsets.all(16),
+                          child: Icon(
+                            CustomIcons.icons_dark_close,
+                            color: Color(0xff454F63),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 8),
@@ -622,20 +947,33 @@ class OpenedSearchBar extends StatelessWidget {
                       Expanded(
                         child: TextField(
                           style: TextStyles.darkNormal,
+                          onChanged: widget.searchController.search,
+                          enabled: _toEnabled,
+                          onTap: () {
+                            widget.searchController.isEndAddress = true;
+                            widget.mapController.suggestAddress();
+                          },
+                          controller: _searchToTextController,
                           decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                            fillColor: Color(0x2f3ACCE1),
+                            filled: !_toEnabled,
                             labelText: 'To',
                             labelStyle: TextStyles.darkMinor,
                             border: InputBorder.none,
+                            errorStyle: TextStyle(color: Colors.red),
+                            errorText: _toError,
+                            enabled: _toEnabled,
                           ),
                         ),
                       ),
                       GestureDetector(
-                        onTap: controller.close(),
+                        onTap: _createTrek,
                         child: Container(
                           color: Colors.transparent,
                           padding: EdgeInsets.all(16),
                           child: Icon(
-                            CustomIcons.icons_dark_close,
+                            Icons.done,
                             color: Color(0xff454F63),
                           ),
                         ),
@@ -652,34 +990,120 @@ class OpenedSearchBar extends StatelessWidget {
   }
 }
 
-class SearchResults extends StatelessWidget {
+class SearchResults extends StatefulWidget {
+  SearchResults({required this.searchController});
+  final SearchController searchController;
+  @override
+  _SearchResultsState createState() => _SearchResultsState();
+}
+
+class _SearchResultsState extends State<SearchResults> {
+  List<Address> results = [];
+  final _scrollController = ScrollController();
+  final _scrollThreshold = 200.0;
+  late ListBloc _postBloc;
+
+  late final StreamSubscription<String> searchSubscription;
+  @override
+  void initState() {
+    _scrollController.addListener(_onScroll);
+    _postBloc = BlocProvider.of<ListBloc>(context);
+//    _postBloc.add(ListFetched());
+    searchSubscription = widget.searchController.searchStream.listen((query) {
+      onSearch(query);
+    });
+
+    super.initState();
+  }
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= _scrollThreshold) {
+      _postBloc.add(ListFetched());
+    }
+  }
+
+  void onSearch(String query) {
+    if (query.length > 3) {
+      _postBloc.add(ListFetched(query: query));
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    searchSubscription.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  List<Widget> addresses(List<Model> models) {
+    models as List<Address>;
+    return models
+        .map(
+          (e) => GestureDetector(
+            onTap: () => widget.searchController.selectAddress(e),
+            child: SearchResultRow(e),
+          ),
+        )
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xffF7F7FA),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'SEARCH RESULTS',
-            style: TextStyle(
-              color: Color(0x9278849E),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+    return BlocBuilder<ListBloc, ListState>(
+      builder: (context, state) {
+        if (state is ListInitial) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is ListFailure) {
+          //TODO: design widget for this particular function
+          //let the popups be for other exceptions
+          return Center(
+            child: Text('fetch failed'),
+          );
+        }
+        if (state is ListSuccess) {
+          if (state.models.isEmpty) {
+            return Center(
+              child: Text('no messages'),
+            );
+          }
+          return Container(
+            color: Color(0xffF7F7FA),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            height: 200,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SEARCH RESULTS',
+                    style: TextStyle(
+                      color: Color(0x9278849E),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  ...addresses(state.models),
+                ],
+              ),
             ),
-          ),
-          SearchResultRow(),
-          SearchResultRow(),
-          SearchResultRow(),
-          SearchResultRow(),
-        ],
-      ),
+          );
+        }
+        return Container();
+      },
     );
   }
 }
 
 class SearchResultRow extends StatelessWidget {
+  SearchResultRow(this.address);
+  final Address address;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -697,8 +1121,7 @@ class SearchResultRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('View All Sushi Restaurants',
-                    style: TextStyles.darkNormal),
+                Text(address.formattedAddress, style: TextStyles.darkNormal),
                 Text('2Km.', style: TextStyles.darkMinor),
               ],
             ),

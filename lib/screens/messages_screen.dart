@@ -7,7 +7,8 @@ import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/repositories/message_repository.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/repositories/user_repository.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class MessagesScreen extends StatelessWidget {
   @override
@@ -129,11 +130,7 @@ class MessageListItem extends StatelessWidget {
 
   factory MessageListItem.random() {
     return MessageListItem(
-      user: User(
-        name: 'Madunagu Ekene',
-        email: 'ekenemadunagu@gmail.com',
-        avatar: '',
-      ),
+      user: UserRepository.dummy(),
       message: 'If you\'re offered a seat on a rocket ship',
       isNew: true,
     );

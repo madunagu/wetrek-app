@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class NearbyScreen extends StatelessWidget {
   @override

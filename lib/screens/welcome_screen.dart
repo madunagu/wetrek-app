@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/widgets.dart';
+import '../widgets/widgets.dart';
 import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
 class WelcomeScreen extends StatelessWidget {

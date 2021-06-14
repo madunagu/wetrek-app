@@ -1,39 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/trek.dart';
 
 class MapController extends ChangeNotifier {
-  SearchBarState _searchBarState = SearchBarState.initialized;
-  bool _isOpen = false;
+  MapState? _mapState = MapState.initialized;
+  Trek? selectedItem;
 
-  open() {
-    _isOpen = true;
+  search() async {
+    _mapState = MapState.searchCompleted;
     notifyListeners();
   }
 
-  close() {
-    _isOpen = false;
+  suggestAddress(){
+    _mapState = MapState.searchSuggested;
     notifyListeners();
   }
 
-  SearchBarState getState() {
-    return _searchBarState;
+  MapState mapState() {
+    return _mapState!;
   }
 
-  void setState(SearchBarState searchBarState) {
-    _searchBarState = searchBarState;
+  selectTrek(Trek trek) {
+    selectedItem = trek;
+    _mapState = MapState.itemSelected;
     notifyListeners();
   }
 
-  bool isOpen() {
-    return _isOpen;
+  createTrek(Address startAddress, Address endAddress){
+//_mapState =
+  }
+
+  dispose() {
+    super.dispose();
+    _mapState = null;
+    selectedItem = null;
   }
 }
 
-enum SearchBarState {
+enum MapState {
   initialized,
   searchFocused,
   searchCompleted,
-  markerClicked,
+  searchSuggested,
+  itemSelected,
+  creatingTrek,
   waiting,
-  opened,
-  closed,
 }

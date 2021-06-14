@@ -21,14 +21,21 @@ class TrekRepository extends Repository {
   late final API api;
   @override
   Future<Paginated> list(Parameters params) async {
-    List<Trek> treks = [];
-    final Map<String, dynamic> res = await api.get('/treks');
-    for (var i = 0; i < res.length; i++) {
-      treks.add(Trek.fromJson(res['data'][i]));
-    }
+//    List<Trek> treks = [];
+//    final Map<String, dynamic> res = await api.get('/treks');
+//    for (var i = 0; i < res.length; i++) {
+//      treks.add(Trek.fromJson(res['data'][i]));
+//    }
+  await Future.delayed(Duration(milliseconds: 100));
     return Paginated(
-      data: treks,
-      pagination: res['pagination'],
+      data: dummies(),
+      pagination: Pagination(
+        count: 40,
+        currentPage: 1,
+        perPage: 40,
+        total: 40,
+        totalPages: 1,
+      ),
     );
   }
 
@@ -99,6 +106,14 @@ class TrekRepository extends Repository {
       name: 'Abule ado trek',
       startingAt: DateTime.now(),
     );
+  }
+
+  List<Trek> dummies() {
+    List<Trek> treks = [];
+    for (int i = 0; i < 40; i++) {
+      treks.add(TrekRepository.dummy());
+    }
+    return treks;
   }
 
   Future<bool> delete(int id) async {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/screens/payment_screen.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class PhoneScreen extends StatelessWidget {
   @override

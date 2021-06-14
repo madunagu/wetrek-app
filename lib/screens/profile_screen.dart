@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/screens/chat_screen.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({required this.user});

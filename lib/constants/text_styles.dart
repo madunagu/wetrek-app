@@ -52,6 +52,7 @@ class TextStyles {
     fontSize: 16,
     height: 21 / 16,
     fontWeight: FontWeight.w500,
+    fontFamily: 'Gibson'
   );
   static final darkMinor = const TextStyle(
     color: Color(0xff959DAD),

@@ -11,8 +11,8 @@ import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/repositories/repository.dart';
 
-class ListBloc extends Bloc<ListEvent, ListState> {
-  ListBloc({
+class SearchBloc extends Bloc<ListEvent, ListState> {
+  SearchBloc({
     required this.repository,
   }) : super(ListInitial());
   final Repository repository;
@@ -28,7 +28,7 @@ class ListBloc extends Bloc<ListEvent, ListState> {
             Parameters(
               page: 0,
               length: 20,
-              q: event.query ?? '',
+              q: event.query!,
             ),
           );
 

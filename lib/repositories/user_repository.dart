@@ -47,4 +47,21 @@ class UserRepository {
     //TODO: chech if boolean true is parsed already
     return res['success'] == 'true';
   }
+
+  static User dummy() {
+    return User(
+      id: 1,
+      name: 'Ekene Madunagu',
+      email: 'ekenemadunagu@gmail.com',
+      avatar: 'myavatar.com'
+    );
+  }
+
+  List<User> dummies() {
+    List<User> treks = [];
+    for (int i = 0; i < 40; i++) {
+      treks.add(UserRepository.dummy());
+    }
+    return treks;
+  }
 }

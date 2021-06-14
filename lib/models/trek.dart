@@ -81,6 +81,9 @@ class Trek extends Model {
     createdAt: createdAt ?? this.createdAt,
   );
 
+  String distance(){
+    return '5.3 Miles';
+  }
   @override
   bool operator ==(Object other) => identical(this, other)
     || other is Trek && startAddress == other.startAddress && endAddress == other.endAddress && users == other.users && name == other.name && locations == other.locations && startingAt == other.startingAt && endingAt == other.endingAt && createdAt == other.createdAt;

@@ -6,7 +6,7 @@ import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/repositories/message_repository.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class NotificationScreen extends StatelessWidget {
   @override

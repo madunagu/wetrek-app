@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 import 'package:wetrek/constants/text_styles.dart';
 
 class CategoriesScreen extends StatelessWidget {

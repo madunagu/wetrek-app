@@ -20,8 +20,8 @@ dependencies:
   flutter_bloc: ^7.0.0
   # fluttericon:
   google_maps_flutter: ^2.0.6
-  geolocator: ^7.0.3
-  geocoding: ^2.0.0
+#  geolocator: ^7.0.3
+#  geocoding: ^2.0.0
 
 
 
@@ -52,6 +52,7 @@ flutter:
      - images/avatar3.jpg
      - images/avatar4.jpg
      - .env
+     - assets/map_style.txt
 
   fonts:
     - family:  MyFlutterApp

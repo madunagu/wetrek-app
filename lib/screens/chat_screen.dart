@@ -10,7 +10,7 @@ import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({required this.title});
@@ -74,7 +74,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
   void onSearch(String query) {
     if (query.length > 3) {
-      _postBloc.add(ListFetched());
+      _postBloc.add(ListFetched(query: query));
     }
   }
 

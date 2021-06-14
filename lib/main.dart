@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
+import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/screens/categories_screen.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/history_screen.dart';
@@ -31,7 +34,14 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Gibson',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MapScreen(),
+      home: MultiBlocProvider(
+          providers: [
+            BlocProvider<AuthenticationBloc>(
+              create: (context) =>
+              AuthenticationBloc()..add(AuthenticationStarted()),
+            ),
+          ],
+          child: MapScreen()),
     );
   }
 }

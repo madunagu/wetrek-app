@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'model.dart';
+import 'package:wetrek/models/model.dart';
 import 'pagination.dart';
 
 @immutable

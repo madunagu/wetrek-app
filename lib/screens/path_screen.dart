@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/widgets.dart';
+import '../widgets/widgets.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
 class TransportPathScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class TransportPathScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 42),
           child: Column(
             children: [
-              LocationPairCard(),
+//              LocationPairCard(),
               SizedBox(height: 16),
               TransportChips(),
               SizedBox(height: 21),

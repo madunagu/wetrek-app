@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/controllers/map_controller.dart';
+import 'package:wetrek/controllers/search_controller.dart';
+import 'package:wetrek/repositories/address_repository.dart';
+import 'package:wetrek/repositories/trek_repository.dart';
+import 'package:wetrek/widgets/app_navigation_bar.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
-
-enum MapState {
-  initialized,
-  searchFocused,
-  searchCompleted,
-  markerClicked,
-  waiting,
-}
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -21,10 +20,88 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  MapState mapState = MapState.searchCompleted;
+  late final MapController mapController;
+  late final SearchController searchController;
 
-  Widget switchSheet() {
-    switch (mapState) {
+  @override
+  void initState() {
+    super.initState();
+    mapController = MapController();
+    searchController = SearchController();
+  }
+
+  @override
+  void dispose() {
+    mapController.dispose();
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Size view = MediaQuery.of(context).size;
+    return Scaffold(
+      drawer: AppNavigationDrawer(),
+      body: BlocProvider<ListBloc>(
+          create: (context) => ListBloc(repository: TrekRepository()),
+          child: Container(
+            height: view.height,
+            width: view.width,
+            color: Colors.white,
+            child: Stack(
+              children: [
+                MapContainer(view: view),
+                Positioned(
+                  top: 36,
+                  width: view.width,
+//              height: 52,
+                  child: PlaceSearchBar(
+                    searchController: searchController,
+                    mapController: mapController,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  width: view.width,
+                  child: MapLowerSheet(
+                    mapController: mapController,
+                    searchController: searchController,
+                  ),
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+}
+
+class MapLowerSheet extends StatefulWidget {
+  const MapLowerSheet({
+    Key? key,
+    required this.mapController,
+    required this.searchController,
+  }) : super(key: key);
+
+  final MapController mapController;
+  final SearchController searchController;
+
+  @override
+  _MapLowerSheetState createState() => _MapLowerSheetState();
+}
+
+class _MapLowerSheetState extends State<MapLowerSheet> {
+  @override
+  void initState() {
+    super.initState();
+    widget.mapController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // mapState = mapController.
+    switch (widget.mapController.mapState()) {
       case MapState.initialized:
         return MapSheet(
           child: MapSheetDetails(
@@ -38,50 +115,35 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
         );
+      case MapState.creatingTrek:
+        return CreateTrek();
       case MapState.searchFocused:
         return Container();
       case MapState.searchCompleted:
-        return SearchResults();
+        return PlacesNearby(
+          searchController: widget.searchController,
+          mapController: widget.mapController,
+        );
       case MapState.waiting:
         return MapSheet(child: TripInfo());
-      case MapState.markerClicked:
+      case MapState.itemSelected:
         return MapSheet(
-          child: MapSheetDetails(child: PlaceDetailsPreview()),
+          child: MapSheetDetails(
+            child: PlaceDetailsPreview(
+              trek: widget.mapController.selectedItem!,
+            ),
+          ),
         );
-      default:
-        return MapSheet(
-          child: MapSheetDetails(),
+      case MapState.searchSuggested:
+        return BlocProvider<ListBloc>(
+          create: (BuildContext context) =>
+              ListBloc(repository: AddressRepository()),
+          child: SearchResults(searchController: widget.searchController),
         );
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final Size view = MediaQuery.of(context).size;
-    return Scaffold(
-      body: Container(
-        height: view.height,
-        width: view.width,
-        color: Colors.white,
-        child: Stack(
-          children: [
-            MapContainer(view: view),
-            Positioned(
-              top: 36,
-              width: view.width,
-//              height: 52,
-              child: PlaceSearchBar(
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              width: view.width,
-              child: switchSheet(),
-            ),
-          ],
-        ),
-      ),
-    );
+      default:
+        return MapSheet(child: MapSheetDetails());
+    }
   }
 }
 
@@ -112,6 +174,13 @@ class _MapContainerState extends State<MapContainer> {
 //    if (isTouchable) {
 //      _showPointDialog(point);
 //    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _loadMapStyle();
+    super.initState();
   }
 
   void _loadMapStyle() {

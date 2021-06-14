@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:wetrek/models/model.dart';
 import 'field.dart';
 import 'geometry.dart';
 import 'plus_code.dart';
 
 @immutable
-class Address {
+class Address extends Model {
 
   const Address({
     required this.addressComponents,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/screens/history_screen.dart';
-import 'package:wetrek/widgets.dart';
+import '../widgets/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
@@ -98,8 +98,9 @@ class TrekScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 15),
                 Text(
-                    'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
-                    style: TextStyles.base),
+                  'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
+                  style: TextStyles.base,
+                ),
                 SizedBox(height: 41),
                 Text('Time', style: TextStyles.base),
                 SizedBox(height: 12),

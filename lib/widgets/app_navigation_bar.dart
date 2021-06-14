@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wetrek/widgets.dart';
+import 'package:wetrek/constants/colors.dart';
+import 'package:wetrek/screens/messages_screen.dart';
+import 'package:wetrek/screens/trek_screen.dart';
+import 'package:wetrek/screens/trips_screen.dart';
+import 'widgets.dart';
 
 class AppNavigationDrawer extends StatefulWidget {
   @override
@@ -13,10 +17,7 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
     return Container(
       width: 325,
       height: size.height,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(topRight: Radius.circular(80)),
-        color: Colors.white,
-      ),
+      color: Colors.white,
       child: Column(
         children: [
           Container(
@@ -24,16 +25,19 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
             width: double.infinity,
             child: Stack(
               children: [
-                Image.asset(
-                  'images/photo.png',
-                  width: 325,
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
                 Container(
                   height: 250,
                   width: 325,
-                  color: Color(0x2e2A2E43),
+                  color: Color(0xff2A2E43),
+                ),
+                Opacity(
+                  opacity: .18,
+                  child: Image.asset(
+                    'images/ice_cream.jpg',
+                    width: 325,
+                    height: 250,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 Container(
                   padding: EdgeInsets.only(top: 60, left: 40),
@@ -73,18 +77,27 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
           ),
           GradientLine(height: 8),
           Container(
-            padding: EdgeInsets.only(top: 40, left: 27),
+            padding: EdgeInsets.only(top: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DrawerLink(
                   title: 'Home',
+                  active: true,
                 ),
                 DrawerLink(
-                  title: 'Videos',
+                  title: 'Treks',
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => TripsScreen()));
+                  },
                 ),
                 DrawerLink(
-                  title: 'Devotionals',
+                  title: 'Chats',
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MessagesScreen()));
+                  },
                 ),
                 DrawerLink(
                   title: 'Events',
@@ -116,12 +129,6 @@ class DrawerLink extends StatelessWidget {
       child: Container(
         alignment: Alignment.topLeft,
         child: Container(
-          decoration: active
-              ? BoxDecoration(
-                  color: Color(0xff8A56AC),
-                  borderRadius: BorderRadius.circular(30),
-                )
-              : null,
           margin: EdgeInsets.only(bottom: 24),
           height: 32,
           child: Row(
@@ -132,15 +139,18 @@ class DrawerLink extends StatelessWidget {
               Container(
                 width: 8,
                 height: 32,
-                color: active ? Color(0xff454F63) : Colors.white,
+                color: active ? Color(0xff3497FD) : Colors.white,
               ),
               SizedBox(width: 32),
-              Icon(icon, size: 20, color: Color(0xff3497FD)),
+              Icon(icon,
+                  size: 20,
+                  color: active ? Color(0xff3497FD) : Color(0xff454F63)),
               SizedBox(width: 16),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 18,
+                  fontWeight: FontWeight.w400,
                   height: 24 / 18,
                   color: Color(0xff454F63),
                 ),

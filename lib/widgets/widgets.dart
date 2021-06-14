@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
 class MyButton extends StatelessWidget {
   MyButton(this.text, {this.onTap, this.color = const Color(0xff3ACCE1)});
@@ -106,7 +107,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 MyAppBarNavigation(
                   fontColor: fontColor,
-                  onPressed: onPressed!,
+                  onPressed: onPressed ?? () {},
                   rightIcon: rightIcon,
                 ),
                 SizedBox(height: 14),
@@ -230,7 +231,7 @@ class BlueDashGradientDecoration extends Decoration {
       : _painter = _BlueGradientPainter(height);
 
   @override
-  BoxPainter createBoxPainter( [VoidCallback? onChanged]) => _painter;
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) => _painter;
 }
 
 class _BlueGradientPainter extends BoxPainter {
@@ -348,6 +349,79 @@ class NotificationPopup extends StatelessWidget {
                     color: Color(0xff3ACCE1),
                   ),
                   child: Icon(Icons.done, color: Colors.white, size: 24),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TutorialPanel extends StatelessWidget {
+  TutorialPanel({
+    required this.title,
+    required this.body,
+  });
+  final String title;
+  final String body;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: 24,
+      ),
+      decoration: BoxDecoration(
+        color: Color(0xff2A2E43),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(title, style: TextStyles.large),
+          SizedBox(height: 15),
+          Text(
+            body,
+            style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
+          ),
+          SizedBox(height: 23),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                DottedTabBar(),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Color(0xff454F63),
+                        ),
+                        child: Icon(Icons.arrow_back,
+                            color: Colors.white, size: 24),
+                      ),
+                      SizedBox(width: 8),
+                      Container(
+                        width: 52,
+                        height: 52,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Color(0xff3ACCE1),
+                        ),
+                        child: Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 24),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
