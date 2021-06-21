@@ -4,6 +4,7 @@
   "end_location":"$Location",
   "html_instructions": "Head <b>south</b> on <b>S Federal St</b> toward <b>W Van Buren St</b>",
   "polyline": "$Polyline",
+  "maneuver?": "turn left or right",
   "start_location":"$Location",
   "travel_mode": "DRIVING"
 }

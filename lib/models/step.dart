@@ -12,6 +12,7 @@ class Step {
     required this.endLocation,
     required this.htmlInstructions,
     required this.polyline,
+    this.maneuver,
     required this.startLocation,
     required this.travelMode,
   });
@@ -21,6 +22,7 @@ class Step {
   final Location endLocation;
   final String htmlInstructions;
   final Polyline polyline;
+  final String? maneuver;
   final Location startLocation;
   final String travelMode;
 
@@ -30,6 +32,7 @@ class Step {
     endLocation: json['end_location'] as Location,
     htmlInstructions: json['html_instructions'] as String,
     polyline: json['polyline'] as Polyline,
+    maneuver: json['maneuver'] != null ? json['maneuver'] as String : null,
     startLocation: json['start_location'] as Location,
     travelMode: json['travel_mode'] as String
   );
@@ -40,6 +43,7 @@ class Step {
     'end_location': endLocation,
     'html_instructions': htmlInstructions,
     'polyline': polyline,
+    'maneuver': maneuver,
     'start_location': startLocation,
     'travel_mode': travelMode
   };
@@ -50,6 +54,7 @@ class Step {
     endLocation: endLocation,
     htmlInstructions: htmlInstructions,
     polyline: polyline,
+    maneuver: maneuver,
     startLocation: startLocation,
     travelMode: travelMode
   );
@@ -61,6 +66,7 @@ class Step {
     Location? endLocation,
     String? htmlInstructions,
     Polyline? polyline,
+    String? maneuver,
     Location? startLocation,
     String? travelMode
   }) => Step(
@@ -69,14 +75,15 @@ class Step {
     endLocation: endLocation ?? this.endLocation,
     htmlInstructions: htmlInstructions ?? this.htmlInstructions,
     polyline: polyline ?? this.polyline,
+    maneuver: maneuver ?? this.maneuver,
     startLocation: startLocation ?? this.startLocation,
     travelMode: travelMode ?? this.travelMode,
   );
 
   @override
   bool operator ==(Object other) => identical(this, other)
-    || other is Step && distance == other.distance && duration == other.duration && endLocation == other.endLocation && htmlInstructions == other.htmlInstructions && polyline == other.polyline && startLocation == other.startLocation && travelMode == other.travelMode;
+    || other is Step && distance == other.distance && duration == other.duration && endLocation == other.endLocation && htmlInstructions == other.htmlInstructions && polyline == other.polyline && maneuver == other.maneuver && startLocation == other.startLocation && travelMode == other.travelMode;
 
   @override
-  int get hashCode => distance.hashCode ^ duration.hashCode ^ endLocation.hashCode ^ htmlInstructions.hashCode ^ polyline.hashCode ^ startLocation.hashCode ^ travelMode.hashCode;
+  int get hashCode => distance.hashCode ^ duration.hashCode ^ endLocation.hashCode ^ htmlInstructions.hashCode ^ polyline.hashCode ^ maneuver.hashCode ^ startLocation.hashCode ^ travelMode.hashCode;
 }

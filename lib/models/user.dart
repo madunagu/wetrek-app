@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:wetrek/models/model.dart';
 
 
 @immutable
-class User {
+class User extends Model {
 
   const User({
     required this.id,

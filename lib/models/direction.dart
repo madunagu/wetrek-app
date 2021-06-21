@@ -3,9 +3,9 @@ import 'waypoint.dart';
 import 'track.dart';
 
 @immutable
-class Directions {
+class Direction {
 
-  const Directions({
+  const Direction({
     required this.geocodedWaypoints,
     required this.routes,
     required this.status,
@@ -15,7 +15,7 @@ class Directions {
   final List<Track> routes;
   final String status;
 
-  factory Directions.fromJson(Map<String,dynamic> json) => Directions(
+  factory Direction.fromJson(Map<String,dynamic> json) => Direction(
     geocodedWaypoints: (json['geocoded_waypoints'] as List? ?? []).map((e) => e as Waypoint).toList(),
     routes: (json['routes'] as List? ?? []).map((e) => e as Track).toList(),
     status: json['status'] as String
@@ -27,18 +27,18 @@ class Directions {
     'status': status
   };
 
-  Directions clone() => Directions(
+  Direction clone() => Direction(
     geocodedWaypoints: geocodedWaypoints.toList(),
     routes: routes.toList(),
     status: status
   );
 
 
-  Directions copyWith({
+  Direction copyWith({
     List<Waypoint>? geocodedWaypoints,
     List<Track>? routes,
     String? status
-  }) => Directions(
+  }) => Direction(
     geocodedWaypoints: geocodedWaypoints ?? this.geocodedWaypoints,
     routes: routes ?? this.routes,
     status: status ?? this.status,
@@ -46,7 +46,7 @@ class Directions {
 
   @override
   bool operator ==(Object other) => identical(this, other)
-    || other is Directions && geocodedWaypoints == other.geocodedWaypoints && routes == other.routes && status == other.status;
+    || other is Direction && geocodedWaypoints == other.geocodedWaypoints && routes == other.routes && status == other.status;
 
   @override
   int get hashCode => geocodedWaypoints.hashCode ^ routes.hashCode ^ status.hashCode;

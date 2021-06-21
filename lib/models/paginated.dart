@@ -3,18 +3,18 @@ import 'package:wetrek/models/model.dart';
 import 'pagination.dart';
 
 @immutable
-class Paginated {
+class Paginated<T> {
 
   const Paginated({
     required this.data,
     required this.pagination,
   });
 
-  final List<Model> data;
+  final List<T> data;
   final Pagination pagination;
 
   factory Paginated.fromJson(Map<String,dynamic> json) => Paginated(
-    data: (json['data'] as List? ?? []).map((e) => e as Model).toList(),
+    data: (json['data'] as List? ?? []).map((e) => e as T).toList(),
     pagination: json['pagination'] as Pagination
   );
   
@@ -30,7 +30,7 @@ class Paginated {
 
 
   Paginated copyWith({
-    List<Model>? data,
+    List<T>? data,
     Pagination? pagination
   }) => Paginated(
     data: data ?? this.data,
