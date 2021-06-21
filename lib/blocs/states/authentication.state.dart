@@ -1,26 +1,24 @@
 import 'package:equatable/equatable.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 
-abstract class AuthenticationState extends Equatable {
+class AuthenticationState extends Equatable {
+  const AuthenticationState._({
+    this.status = AuthenticationStatus.unknown,
+    this.user,
+  });
+
+  const AuthenticationState.unknown() : this._();
+
+  const AuthenticationState.authenticated(User user)
+      : this._(status: AuthenticationStatus.authenticated, user: user);
+
+  const AuthenticationState.unauthenticated()
+      : this._(status: AuthenticationStatus.unauthenticated);
+
+  final AuthenticationStatus status;
+  final User? user;
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [status, user ?? 'empty'];
 }
-
-class AuthenticationInitial extends AuthenticationState {}
-
-class AuthenticationSuccess extends AuthenticationState {
-  final String token;
-  final User user;
-
-   AuthenticationSuccess({required this.token, required this.user});
-
-  @override
-  List<Object> get props => [token];
-
-  @override
-  String toString() => 'AuthenticationSuccess { token: $token }';
-}
-
-class AuthenticationFailure extends AuthenticationState {}
-
-class AuthenticationInProgress extends AuthenticationState {}

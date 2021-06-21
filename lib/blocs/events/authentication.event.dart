@@ -1,6 +1,5 @@
-import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
-import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 
 abstract class AuthenticationEvent extends Equatable {
   const AuthenticationEvent();
@@ -9,18 +8,13 @@ abstract class AuthenticationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthenticationStarted extends AuthenticationEvent {}
+class AuthenticationStatusChanged extends AuthenticationEvent {
+  const AuthenticationStatusChanged(this.status);
 
-class AuthenticationLoggedIn extends AuthenticationEvent {
-  final User user;
-
-  const AuthenticationLoggedIn({required this.user});
+  final AuthenticationStatus status;
 
   @override
-  List<Object> get props => [user];
-
-  @override
-  String toString() => 'AuthenticationLoggedIn { token: $user.token }';
+  List<Object> get props => [status];
 }
 
-class AuthenticationLoggedOut extends AuthenticationEvent {}
+class AuthenticationLogoutRequested extends AuthenticationEvent {}

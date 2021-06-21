@@ -1,25 +1,54 @@
-import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
+import 'package:formz/formz.dart';
 
-abstract class LoginState extends Equatable {
-  const LoginState();
+enum UsernameValidationError { empty }
+
+class Username extends FormzInput<String, UsernameValidationError> {
+  const Username.pure() : super.pure('');
+  const Username.dirty([String value = '']) : super.dirty(value);
 
   @override
-  List<Object> get props => [];
+  UsernameValidationError? validator(String? value) {
+    return value?.isNotEmpty == true ? null : UsernameValidationError.empty;
+  }
 }
 
-class LoginInitial extends LoginState {}
+enum PasswordValidationError { empty }
 
-class LoginInProgress extends LoginState {}
-
-class LoginFailure extends LoginState {
-  final String error;
-
-  const LoginFailure({required this.error});
+class Password extends FormzInput<String, PasswordValidationError> {
+  const Password.pure() : super.pure('');
+  const Password.dirty([String value = '']) : super.dirty(value);
 
   @override
-  List<Object> get props => [error];
-
-  @override
-  String toString() => 'LoginFailure { error: $error }';
+  PasswordValidationError? validator(String? value) {
+    return value?.isNotEmpty == true ? null : PasswordValidationError.empty;
+  }
 }
+
+class LoginState extends Equatable {
+  const LoginState({
+    this.status = FormzStatus.pure,
+    this.username = const Username.pure(),
+    this.password = const Password.pure(),
+  });
+
+  final FormzStatus status;
+  final Username username;
+  final Password password;
+
+  LoginState copyWith({
+    FormzStatus? status,
+    Username? username,
+    Password? password,
+  }) {
+    return LoginState(
+      status: status ?? this.status,
+      username: username ?? this.username,
+      password: password ?? this.password,
+    );
+  }
+
+  @override
+  List<Object> get props => [status, username, password];
+}
+
