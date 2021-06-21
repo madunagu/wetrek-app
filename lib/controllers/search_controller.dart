@@ -10,7 +10,7 @@ class SearchController extends ChangeNotifier {
   Address? startAddress;
   Address? endAddress;
   bool? isEndAddress = true;
-  final searchController = StreamController<String>();
+  final searchController = StreamController<String>.broadcast();
 
   Stream<String> get searchStream => searchController.stream;
 
@@ -19,6 +19,11 @@ class SearchController extends ChangeNotifier {
   open() {
     _searchBarState = SearchBarState.searchOpened;
     notifyListeners();
+  }
+
+  resetAddress(){
+    startAddress = null;
+    endAddress = null;
   }
 
   close() {
@@ -45,11 +50,11 @@ class SearchController extends ChangeNotifier {
   }
 
   dispose() {
-    super.dispose();
     _searchBarState = null;
     searchQuery = null;
     isEndAddress = null;
     searchController.close();
+    super.dispose();
   }
 }
 

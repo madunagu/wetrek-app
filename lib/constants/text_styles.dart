@@ -59,10 +59,17 @@ class TextStyles {
     fontSize: 12,
     height: 16 / 12,
   );
+
+  static final terms = const TextStyle(
+    color: Color(0xff78849E),
+    fontSize: 14,
+//    height: 16 / 12,
+  );
+
   static final input = const TextStyle(
-    color: Color(0x9078849E),
     fontSize: 15,
-    height: 30 / 15,
-    fontWeight: FontWeight.bold,
+    color: Color(0xff454F63),
+    fontWeight: FontWeight.w500,
+    height: 20/15,
   );
 }

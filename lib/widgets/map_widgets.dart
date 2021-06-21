@@ -64,13 +64,9 @@ class _CreateTrekState extends State<CreateTrek> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Stepper(
-        steps: [
-          Step(title: Text('Trek Details'), content: TrekForm()),
-          Step(title: Text('Select Ride'), content: ChooseRideType()),
-        ],
-        type: StepperType.horizontal,
-      ),
+      width: MediaQuery.of(context).size.width,
+      height: 400,
+      child: TrekForm(),
     );
   }
 }
@@ -81,9 +77,44 @@ class TrekForm extends StatefulWidget {
 }
 
 class _TrekFormState extends State<TrekForm> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _startingAtController;
+  @override
+  void initState() {
+    _titleController = TextEditingController();
+    _startingAtController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _startingAtController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MyInput(
+            controller: _titleController,
+            isDark: true,
+            hintText: 'Trek Title',
+          ),
+          Text('Starting At', style: TextStyles.normal),
+          MyTimePicker(_startingAtController),
+          MyButton(
+            'Continue',
+            isLarge: true,
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -623,11 +654,18 @@ class PlaceSearchBar extends StatefulWidget {
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
   @override
   void initState() {
+    widget.searchController.addListener(_refresh);
     super.initState();
+  }
 
-    widget.searchController.addListener(() {
-      setState(() {});
-    });
+  void _refresh() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.searchController.removeListener(_refresh);
+    super.dispose();
   }
 
   @override
@@ -828,33 +866,66 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
 //  Address? endAddress;
   String? _fromError;
   String? _toError;
+  late FocusNode _fromFocus;
+  late FocusNode _toFocus;
   @override
   void initState() {
-    _updateTextAddress();
-
-    widget.searchController.addListener(() {
-      _toEnabled = widget.searchController.endAddress == null;
-      _fromEnabled = widget.searchController.startAddress == null;
-      _fromError = _toError = null;
-//      showCurrentAddress();
-//      setState(() {});
-    });
-    super.initState();
-  }
-
-  _updateTextAddress() {
     _searchFromTextController.text =
         widget.searchController.startAddress?.formattedAddress ?? '';
     _searchToTextController.text =
         widget.searchController.endAddress?.formattedAddress ??
             widget.searchController.searchQuery ??
             '';
+    _toEnabled = widget.searchController.endAddress == null;
+    _fromEnabled = widget.searchController.startAddress == null;
+    _fromError = _toError = null;
+    _fromFocus = FocusNode();
+    _toFocus = FocusNode();
+    _fromFocus.addListener(_suggestFromAddress);
+    _toFocus.addListener(_suggestToAddress);
+    widget.searchController.addListener(_updateTextAddress);
+    super.initState();
+  }
+
+  void _resetForm() {
+    _fromEnabled = true;
+    _toEnabled = true;
+    _searchFromTextController.text = '';
+    _searchToTextController.text = '';
+    widget.searchController.resetAddress();
+    setState(() {});
+  }
+
+  void _suggestFromAddress() {
+    widget.searchController.isEndAddress = false;
+    widget.mapController.suggestAddress();
+  }
+
+  void _suggestToAddress() {
+    widget.searchController.isEndAddress = true;
+    widget.mapController.suggestAddress();
+  }
+
+  void _updateTextAddress() {
+    _searchFromTextController.text =
+        widget.searchController.startAddress?.formattedAddress ?? '';
+    _searchToTextController.text =
+        widget.searchController.endAddress?.formattedAddress ??
+            widget.searchController.searchQuery ??
+            '';
+    _toEnabled = widget.searchController.endAddress == null;
+    _fromEnabled = widget.searchController.startAddress == null;
+    _fromError = _toError = null;
+    setState(() {});
   }
 
   @override
   void dispose() {
     _searchToTextController.dispose();
     _searchFromTextController.dispose();
+    widget.searchController.removeListener(_updateTextAddress);
+    _fromFocus.dispose();
+    _toFocus.dispose();
     super.dispose();
   }
 
@@ -862,17 +933,19 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
     if (widget.searchController.endAddress == null) {
       // TODO : throw text editor error that text is required
       _toError = 'Select a Valid Address';
-//      setState(() {});
+      setState(() {});
       return;
     }
     if (widget.searchController.startAddress == null) {
       // TODO : throw text editor error that text is required
       _fromError = 'Select a Valid Address';
-//      setState(() {});
+      setState(() {});
       return;
     }
-    widget.mapController.createTrek(widget.searchController.startAddress!,
-        widget.searchController.endAddress!);
+    widget.mapController.createTrek(
+      widget.searchController.startAddress!,
+      widget.searchController.endAddress!,
+    );
     widget.searchController.compress();
   }
 
@@ -900,10 +973,7 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
                         child: TextField(
                           style: TextStyles.darkNormal,
                           onChanged: widget.searchController.search,
-                          onTap: () {
-                            widget.searchController.isEndAddress = false;
-                            widget.mapController.suggestAddress();
-                          },
+                          focusNode: _fromFocus,
                           controller: _searchFromTextController,
                           enabled: _fromEnabled,
                           decoration: InputDecoration(
@@ -920,11 +990,7 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          _fromEnabled = true;
-                          _toEnabled = true;
-                          setState(() {});
-                        },
+                        onTap: _resetForm,
                         child: Container(
                           color: Colors.transparent,
                           padding: EdgeInsets.all(16),
@@ -949,10 +1015,7 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
                           style: TextStyles.darkNormal,
                           onChanged: widget.searchController.search,
                           enabled: _toEnabled,
-                          onTap: () {
-                            widget.searchController.isEndAddress = true;
-                            widget.mapController.suggestAddress();
-                          },
+                          focusNode: _toFocus,
                           controller: _searchToTextController,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -1052,51 +1115,68 @@ class _SearchResultsState extends State<SearchResults> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
-      builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
-            );
-          }
-          return Container(
-            color: Color(0xffF7F7FA),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            height: 200,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SEARCH RESULTS',
-                    style: TextStyle(
-                      color: Color(0x9278849E),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  ...addresses(state.models),
-                ],
+    return Container(
+      color: Color(0xffF7F7FA),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      height: 200,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'SEARCH RESULTS',
+              style: TextStyle(
+                color: Color(0x9278849E),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          );
-        }
-        return Container();
-      },
+            Container(
+              child: BlocBuilder<ListBloc, ListState>(
+                builder: (context, state) {
+                  if (state is ListProgress) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (state is ListInitial) {
+                    return Center(
+                      child: Container(),
+                    );
+                  }
+                  if (state is ListProgress) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (state is ListFailure) {
+                    //TODO: design widget for this particular function
+                    //let the popups be for other exceptions
+                    return Center(
+                      child: Text('fetch failed'),
+                    );
+                  }
+                  if (state is ListSuccess) {
+                    if (state.models.isEmpty) {
+                      return Center(
+                        child: Text('no messages'),
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ...addresses(state.models),
+                      ],
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

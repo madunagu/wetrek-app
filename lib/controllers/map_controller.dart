@@ -11,7 +11,7 @@ class MapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  suggestAddress(){
+  suggestAddress() {
     _mapState = MapState.searchSuggested;
     notifyListeners();
   }
@@ -26,14 +26,15 @@ class MapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  createTrek(Address startAddress, Address endAddress){
-//_mapState =
+  createTrek(Address startAddress, Address endAddress) {
+    _mapState = MapState.creatingTrek;
+    notifyListeners();
   }
 
   dispose() {
-    super.dispose();
     _mapState = null;
     selectedItem = null;
+    super.dispose();
   }
 }
 

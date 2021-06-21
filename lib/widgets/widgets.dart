@@ -4,15 +4,17 @@ import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
 class MyButton extends StatelessWidget {
-  MyButton(this.text, {this.onTap, this.color = const Color(0xff3ACCE1)});
+  MyButton(this.text,
+      {this.onTap, this.isLarge = false, this.color = const Color(0xff3ACCE1)});
   final String text;
   final VoidCallback? onTap;
+  final bool isLarge;
   final Color color;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Container(
-        height: 44,
+        height: isLarge ? 52 : 44,
         alignment: Alignment.center,
         width: double.infinity,
         decoration: BoxDecoration(
@@ -21,12 +23,18 @@ class MyButton extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-            height: 17 / 13,
-          ),
+          style: isLarge
+              ? TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                )
+              : TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  height: 17 / 13,
+                ),
         ),
       ),
     );
@@ -306,54 +314,74 @@ class NotificationPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 16,
-        bottom: 24,
-      ),
-      decoration: BoxDecoration(
-        color: Color(0xff2A2E43),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text(title, style: TextStyles.large),
-          SizedBox(height: 15),
-          Text(
-            body,
-            style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
-          ),
-          SizedBox(height: 23),
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(112),
-                    color: Color(0xffC840E9),
-                  ),
-                  child: Icon(Icons.cancel, color: Colors.white, size: 24),
-                ),
-                SizedBox(width: 8),
-                Container(
-                  width: 52,
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(112),
-                    color: Color(0xff3ACCE1),
-                  ),
-                  child: Icon(Icons.done, color: Colors.white, size: 24),
-                ),
-              ],
+      color: Colors.white60,
+      alignment: Alignment.center,
+      child: Container(
+        width: MediaQuery.of(context).size.width - 48,
+//        height: 200,
+        constraints: BoxConstraints(
+          minHeight: 200,
+          maxHeight: 330,
+        ),
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 16,
+          bottom: 24,
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xff2A2E43),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title, style: TextStyles.large),
+            SizedBox(height: 15),
+            Container(
+              alignment: Alignment.topLeft,
+              child: Text(
+                body,
+                style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 23),
+            Container(
+              height: 52,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(112),
+                        color: Color(0xffC840E9),
+                      ),
+                      child: Icon(Icons.close, color: Colors.white, size: 24),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(112),
+                      color: Color(0xff3ACCE1),
+                    ),
+                    child: Icon(Icons.done, color: Colors.white, size: 24),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -571,25 +599,241 @@ class PlacedCard extends StatelessWidget {
 }
 
 class MyInput extends StatelessWidget {
-  MyInput();
+  MyInput({
+    this.controller,
+    this.hintText,
+    this.errorText,
+    this.onChanged,
+    this.key,
+    this.obscureText = false,
+    this.isDark = false,
+    this.enabled = true,
+    this.label,
+    this.prefixIcon,
+  });
+  final bool isDark;
+  final bool enabled;
+  final TextEditingController? controller;
+  final String? hintText;
+  final String? errorText;
+  final String? label;
+  final Icon? prefixIcon;
+  final bool obscureText;
+  final Key? key;
+  final onChanged;
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+//      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 24),
       margin: EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+//        borderRadius: BorderRadius.circular(12),
+//        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Color(0xff455B63),
+            color: Color(0x14455B63),
             offset: Offset(0, 4),
             blurRadius: 16,
           ),
         ],
       ),
       child: TextField(
-        style: TextStyles.input,
+        key: key,
+        onChanged: onChanged,
+        controller: controller,
+        style: isDark ? TextStyles.normal : TextStyles.input,
+        obscureText: obscureText,
+        enabled: enabled,
+        decoration: InputDecoration(
+          fillColor: isDark ? Color(0xff454F63) : Colors.white,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.white),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.transparent),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Color(0xffFF4F9A), width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Color(0xffFF4F9A), width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Color(0xff3ACCE1), width: 2),
+          ),
+          hintText: hintText,
+          errorText: errorText,
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Color(0xff959DAD),
+            fontSize: 11,
+//            height: 15/11,
+          ),
+          prefixIcon: prefixIcon,
+          hintStyle: TextStyle(
+            color: isDark ? Color(0xff959DAD) : Color(0x9078849E),
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class MyBullet extends StatelessWidget {
+  const MyBullet();
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      height: 3.0,
+      width: 3.0,
+      decoration: new BoxDecoration(
+        color: Colors.black,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class ListItem extends StatelessWidget {
+  ListItem({required this.text, this.bullet = const MyBullet()});
+  final Widget bullet;
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          bullet,
+          SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyles.terms,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MyTimePicker extends StatefulWidget {
+  MyTimePicker(this.controller);
+  final TextEditingController controller;
+
+  @override
+  _MyTimePickerState createState() => _MyTimePickerState();
+}
+
+class _MyTimePickerState extends State<MyTimePicker> {
+  DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
+  late final TextEditingController _dateController;
+  late final TextEditingController _timeController;
+  @override
+  initState() {
+    _dateController = TextEditingController(text: _dateFormat());
+    _timeController = TextEditingController(text: _timeFormat());
+    widget.controller.text = _formatLaravelDateTime();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _timeController.dispose();
+    super.dispose();
+  }
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = _dateFormat();
+        widget.controller.text = _formatLaravelDateTime();
+      });
+  }
+
+  String _dateFormat() {
+    return "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}";
+  }
+
+  String _timeFormat() {
+    return "${selectedTime.hour}:${selectedTime.minute}";
+  }
+
+  String _formatLaravelDateTime() {
+    return "${_dateFormat()} ${_timeFormat()}";
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _timeController.text = _timeFormat();
+        widget.controller.text = _formatLaravelDateTime();
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: GestureDetector(
+            onTap: () {
+              _selectDate(context);
+            },
+            child: MyInput(
+              label: 'Select Date',
+              controller: _dateController,
+              isDark: true,
+              prefixIcon: Icon(Icons.calendar_today, color: Colors.white),
+              hintText: 'Select Date',
+              enabled: false,
+            ),
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          flex: 1,
+          child: GestureDetector(
+            onTap: () {
+              _selectTime(context);
+            },
+            child: MyInput(
+              controller: _timeController,
+              isDark: true,
+              label: 'Select Time',
+              prefixIcon: Icon(Icons.timer, color: Colors.white),
+              hintText: 'Select Time',
+              enabled: false,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

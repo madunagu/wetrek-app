@@ -9,11 +9,13 @@ class API {
   static String host = 'https://devotion.wakabout.com.ng/api';
   // String _rootURL = 'http://10.0.2.2:8000/api';
   late String _token;
-  static Uri base = Uri(
-    host: 'devotion.wakabout.com',
-    scheme: 'https',
-    path: '/api',
-  );
+//  static Uri base = Uri(
+//    host: 'devotion.wakabout.com.ng',
+//    scheme: 'https',
+//    path: '/api',
+//    port: 80,
+//  );
+  static Uri base = Uri.parse('https://devotion.wakabout.com.ng/api');
 
   API(token) {
     this._token = token;
@@ -81,6 +83,16 @@ class API {
       body: jsonData,
       headers: headers,
     );
+    return prepareResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getExternal(String fullUrl,
+      {Map<String, String>? params}) async {
+    final uri = Uri.parse(fullUrl);
+    http.Response response = await http.get(
+      uri.replace(queryParameters: params),
+    );
+    log(response.body.toString(), name: 'network.category');
     return prepareResponse(response);
   }
 
