@@ -13,6 +13,8 @@ class ListInitial extends ListState {}
 
 class ListFailure extends ListState {}
 
+class ListProgress extends ListState {}
+
 class ListSuccess extends ListState {
   final List<Model> models;
   final int currentPage;

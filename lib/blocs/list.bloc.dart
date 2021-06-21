@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/repositories/repository.dart';
@@ -24,7 +25,8 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     if (event is ListFetched && !_hasReachedMax(currentState)) {
       try {
         if (currentState is ListInitial) {
-          final Paginated paginatedList = await repository.list(
+          yield ListProgress();
+          final Paginated<Model> paginatedList = await repository.list(
             Parameters(
               page: 0,
               length: 20,
@@ -40,7 +42,8 @@ class ListBloc extends Bloc<ListEvent, ListState> {
         }
 
         if (currentState is ListSuccess) {
-          final Paginated paginatedList = await repository.list(
+          yield ListProgress();
+          final Paginated<Model> paginatedList = await repository.list(
             Parameters(
               page: currentState.currentPage + 1,
               length: 20,
