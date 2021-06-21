@@ -22,7 +22,7 @@ class PhoneScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 38),
-                MyInput(),
+                MyInput(isDark: true),
                 SizedBox(height: 56),
                 MyButton('NEXT STEP'),
               ],

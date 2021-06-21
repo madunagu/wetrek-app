@@ -15,6 +15,10 @@ import 'package:wetrek/widgets/map_widgets.dart';
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
 
+  static MaterialPageRoute<MapScreen> route() {
+    return MaterialPageRoute(builder: (context) => MapScreen());
+  }
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -116,7 +120,7 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
           ),
         );
       case MapState.creatingTrek:
-        return CreateTrek();
+        return MapSheet(child: CreateTrek());
       case MapState.searchFocused:
         return Container();
       case MapState.searchCompleted:
@@ -160,14 +164,14 @@ class MapContainer extends StatefulWidget {
 }
 
 class _MapContainerState extends State<MapContainer> {
-  late GoogleMapController _mapController;
+  late GoogleMapController _googleMapController;
   Map<MarkerId, Marker> markers = {};
   Map<PolylineId, Polyline> polylines = {};
   Completer<GoogleMapController> _controller = Completer();
   late String mapStyle;
   void onMapCreated(GoogleMapController controller) async {
-    _mapController = controller;
-    _mapController.setMapStyle(mapStyle);
+    _googleMapController = controller;
+//    _mapController.setMapStyle(mapStyle);
   }
 
   void _onMapTap(LatLng point) {
@@ -176,11 +180,18 @@ class _MapContainerState extends State<MapContainer> {
 //    }
   }
 
+  void _loadPointers() {}
+
   @override
   void initState() {
-    // TODO: implement initState
-    _loadMapStyle();
+//    _loadMapStyle();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _googleMapController.dispose();
+    super.dispose();
   }
 
   void _loadMapStyle() {

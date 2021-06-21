@@ -20,14 +20,14 @@ import 'package:wetrek/repositories/repository.dart';
 class TrekRepository extends Repository {
   late final API api;
   @override
-  Future<Paginated> list(Parameters params) async {
+  Future<Paginated<Trek>> list(Parameters params) async {
 //    List<Trek> treks = [];
 //    final Map<String, dynamic> res = await api.get('/treks');
 //    for (var i = 0; i < res.length; i++) {
 //      treks.add(Trek.fromJson(res['data'][i]));
 //    }
   await Future.delayed(Duration(milliseconds: 100));
-    return Paginated(
+    return Paginated<Trek>(
       data: dummies(),
       pagination: Pagination(
         count: 40,

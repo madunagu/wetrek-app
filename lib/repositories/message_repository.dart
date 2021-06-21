@@ -12,7 +12,7 @@ import 'package:wetrek/repositories/repository.dart';
 class MessageRepository extends Repository {
   late final API api;
 
-  Future<Paginated> list(Parameters params) async {
+  Future<Paginated<Message>> list(Parameters params) async {
     List<Message> messages = [];
     String? chatId = params.where['chat_id'];
 
@@ -26,7 +26,7 @@ class MessageRepository extends Repository {
     for (var i = 0; i < res.length; i++) {
       messages.add(Message.fromJson(res['data'][i]));
     }
-    return Paginated(
+    return Paginated<Message>(
       data: messages,
       pagination: Pagination.fromJson(res['pagination']),
     );

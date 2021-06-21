@@ -17,7 +17,7 @@ import 'package:wetrek/repositories/repository.dart';
 class AddressRepository extends Repository {
   late final API api;
 
-  Future<Paginated> list(Parameters params) async {
+  Future<Paginated<Address>> list(Parameters params) async {
     List<Address> addresses = AddressRepository.dummies();
 
 //    final Map<String, dynamic> res = await api.get("/addresses", params: {
@@ -29,7 +29,7 @@ class AddressRepository extends Repository {
 //    for (var i = 0; i < res.length; i++) {
 //      addresses.add(Address.fromJson(res['data'][i]));
 //    }
-    return Paginated(
+    return Paginated<Address>(
       data: addresses,
       pagination: Pagination(
         count: 10,

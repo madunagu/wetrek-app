@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
+import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/constants/colors.dart';
+import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/screens/messages_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/screens/trips_screen.dart';
@@ -84,15 +88,18 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                 DrawerLink(
                   title: 'Home',
                   active: true,
+                  icon: Icons.home_outlined,
                 ),
                 DrawerLink(
                   title: 'Treks',
+                  icon: Icons.directions_walk,
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => TripsScreen()));
                   },
                 ),
                 DrawerLink(
+                  icon: CustomIcons.icons_comment,
                   title: 'Chats',
                   onTap: () {
                     Navigator.push(context,
@@ -104,6 +111,14 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                 ),
               ],
             ),
+          ),
+          Spacer(),
+          DrawerLink(
+            title: 'Logout',
+            icon: Icons.logout,
+            onTap: (){
+              BlocProvider.of<AuthenticationBloc>(context).add(AuthenticationLogoutRequested());
+            },
           ),
         ],
       ),

@@ -7,12 +7,14 @@ class PaymentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(title: 'Payments'),
-      body: Column(
-        children: [
-          MyInput(),
-          MyInput(),
-          MyInput(),
-        ],
+      body: Container(
+        child: Column(
+          children: [
+            MyInput(),
+            MyInput(),
+            MyInput(),
+          ],
+        ),
       ),
     );
   }

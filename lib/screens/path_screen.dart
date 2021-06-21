@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import '../widgets/widgets.dart';
+import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
-class TransportPathScreen extends StatelessWidget {
+class PathScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,7 +14,9 @@ class TransportPathScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 42),
           child: Column(
             children: [
-//              LocationPairCard(),
+              LocationPairCard(
+                trek: TrekRepository.dummy(),
+              ),
               SizedBox(height: 16),
               TransportChips(),
               SizedBox(height: 21),

@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:wetrek/models/model.dart';
+import 'package:wetrek/models/paginated.dart';
+import 'package:wetrek/models/pagination.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/network/api.dart';
 import 'package:flutter/material.dart';
+import 'package:wetrek/repositories/repository.dart';
 
-class UserRepository {
+class UserRepository extends Repository {
   late final API api;
   Future<User> authenticate({
     required String username,
@@ -16,17 +21,31 @@ class UserRepository {
       '/login',
       {'email': username, 'password': password},
     );
-
     return User.fromJson(res);
   }
 
-  Future<List<User>> list(Parameters params) async {
-    List<User> users = [];
-    final Map<String, dynamic> res = await api.get('/users');
-    for (var i = 0; i < res.length; i++) {
-      users.add(User.fromJson(res[i]));
-    }
-    return users;
+  Future<Paginated<User>> list(Parameters params) async {
+//    List<User> users = [];
+//    final Map<String, dynamic> res = await api.get('/users');
+//    for (var i = 0; i < res.length; i++) {
+//      users.add(User.fromJson(res[i]));
+//    }
+
+    await Future.delayed(Duration(milliseconds: 100));
+    return Paginated<User>(
+      data: dummies(),
+      pagination: Pagination(
+        count: 40,
+        currentPage: 1,
+        perPage: 40,
+        total: 40,
+        totalPages: 1,
+      ),
+    );
+//    return Paginated(
+//      data: users,
+//      pagination: Pagination.fromJson(res['pagination']),
+//    );
   }
 
   Future<User> get(int id) async {
@@ -34,18 +53,17 @@ class UserRepository {
     return User.fromJson(res);
   }
 
-  Future<bool> create(User user) async {
+  Future<User> create(Model user) async {
     final Map<String, dynamic> res =
         await api.post('/users', jsonEncode(user.toJson()));
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return User.fromJson(res['data']);
   }
 
-  Future<bool> update(User user) async {
+  Future<User> update(Model user) async {
+    user as User;
     final Map<String, dynamic> res =
         await api.put("/users/${user.id}", jsonEncode(user.toJson()));
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return User.fromJson(res['data']);
   }
 
   static User dummy() {
@@ -53,13 +71,13 @@ class UserRepository {
       id: 1,
       name: 'Ekene Madunagu',
       email: 'ekenemadunagu@gmail.com',
-      avatar: 'myavatar.com'
+      avatar: 'images/avatar1.jpg',
     );
   }
 
   List<User> dummies() {
     List<User> treks = [];
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 10; i++) {
       treks.add(UserRepository.dummy());
     }
     return treks;

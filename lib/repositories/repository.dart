@@ -9,10 +9,10 @@ import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/network/api.dart';
 
 abstract class Repository {
-  final String endpoint = '/messages';
+  final String endpoint ='';
   late final API api;
 
-  Future<Paginated> list(Parameters params) async {
+  Future<Paginated<Model>> list(Parameters params) async {
     return Paginated(
       data: [],
       pagination: Pagination.fromJson({}),
