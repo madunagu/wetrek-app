@@ -12,6 +12,10 @@ abstract class Repository {
   final String endpoint ='';
   late final API api;
 
+  Repository(String token){
+    api = API(token);
+  }
+
   Future<Paginated<Model>> list(Parameters params) async {
     return Paginated(
       data: [],
@@ -21,7 +25,7 @@ abstract class Repository {
 
   Future<dynamic> get(int id) async {}
 
-  Future<Model> create(Model model) async {
+  Future<Model> create(Map<String,dynamic> model) async {
     return Model();
   }
 

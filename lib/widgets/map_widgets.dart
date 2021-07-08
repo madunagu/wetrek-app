@@ -8,6 +8,7 @@ import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/controllers/home_controller.dart';
 import 'package:wetrek/controllers/map_controller.dart';
 import 'package:wetrek/controllers/search_controller.dart';
 import 'package:wetrek/models/address.dart';
@@ -15,6 +16,11 @@ import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/option.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/maps_repository.dart';
+import 'package:wetrek/repositories/trek_repository.dart';
+import 'package:wetrek/screens/path_screen.dart';
+import 'package:wetrek/screens/trek_screen.dart';
 import 'widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -55,23 +61,10 @@ class PlaceDetailsPreview extends StatelessWidget {
   }
 }
 
-class CreateTrek extends StatefulWidget {
-  @override
-  _CreateTrekState createState() => _CreateTrekState();
-}
-
-class _CreateTrekState extends State<CreateTrek> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 400,
-      child: TrekForm(),
-    );
-  }
-}
-
 class TrekForm extends StatefulWidget {
+  TrekForm({required this.controller});
+
+  final HomeController controller;
   @override
   _TrekFormState createState() => _TrekFormState();
 }
@@ -93,6 +86,24 @@ class _TrekFormState extends State<TrekForm> {
     super.dispose();
   }
 
+  createTrek() async {
+    Map<String, String> data = {
+      "starting_at": _startingAtController.value.text,
+      "title": _titleController.value.text,
+      "start_address": widget.controller.originAddress!.toJson().toString(),
+      "end_address": widget.controller.originAddress!.toJson().toString(),
+      "directions": widget.controller.direction!.toJson().toString(),
+    };
+    try {
+      Trek trek = await TrekRepository(
+              RepositoryProvider.of<AuthenticationRepository>(context).token!)
+          .create(data);
+      Navigator.push(context, TrekScreen.route(trek));
+    } on Exception catch (e) {
+      widget.controller.addError(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -110,7 +121,7 @@ class _TrekFormState extends State<TrekForm> {
           MyButton(
             'Continue',
             isLarge: true,
-            onTap: () {},
+            onTap: createTrek,
           ),
         ],
       ),
@@ -232,7 +243,7 @@ class MapSheetDetails extends StatelessWidget {
             ),
           ),
           if (rightContent != null) Spacer(),
-          rightContent!,
+          rightContent ?? Container(),
         ],
       ),
     );
@@ -240,9 +251,10 @@ class MapSheetDetails extends StatelessWidget {
 }
 
 class PlacesNearby extends StatefulWidget {
-  PlacesNearby({required this.searchController, required this.mapController});
-  final SearchController searchController;
-  final MapController mapController;
+  PlacesNearby({
+    required this.controller,
+  });
+  final HomeController controller;
   @override
   _PlacesNearbyState createState() => _PlacesNearbyState();
 }
@@ -261,7 +273,7 @@ class _PlacesNearbyState extends State<PlacesNearby> {
     _scrollController.addListener(_onScroll);
     _postBloc = BlocProvider.of<ListBloc>(context);
 //    _postBloc.add(ListFetched());
-    subscription = widget.searchController.searchStream.listen((query) {
+    subscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
     });
   }
@@ -285,6 +297,10 @@ class _PlacesNearbyState extends State<PlacesNearby> {
     if (query.length > 3) {
       _postBloc.add(ListFetched(query: query));
     }
+  }
+
+  String distance(trek) {
+    return '200km';
   }
 
   @override
@@ -325,10 +341,10 @@ class _PlacesNearbyState extends State<PlacesNearby> {
         scrollDirection: Axis.horizontal,
         children: models
             .map((e) => GestureDetector(
-                  onTap: () => widget.mapController.selectTrek(e),
+                  onTap: () => widget.controller.selectTrek(e),
                   child: PlacedCard(
                     title: e.name,
-                    subTitle: e.distance(),
+                    subTitle: distance(e),
                   ),
                 ))
             .toList(),
@@ -561,13 +577,13 @@ class _SelectCardGroupState extends State<SelectCardGroup> {
   }
 }
 
-class LocationPairCard extends StatelessWidget {
-  LocationPairCard({this.onTap, required this.trek});
+class TrekCard extends StatelessWidget {
+  TrekCard({this.onTap, required this.trek});
   final VoidCallback? onTap;
   final Trek trek;
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -585,53 +601,29 @@ class LocationPairCard extends StatelessWidget {
         ),
         height: 183,
         padding: EdgeInsets.only(left: 20, right: 16, top: 13, bottom: 15),
-        child: Row(
+        child: Column(
           children: [
-            MovementDrawing(height: 73, width: 10),
-            SizedBox(width: 20),
-            Expanded(
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Start Location', style: TextStyles.darkMinor),
-                    Text('Fresh Market', style: TextStyles.darkNormal),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 15),
-                      height: 1,
-                      color: Color(0xffF4F4F6),
-                    ),
-                    Text(
-                      'Destination Location',
-                      style: TextStyles.darkMinor,
-                    ),
-                    Text('My Home', style: TextStyles.darkNormal),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 6),
-                      height: 1,
-                      color: Color(0xffF4F4F6),
-                    ),
-                    Container(
-                      child: Row(
-                        children: [
-                          AvatarList(
-                            imgSrcs: [
-                              'images/avatar1.jpg',
-                              'images/avatar2.jpg',
-                              'images/avatar3.jpg',
-                            ],
-                          ),
-                          Text(
-                            'Ekene is attending',
-                            style: TextStyles.darkMinor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            LocationPairCard(
+              originAddress: trek.startAddress.formattedAddress,
+              destinationAddress: trek.endAddress.formattedAddress,
+            ),
+            Container(
+              child: Row(
+                children: [
+                  AvatarList(
+                    imgSrcs: [
+                      'images/avatar1.jpg',
+                      'images/avatar2.jpg',
+                      'images/avatar3.jpg',
+                    ],
+                  ),
+                  Text(
+                    'Ekene is attending',
+                    style: TextStyles.darkMinor,
+                  ),
+                ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -639,32 +631,74 @@ class LocationPairCard extends StatelessWidget {
   }
 }
 
+class LocationPairCard extends StatelessWidget {
+  LocationPairCard(
+      {required this.originAddress, required this.destinationAddress});
+  final String originAddress;
+  final String destinationAddress;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        MovementDrawing(height: 73, width: 10),
+        SizedBox(width: 20),
+        Expanded(
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Start Location', style: TextStyles.darkMinor),
+                Text(originAddress, style: TextStyles.darkNormal),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  height: 1,
+                  color: Color(0xffF4F4F6),
+                ),
+                Text(
+                  'Destination Location',
+                  style: TextStyles.darkMinor,
+                ),
+                Text(destinationAddress, style: TextStyles.darkNormal),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 6),
+                  height: 1,
+                  color: Color(0xffF4F4F6),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+}
+
 class PlaceSearchBar extends StatefulWidget {
   PlaceSearchBar({
-    required this.mapController,
-    required this.searchController,
+    required this.controller,
   });
-  final MapController mapController;
-  final SearchController searchController;
+  final HomeController controller;
 
   @override
   _PlaceSearchBarState createState() => _PlaceSearchBarState();
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
+  late StreamSubscription<SearchBarStatus> sub;
+  SearchBarStatus searchBarStatus = SearchBarStatus.normal;
   @override
   void initState() {
-    widget.searchController.addListener(_refresh);
+    sub = widget.controller.searchBarStatus.listen((status) {
+      setState(() {
+        searchBarStatus = status;
+      });
+    });
     super.initState();
-  }
-
-  void _refresh() {
-    setState(() {});
   }
 
   @override
   void dispose() {
-    widget.searchController.removeListener(_refresh);
+    sub.cancel();
     super.dispose();
   }
 
@@ -681,39 +715,38 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
   }
 
   Widget currentSearchWidget() {
-    switch (widget.searchController.searchBarState()) {
-      case SearchBarState.searchOpened:
-        return OpenedSearchBar(
-          searchController: widget.searchController,
-          mapController: widget.mapController,
+    switch (searchBarStatus) {
+      case SearchBarStatus.expanded:
+        return ExpandedSearchBar(
+          controller: widget.controller,
         );
-      case SearchBarState.searchCompressed:
-        return CompressedSearchBar(searchController: widget.searchController);
-      case SearchBarState.searchCollapsed:
-        return CollapsedSearchBar(
-          searchController: widget.searchController,
-          mapController: widget.mapController,
+      case SearchBarStatus.compressed:
+        return CompressedSearchBar(
+          controller: widget.controller,
+        );
+      case SearchBarStatus.normal:
+        return NormalSearchBar(
+          controller: widget.controller,
         );
 
       default:
-        return CollapsedSearchBar(
-          searchController: widget.searchController,
-          mapController: widget.mapController,
+        return NormalSearchBar(
+          controller: widget.controller,
         );
     }
   }
 }
 
 class CompressedSearchBar extends StatelessWidget {
-  CompressedSearchBar({required this.searchController});
-  final SearchController searchController;
+  CompressedSearchBar({required this.controller});
+  final HomeController controller;
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: searchController.open,
+          onTap: controller.expandSearchBar,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Icon(
@@ -737,9 +770,7 @@ class CompressedSearchBar extends StatelessWidget {
               strutStyle: StrutStyle(fontSize: 12.0),
               text: TextSpan(
                 style: TextStyles.darkNormal.copyWith(color: Color(0xff78849E)),
-                text: searchController.startAddress?.toString() != null
-                    ? searchController.startAddress!.formattedAddress
-                    : 'Your Location',
+                text: controller.origin(),
               ),
             ),
           ),
@@ -760,8 +791,8 @@ class CompressedSearchBar extends StatelessWidget {
               strutStyle: StrutStyle(fontSize: 12.0),
               text: TextSpan(
                 style: TextStyles.darkNormal,
-                text: searchController.endAddress?.toString() != null
-                    ? searchController.endAddress!.formattedAddress
+                text: controller.destinationAddress?.toString() != null
+                    ? controller.destinationAddress!.formattedAddress
                     : 'Your Location',
               ),
             ),
@@ -772,25 +803,23 @@ class CompressedSearchBar extends StatelessWidget {
   }
 }
 
-class CollapsedSearchBar extends StatefulWidget {
-  CollapsedSearchBar({
-    required this.searchController,
-    required this.mapController,
+class NormalSearchBar extends StatefulWidget {
+  NormalSearchBar({
+    required this.controller,
   });
-  final SearchController searchController;
-  final MapController mapController;
+  final HomeController controller;
 
   @override
-  _CollapsedSearchBarState createState() => _CollapsedSearchBarState();
+  _NormalSearchBarState createState() => _NormalSearchBarState();
 }
 
-class _CollapsedSearchBarState extends State<CollapsedSearchBar> {
+class _NormalSearchBarState extends State<NormalSearchBar> {
   late final TextEditingController searchToTextController;
 
   @override
   void initState() {
     searchToTextController =
-        TextEditingController(text: widget.searchController.searchQuery);
+        TextEditingController(text: widget.controller.searchQuery);
 
     super.initState();
   }
@@ -820,8 +849,10 @@ class _CollapsedSearchBarState extends State<CollapsedSearchBar> {
           child: Padding(
             padding: const EdgeInsets.only(top: 6.0, left: 16, bottom: 6),
             child: TextField(
-              onChanged: widget.searchController.search,
-              onTap: widget.mapController.search,
+              onChanged: widget.controller.search,
+              onTap: () {
+                widget.controller.setHomeStatus(HomePageStatus.searching);
+              },
               controller: searchToTextController,
               style: TextStyles.darkNormal,
               decoration: InputDecoration(
@@ -835,7 +866,7 @@ class _CollapsedSearchBarState extends State<CollapsedSearchBar> {
           ),
         ),
         GestureDetector(
-          onTap: widget.searchController.open,
+          onTap: widget.controller.expandSearchBar,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Icon(CustomIcons.icons_dark_add, color: Color(0xff454F63)),
@@ -846,17 +877,15 @@ class _CollapsedSearchBarState extends State<CollapsedSearchBar> {
   }
 }
 
-class OpenedSearchBar extends StatefulWidget {
-  OpenedSearchBar(
-      {required this.searchController, required this.mapController});
-  final SearchController searchController;
-  final MapController mapController;
+class ExpandedSearchBar extends StatefulWidget {
+  ExpandedSearchBar({required this.controller});
+  final HomeController controller;
 
   @override
-  _OpenedSearchBarState createState() => _OpenedSearchBarState();
+  _ExpandedSearchBarState createState() => _ExpandedSearchBarState();
 }
 
-class _OpenedSearchBarState extends State<OpenedSearchBar> {
+class _ExpandedSearchBarState extends State<ExpandedSearchBar> {
   final TextEditingController _searchFromTextController =
       TextEditingController();
   final TextEditingController _searchToTextController = TextEditingController();
@@ -870,20 +899,16 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
   late FocusNode _toFocus;
   @override
   void initState() {
-    _searchFromTextController.text =
-        widget.searchController.startAddress?.formattedAddress ?? '';
-    _searchToTextController.text =
-        widget.searchController.endAddress?.formattedAddress ??
-            widget.searchController.searchQuery ??
-            '';
-    _toEnabled = widget.searchController.endAddress == null;
-    _fromEnabled = widget.searchController.startAddress == null;
-    _fromError = _toError = null;
+    _updateTextAddress();
     _fromFocus = FocusNode();
     _toFocus = FocusNode();
     _fromFocus.addListener(_suggestFromAddress);
     _toFocus.addListener(_suggestToAddress);
-    widget.searchController.addListener(_updateTextAddress);
+    widget.controller.addListener(() {
+      setState(() {
+        _updateTextAddress();
+      });
+    });
     super.initState();
   }
 
@@ -892,61 +917,50 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
     _toEnabled = true;
     _searchFromTextController.text = '';
     _searchToTextController.text = '';
-    widget.searchController.resetAddress();
+    widget.controller.resetAddress();
     setState(() {});
   }
 
   void _suggestFromAddress() {
-    widget.searchController.isEndAddress = false;
-    widget.mapController.suggestAddress();
+    widget.controller.isOriginAddress = true;
+    widget.controller.setHomeStatus(HomePageStatus.suggesting);
   }
 
   void _suggestToAddress() {
-    widget.searchController.isEndAddress = true;
-    widget.mapController.suggestAddress();
+    widget.controller.isOriginAddress = false;
+    widget.controller.setHomeStatus(HomePageStatus.suggesting);
   }
 
   void _updateTextAddress() {
-    _searchFromTextController.text =
-        widget.searchController.startAddress?.formattedAddress ?? '';
-    _searchToTextController.text =
-        widget.searchController.endAddress?.formattedAddress ??
-            widget.searchController.searchQuery ??
-            '';
-    _toEnabled = widget.searchController.endAddress == null;
-    _fromEnabled = widget.searchController.startAddress == null;
+    _searchFromTextController.text = widget.controller.origin();
+    _searchToTextController.text = widget.controller.destination();
+    _toEnabled = widget.controller.destinationAddress == null;
+    _fromEnabled = widget.controller.originAddress == null;
     _fromError = _toError = null;
-    setState(() {});
   }
 
   @override
   void dispose() {
     _searchToTextController.dispose();
     _searchFromTextController.dispose();
-    widget.searchController.removeListener(_updateTextAddress);
+    widget.controller.removeListener(_updateTextAddress);
     _fromFocus.dispose();
     _toFocus.dispose();
     super.dispose();
   }
 
   void _createTrek() {
-    if (widget.searchController.endAddress == null) {
-      // TODO : throw text editor error that text is required
-      _toError = 'Select a Valid Address';
+    if (widget.controller.destinationAddress == null) {
+      _toError = 'Select a Valid Destination Address';
       setState(() {});
       return;
     }
-    if (widget.searchController.startAddress == null) {
-      // TODO : throw text editor error that text is required
-      _fromError = 'Select a Valid Address';
+    if (widget.controller.originAddress == null) {
+      _fromError = 'Select a Valid Origin Address';
       setState(() {});
       return;
     }
-    widget.mapController.createTrek(
-      widget.searchController.startAddress!,
-      widget.searchController.endAddress!,
-    );
-    widget.searchController.compress();
+    widget.controller.getDirection();
   }
 
   @override
@@ -972,7 +986,7 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
                       Expanded(
                         child: TextField(
                           style: TextStyles.darkNormal,
-                          onChanged: widget.searchController.search,
+                          onChanged: widget.controller.search,
                           focusNode: _fromFocus,
                           controller: _searchFromTextController,
                           enabled: _fromEnabled,
@@ -1013,7 +1027,7 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
                       Expanded(
                         child: TextField(
                           style: TextStyles.darkNormal,
-                          onChanged: widget.searchController.search,
+                          onChanged: widget.controller.search,
                           enabled: _toEnabled,
                           focusNode: _toFocus,
                           controller: _searchToTextController,
@@ -1054,8 +1068,8 @@ class _OpenedSearchBarState extends State<OpenedSearchBar> {
 }
 
 class SearchResults extends StatefulWidget {
-  SearchResults({required this.searchController});
-  final SearchController searchController;
+  SearchResults({required this.controller});
+  final HomeController controller;
   @override
   _SearchResultsState createState() => _SearchResultsState();
 }
@@ -1072,7 +1086,7 @@ class _SearchResultsState extends State<SearchResults> {
     _scrollController.addListener(_onScroll);
     _postBloc = BlocProvider.of<ListBloc>(context);
 //    _postBloc.add(ListFetched());
-    searchSubscription = widget.searchController.searchStream.listen((query) {
+    searchSubscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
     });
 
@@ -1088,9 +1102,9 @@ class _SearchResultsState extends State<SearchResults> {
   }
 
   void onSearch(String query) {
-    if (query.length > 3) {
-      _postBloc.add(ListFetched(query: query));
-    }
+//    if (query.length > 3) {
+    _postBloc.add(ListFetched(query: query));
+//    }
   }
 
   @override
@@ -1106,7 +1120,7 @@ class _SearchResultsState extends State<SearchResults> {
     return models
         .map(
           (e) => GestureDetector(
-            onTap: () => widget.searchController.selectAddress(e),
+            onTap: () => widget.controller.selectAddress(e),
             child: SearchResultRow(e),
           ),
         )
@@ -1143,11 +1157,6 @@ class _SearchResultsState extends State<SearchResults> {
                   if (state is ListInitial) {
                     return Center(
                       child: Container(),
-                    );
-                  }
-                  if (state is ListProgress) {
-                    return Center(
-                      child: CircularProgressIndicator(),
                     );
                   }
                   if (state is ListFailure) {

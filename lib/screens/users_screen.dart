@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
@@ -5,6 +7,7 @@ import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
@@ -12,10 +15,15 @@ import 'package:wetrek/widgets/widgets.dart';
 class UsersScreen extends StatefulWidget {
   @override
   _UsersScreenState createState() => _UsersScreenState();
+
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => UsersScreen(),
+    );
+  }
 }
 
-class _UsersScreenState extends State<UsersScreen>
-    with SingleTickerProviderStateMixin {
+class _UsersScreenState extends State<UsersScreen> {
   @override
   initState() {
     super.initState();
@@ -29,7 +37,8 @@ class _UsersScreenState extends State<UsersScreen>
         rightIcon: Icons.filter_list,
       ),
       body: BlocProvider<ListBloc>(
-        create: (context) => ListBloc(repository: UserRepository()),
+        create: (context) => ListBloc(repository: UserRepository(RepositoryProvider.of<AuthenticationRepository>(context)
+            .token!)),
         child: UserList(),
       ),
     );
@@ -176,33 +185,53 @@ class SingleUser extends StatelessWidget {
             ],
           ),
           Spacer(),
-          FollowButton('Follow'),
+          FollowButton(user),
         ],
       ),
     );
   }
 }
 
-class FollowButton extends StatelessWidget {
-  FollowButton(this.text);
-  final String text;
+class FollowButton extends StatefulWidget {
+  FollowButton(this.user);
+  final User user;
+
+  @override
+  _FollowButtonState createState() => _FollowButtonState();
+}
+
+class _FollowButtonState extends State<FollowButton> {
+  late bool isFollowing ;
+  @override
+  initState() {
+    // perform check of if the user is following this user
+
+    isFollowing = math.Random().nextBool();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () async {
+        UserRepository userRepository =
+            RepositoryProvider.of<UserRepository>(context);
+        isFollowing = await userRepository.follow(widget.user);
+      },
       child: Container(
         height: 32,
         alignment: Alignment.center,
         width: 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Color(0xff665EFF),
+          color: isFollowing ? Color(0xffE9EBEF) : Color(0xff665EFF),
         ),
         child: Text(
-          text,
+          isFollowing ? 'UNFOLLOW' : 'FOLLOW',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: Colors.white,
+            color: isFollowing ? Color(0xff78849E) : Colors.white,
             height: 17 / 13,
           ),
         ),

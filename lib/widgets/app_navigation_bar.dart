@@ -5,9 +5,11 @@ import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/screens/messages_screen.dart';
+import 'package:wetrek/screens/notifications_screen.dart';
+import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/screens/trips_screen.dart';
-import 'widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 
 class AppNavigationDrawer extends StatefulWidget {
   @override
@@ -43,37 +45,42 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(top: 60, left: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          'images/avatar2.jpg',
-                          width: 64,
-                          height: 64,
+                InkWell(
+                  onTap: () {
+                    Navigator.push(context, ProfileScreen.route());
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(top: 60, left: 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            'images/avatar2.jpg',
+                            width: 64,
+                            height: 64,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Ekene Madunagu',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          height: 32 / 24,
-                          fontWeight: FontWeight.w500,
+                        SizedBox(height: 12),
+                        Text(
+                          'Ekene Madunagu',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            height: 32 / 24,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 7),
-                      Text(
-                        '@ekenemadunagu',
-                        style: TextStyle(
-                          color: Color(0x8fffffff),
+                        SizedBox(height: 7),
+                        Text(
+                          '@ekenemadunagu',
+                          style: TextStyle(
+                            color: Color(0x8fffffff),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -94,20 +101,22 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                   title: 'Treks',
                   icon: Icons.directions_walk,
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TripsScreen()));
+                    Navigator.push(context, TripsScreen.route());
                   },
                 ),
                 DrawerLink(
                   icon: CustomIcons.icons_comment,
                   title: 'Chats',
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MessagesScreen()));
+                    Navigator.push(context, MessagesScreen.route());
                   },
                 ),
                 DrawerLink(
-                  title: 'Events',
+                  title: 'Notifications',
+                  icon: Icons.notifications,
+                  onTap: () {
+                    Navigator.push(context, NotificationScreen.route());
+                  },
                 ),
               ],
             ),
@@ -116,8 +125,9 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
           DrawerLink(
             title: 'Logout',
             icon: Icons.logout,
-            onTap: (){
-              BlocProvider.of<AuthenticationBloc>(context).add(AuthenticationLogoutRequested());
+            onTap: () {
+              BlocProvider.of<AuthenticationBloc>(context)
+                  .add(AuthenticationLogoutRequested());
             },
           ),
         ],

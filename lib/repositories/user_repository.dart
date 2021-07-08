@@ -13,14 +13,11 @@ import 'package:wetrek/repositories/repository.dart';
 
 class UserRepository extends Repository {
   late final API api;
-  Future<User> authenticate({
-    required String username,
-    required String password,
-  }) async {
-    final Map<String, dynamic> res = await API.postWithoutToken(
-      '/login',
-      {'email': username, 'password': password},
-    );
+
+  UserRepository(token) : super(token);
+
+  Future<User> current() async {
+    final Map<String, dynamic> res = await api.get('/user');
     return User.fromJson(res);
   }
 
@@ -53,10 +50,13 @@ class UserRepository extends Repository {
     return User.fromJson(res);
   }
 
-  Future<User> create(Model user) async {
-    final Map<String, dynamic> res =
-        await api.post('/users', jsonEncode(user.toJson()));
+  Future<User> create(Map<String, dynamic> user) async {
+    final Map<String, dynamic> res = await api.post('/users', jsonEncode(user));
     return User.fromJson(res['data']);
+  }
+
+  Future<bool> follow(User user) async {
+    return true;
   }
 
   Future<User> update(Model user) async {

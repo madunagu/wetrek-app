@@ -15,10 +15,13 @@ import 'package:wetrek/models/plus_code.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/api.dart';
 import 'package:flutter/material.dart';
+import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/repository.dart';
 
 class TrekRepository extends Repository {
   late final API api;
+
+  TrekRepository(token) : super(token);
   @override
   Future<Paginated<Trek>> list(Parameters params) async {
 //    List<Trek> treks = [];
@@ -44,9 +47,9 @@ class TrekRepository extends Repository {
     return Trek.fromJson(res);
   }
 
-  Future<Trek> create(Model trek) async {
+  Future<Trek> create(Map<String,dynamic> trek) async {
     final Map<String, dynamic> res =
-        await api.post('/treks', jsonEncode(trek.toJson()));
+        await api.post('/treks', jsonEncode(trek));
     return Trek.fromJson(res['data']);
   }
 
@@ -61,6 +64,7 @@ class TrekRepository extends Repository {
     return Trek(
       createdAt: DateTime.now(),
       locations: [],
+      direction: MapsRepository.dummy(),
       startAddress: Address(
         plusCode: PlusCode(compoundCode: 'kkk', globalCode: 'jj'),
         formattedAddress: 'where',

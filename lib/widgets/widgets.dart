@@ -12,7 +12,8 @@ class MyButton extends StatelessWidget {
   final Color color;
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
+      onTap: onTap,
       child: Container(
         height: isLarge ? 52 : 44,
         alignment: Alignment.center,
@@ -834,6 +835,73 @@ class _MyTimePickerState extends State<MyTimePicker> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class HistoryItem extends StatelessWidget {
+  final IconData icon;
+  final subTitle;
+  final String title;
+  final Widget? child;
+  const HistoryItem({
+    Key? key,
+    required this.icon,
+    required this.subTitle,
+    required this.title,
+    this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            child: Column(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: WeTrekColors.blue4,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                ),
+                Container(
+                  width: 2,
+                  height: 100,
+                  color: Color(0x20959DAD),
+                )
+              ],
+            ),
+          ),
+          SizedBox(width: 40),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                subTitle,
+                style: TextStyles.darkMinor,
+              ),
+              Text(
+                title,
+                style: TextStyles.darkNormal,
+              ),
+              SizedBox(height: 11),
+              child ?? Container(),
+              SizedBox(height: 53),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

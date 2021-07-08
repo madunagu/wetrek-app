@@ -5,10 +5,18 @@ import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/message.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
+import 'package:wetrek/repositories/notification_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class NotificationScreen extends StatelessWidget {
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => NotificationScreen(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +25,11 @@ class NotificationScreen extends StatelessWidget {
         rightIcon: Icons.search,
       ),
       body: BlocProvider(
-        create: (BuildContext context) =>
-            ListBloc(repository: MessageRepository())..add(ListFetched()),
+        create: (BuildContext context) => ListBloc(
+            repository: NotificationRepository(
+                RepositoryProvider.of<AuthenticationRepository>(context)
+                    .token!))
+          ..add(ListFetched()),
         child: Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width,
@@ -120,11 +131,12 @@ class _NotificationListState extends State<NotificationList> {
 }
 
 class NotificationListItem extends StatelessWidget {
-  NotificationListItem(
-      {required this.imageURL,
-      required this.name,
-      required this.message,
-      required this.isNew});
+  NotificationListItem({
+    required this.imageURL,
+    required this.name,
+    required this.message,
+    required this.isNew,
+  });
   final String imageURL;
   final String name;
   final String message;

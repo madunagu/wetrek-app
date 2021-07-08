@@ -12,6 +12,7 @@ enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 class AuthenticationRepository {
   final FlutterSecureStorage storage = FlutterSecureStorage();
   final _controller = StreamController<AuthenticationStatus>();
+  late String _token;
 
   Stream<AuthenticationStatus> get status async* {
     User? user = await getUser();
@@ -32,29 +33,40 @@ class AuthenticationRepository {
       {'email': username, 'password': password},
     );
     log(res.toString());
+    await saveToken(res['token']);
+
 //    await Future.delayed(const Duration(milliseconds: 300));
-//    _controller.add(AuthenticationStatus.authenticated);
+    _controller.add(AuthenticationStatus.authenticated);
   }
 
   Future<void> delete() async {
-    await storage.delete(key: 'user');
+    await storage.delete(key: 'token');
     return;
   }
 
-  void logOut() => _controller.add(AuthenticationStatus.unauthenticated);
+  Future<void> saveToken(String token) async {
+    await storage.write(key: 'token', value: token);
+    return;
+  }
+
+  void logOut() async {
+    await delete();
+    _controller.add(AuthenticationStatus.unauthenticated);
+  }
 
   void dispose() => _controller.close();
-
-  Future<void> saveUser(String user) async {
-    await storage.write(key: 'user', value: user);
-    return;
-  }
 
   Future<User?> getUser() async {
 //    String? userStr = await storage.read(key: 'user');
 //    if (userStr != null) {
 //      return User.fromJson(jsonDecode(userStr));
 //    }
-    return UserRepository.dummy();
+    log('Get User Called');
+    String? t = await storage.read(key: 'token');
+    if (t == null) return null;
+    _token = t;
+    return UserRepository(_token).current();
   }
+
+  String? get token => _token;
 }

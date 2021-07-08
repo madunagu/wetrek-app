@@ -5,6 +5,7 @@ import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import '../widgets/widgets.dart';
@@ -14,34 +15,22 @@ import 'package:wetrek/widgets/map_widgets.dart';
 class TripsScreen extends StatefulWidget {
   @override
   _TripsScreenState createState() => _TripsScreenState();
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => TripsScreen(),
+    );
+  }
 }
 
 class _TripsScreenState extends State<TripsScreen>
     with SingleTickerProviderStateMixin {
   List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
   late final TabController tabController;
-//  RefreshController _refreshController =
-//      RefreshController(initialRefresh: false);
+
   @override
   initState() {
     tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     super.initState();
-  }
-
-  void _onRefresh() async {
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use refreshFailed()
-//    _refreshController.refreshCompleted();
-  }
-
-  void _onLoading() async {
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use loadFailed(),if no data return,use LoadNodata()
-    items.add((items.length + 1).toString());
-    if (mounted) setState(() {});
-//    _refreshController.loadComplete();
   }
 
   @override
@@ -59,8 +48,12 @@ class _TripsScreenState extends State<TripsScreen>
         controller: tabController,
         children: [
           BlocProvider<ListBloc>(
-              create: (context) => ListBloc(repository: TrekRepository()),
-              child: TrekList(),),
+            create: (context) => ListBloc(
+                repository: TrekRepository(
+                    RepositoryProvider.of<AuthenticationRepository>(context)
+                        .token!)),
+            child: TrekList(),
+          ),
           SingleChildScrollView(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -102,7 +95,6 @@ class TrekList extends StatefulWidget {
 }
 
 class _TrekListState extends State<TrekList> {
-
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
   late ListBloc _postBloc;
@@ -270,7 +262,7 @@ class SingleTrek extends StatelessWidget {
           ),
         ),
         SizedBox(height: 12),
-        LocationPairCard(
+        TrekCard(
           trek: trek,
           onTap: () {
             Navigator.push(

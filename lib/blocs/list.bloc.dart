@@ -47,12 +47,12 @@ class ListBloc extends Bloc<ListEvent, ListState> {
             Parameters(
               page: currentState.currentPage + 1,
               length: 20,
-              q: event.query!,
+              q: event.query?? '',
             ),
           );
 
           yield ListSuccess(
-            models: paginatedList.data,
+            models: currentState.models + paginatedList.data,
             totalPages: paginatedList.pagination.totalPages,
             currentPage: paginatedList.pagination.currentPage,
           );

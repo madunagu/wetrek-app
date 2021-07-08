@@ -26,6 +26,7 @@ class TextStyles {
     fontWeight: FontWeight.w500,
     color: Color(0xff454F63),
     height: 32 / 24,
+    fontFamily: 'Gibson',
   );
 
   static final title = const TextStyle(
@@ -48,12 +49,11 @@ class TextStyles {
   );
 
   static final darkNormal = const TextStyle(
-    color: Color(0xff454F63),
-    fontSize: 16,
-    height: 21 / 16,
-    fontWeight: FontWeight.w500,
-    fontFamily: 'Gibson'
-  );
+      color: Color(0xff454F63),
+      fontSize: 16,
+      height: 21 / 16,
+      fontWeight: FontWeight.w500,
+      fontFamily: 'Gibson');
   static final darkMinor = const TextStyle(
     color: Color(0xff959DAD),
     fontSize: 12,
@@ -70,6 +70,6 @@ class TextStyles {
     fontSize: 15,
     color: Color(0xff454F63),
     fontWeight: FontWeight.w500,
-    height: 20/15,
+    height: 20 / 15,
   );
 }

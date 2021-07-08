@@ -11,10 +11,10 @@ import 'package:wetrek/network/api.dart';
 import 'package:wetrek/repositories/repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 
-class MessageRepository extends Repository {
+class NotificationRepository extends Repository {
   late final API api;
 
-  MessageRepository(token) : super(token);
+  NotificationRepository(token) : super(token);
 
   Future<Paginated<Message>> list(Parameters params) async {
     List<Message> messages = [];
@@ -67,7 +67,7 @@ class MessageRepository extends Repository {
 
   Future<Message> create(Map<String,dynamic> message) async {
     final Map<String, dynamic> res =
-        await api.post('/messages', jsonEncode(message));
+    await api.post('/messages', jsonEncode(message));
     return Message.fromJson(res['data']);
   }
 
@@ -100,7 +100,7 @@ class MessageRepository extends Repository {
     List<Message> messages = [];
     Random r = Random();
     for (int i = 0; i < 10; i++) {
-      messages.add(MessageRepository.dummy(i: 10));
+      messages.add(NotificationRepository.dummy(i: 10));
     }
     return messages;
   }

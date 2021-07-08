@@ -6,11 +6,19 @@ import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
+import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class MessagesScreen extends StatelessWidget {
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => MessagesScreen(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +28,7 @@ class MessagesScreen extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (BuildContext context) =>
-            ListBloc(repository: MessageRepository())..add(ListFetched()),
+            ListBloc(repository: MessageRepository(RepositoryProvider.of<AuthenticationRepository>(context).token!))..add(ListFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(horizontal: 24),
@@ -137,58 +145,67 @@ class MessageListItem extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 22),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(width: 1.0, color: Color(0xffF4F4F6)),
-        ),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              user.avatar,
-              width: 62,
-              height: 62,
-              fit: BoxFit.cover,
-            ),
+    return InkWell(
+      onTap: () {
+        Navigator.push(context, ChatScreen.route());
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 22),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(width: 1.0, color: Color(0xffF4F4F6)),
           ),
-          SizedBox(width: 16),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width - 126,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text(user.name, style: TextStyles.darkNormal),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Color(0xffff4f9a),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(height: 7),
-                Text(
-                  message,
-                  style: TextStyles.base.copyWith(
-                    color: Color(0xff78849E),
-                  ),
-                ),
-              ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                user.avatar,
+                width: 62,
+                height: 62,
+                fit: BoxFit.cover,
+              ),
             ),
-          )
-        ],
+            SizedBox(width: 16),
+            Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width - 126,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(user.name, style: TextStyles.darkNormal),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Color(0xffff4f9a),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 7),
+                  RichText(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      text: message,
+                      style: TextStyles.base.copyWith(
+                        color: Color(0xff78849E),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

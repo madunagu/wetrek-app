@@ -1,26 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/bounds.dart';
 import 'package:wetrek/models/detail.dart';
-import 'package:wetrek/models/field.dart';
-import 'package:wetrek/models/geometry.dart';
-import 'package:wetrek/models/index.dart';
+import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/leg.dart';
 import 'package:wetrek/models/location.dart';
-import 'package:wetrek/models/plus_code.dart';
 import 'package:wetrek/models/polyline.dart';
 import 'package:wetrek/models/step.dart';
 import 'package:wetrek/models/track.dart';
 import 'package:wetrek/models/waypoint.dart';
 import 'package:wetrek/network/api.dart';
 
-class DirectionsRepository {
-  Future<Direction> get(
+class MapsRepository {
+  static Future<Direction> getDirections(
     Address origin,
     Address destination,
   ) async {
+    return MapsRepository.dummy();
     final Map<String, dynamic> res = await API.getExternal(
       "https://maps.googleapis.com/maps/api/directions/json",
       params: {
@@ -31,6 +28,22 @@ class DirectionsRepository {
     );
     return Direction.fromJson(res);
   }
+
+//  Future<Address> getAddress(
+//      String q,
+//      ) async {
+//
+//    return DirectionsRepository.dummy();
+//    final Map<String, dynamic> res = await API.getExternal(
+//      "https://maps.googleapis.com/maps/api/directions/json",
+//      params: {
+//        'origin': 'place_id:' + origin.placeId,
+//        'destination': 'place_id:' + destination.placeId,
+//        'key': 'myapikey',
+//      },
+//    );
+//    return Direction.fromJson(res);
+//  }
 
   static Direction dummy() {
     return Direction(geocodedWaypoints: [
@@ -55,7 +68,7 @@ class DirectionsRepository {
           Leg(
             distance: Detail(text: '5.3 km', value: 5317),
             duration: Detail(text: '15 mins', value: 895),
-            endAddress: ' "Abule Ado Bus Stop, Satellite Town, Lagos, Nigeria"',
+            endAddress: "Abule Ado Bus Stop, Satellite Town, Lagos, Nigeria",
             endLocation: Location(lat: 6.4561927, lng: 3.2562291),
             startAddress: "Unipetrol Rd, Satellite Town, Lagos, Nigeria",
             startLocation: Location(lat: 6.4482876, lng: 3.2487351),
@@ -135,7 +148,8 @@ class DirectionsRepository {
           ),
         ],
         overviewPolyline: Polyline(
-          points: '',
+          points:
+              "eir~FdezuOndEhaBhjHd~]jsIhmY~nO|qa@ptHhcHlnLnfBb_Tr}AheUoXxrFfdHtvR~tOhoNfuWrqTv|PxxPzlX|`k@fnQ||IfzIbmNr_X~L~vMjoLza@zdKh~CdbFvxGneKjqM~wInsKhtKprMvWl|PzgPx~AtmKhuI~uN|qNn{Tp`FdrP|uDh{QjxCh__Aw[ngWniCbaTnrNryUf\\`d_@nwZ~`LrqBvfEjrF~cHxsWn_IljYxfAvoS|gFv~N`gJllc@|gBvfg@fkFb~RvpIzqGryN~sUnzNnrQn}Rrk\\|iQxli@liKfmm@dyE`tIoYpqWlzNl{SnvG|f[b_Hdtc@f{Fp}j@z~WjpT`cNjwVjpQnsH`sS~aNtkI`|^`zErnm@ddGncP|{@dt[nqRvum@b_Atx^ss@nn|A`Yd_GpgIhzAriG|lSvnTbqh@r{YjuKbqQ|~g@l}^p|e@t|LjrPhlLnsQpqGfuRjrXrd\\zoMzgo@fiJt|OryDnqJhn]|~o@jzIlya@tcb@pdzCheGdeNb}Pr`Bh~A~zc@y{Flcb@qdA~t\\ehBhebAmn@fzm@zzAndXvwBvtn@jrJhzk@ddCxdYr_F~~Vf_BdoTtxQh{OphHrmk@sAlnj@]z~q@pMpt{@j~@feWnzEf|V}oDvjpAeuAhz]`{Ab~c@n~Altj@clBj|w@c}Jb_}A||[dlsBeaA|l]q|FxjNleCtrn@vmElnY~mG|ou@jpHr`u@fjNpcj@{mH`_qC}~@hdcBmDzeWi|GlqYyeJxz`@daHly[kdGfc[zy@nfRhmU`lsAukA`jW{{EnoI|Gf|TylHjs`@~tAvlN_lHdeTgqSn{VolVneMosOf}y@e}Qh{p@e`BvyY~iCtzWhkNny[leOnyOhhL`|XjhFlgSteNfxc@`bPdtn@~cMdo\\f_BbmVvzJ~dYrxCvxJcyH`zWodKj}cA}jOd_|@o{Epui@gzK~nh@cW~rOfyAjgVnDdqSwpEl{LewEpvk@x|A~xc@~kDf|a@g_Ddut@}mI`o^ceCtcX~sHzfd@r_Njye@vzB~r`@hItnn@aeHzqk@~`EzyMzaNlmHlpb@brEjsXp`A~yKtq_@xcAzjf@yxYnlRw`EtkPtTtuKpjDpbSlfL~lgBr|Jhae@|p@di_@dCv|o@cl@rcd@ikJn}d@ubI|raAoaEzyc@yt@rpWrva@jrY~yMpmDf_u@tsi@|_CjpD~uD{kDrfLoaGluP|hPzN~da@hoAjnj@e\\jvKf~JdyFby@|sg@fQ|}D",
         ),
         summary: 'a summary',
         warnings: [],
