@@ -4,6 +4,12 @@ import 'package:wetrek/screens/payment_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class PhoneScreen extends StatelessWidget {
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => PhoneScreen(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -38,7 +38,7 @@ class WelcomeScreen extends StatelessWidget {
                     'CONTINUE WITH',
                     style: TextStyles.minor.copyWith(color: Colors.white),
                   ),
-                  MyButton('GMAIL'),
+                  MyButton('GOOGLE'),
                   SizedBox(height: 12),
                   MyButton('FACEBOOK'),
                 ],

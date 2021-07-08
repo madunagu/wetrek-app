@@ -3,6 +3,11 @@ import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class StatisticsScreen extends StatelessWidget {
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => StatisticsScreen(),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

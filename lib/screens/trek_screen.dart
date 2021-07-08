@@ -1,172 +1,155 @@
 import 'package:flutter/material.dart';
+import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/trek.dart';
-import 'package:wetrek/screens/history_screen.dart';
-import '../widgets/widgets.dart';
-import 'package:wetrek/widgets/avatar_list.dart';
+import 'package:wetrek/screens/chat_screen.dart';
+import 'package:wetrek/screens/path_screen.dart';
+import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
+import 'package:wetrek/widgets/avatar_list.dart';
 
-class TrekScreen extends StatelessWidget {
-  TrekScreen({required this.trek});
+class TrekScreen extends StatefulWidget {
   final Trek trek;
+  TrekScreen({required this.trek});
+
+  static route(Trek trek) {
+    return MaterialPageRoute(
+      builder: (context) => TrekScreen(
+        trek: trek,
+      ),
+    );
+  }
+
+  @override
+  _TrekScreenState createState() => _TrekScreenState();
+}
+
+class _TrekScreenState extends State<TrekScreen> {
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              expandedHeight: 340.0,
-              floating: false,
-              actions: [
-                GestureDetector(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Icon(Icons.filter_list, color: Colors.white),
-                  ),
-                ),
-              ],
-              pinned: true,
-              backgroundColor: Color(0xff2a2e43),
-              bottom: PreferredSize(
-                preferredSize: Size.fromHeight(100),
-                child: Container(
-                  height: 100,
-                  padding: EdgeInsets.only(left: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Abule-Ado Group",
-                        style: TextStyles.title.copyWith(color: Colors.white),
-                      ),
-                      Row(
-                        children: [
-                          ReviewBar(max: 5, num: 4),
-                          SizedBox(width: 12),
-                          Text('24 Reviews', style: TextStyles.base),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
+      appBar: MyAppBar(title: 'Trek Path'),
+      floatingActionButton: Container(
+          width: 52,
+          height: 52,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: WeTrekColors.blue3,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(Icons.share,color: Colors.white,)),
+      body: Container(
+        width: size.width,
+        height: size.height,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Image.asset(
+                'images/dark_map.png',
+                width: size.width,
+                fit: BoxFit.cover,
               ),
-              flexibleSpace: FlexibleSpaceBar(
-                title: Container(
-                  height: 100,
+              Container(
+                width: size.width,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
                 ),
-                background: Container(
-                  child: Stack(
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      Image.asset(
-                        "images/dark_map.png",
-                        fit: BoxFit.cover,
-                        width: double.infinity,
+                      Text('ABULE ADO TREK', style: TextStyles.darkLarge),
+                      SizedBox(height: 16),
+                      Text(
+                        'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
+                        style: TextStyles.darkMinor,
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0x002A2E43),
-                              Color(0x8408090D),
+                      SizedBox(height: 16),
+                      TrekItem(
+                        subTitle: '15 treks',
+                        title: 'Trekkers',
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(context, UsersScreen.route());
+                          },
+                          child: AvatarList(
+                            imgSrcs: [
+                              'images/avatar1.jpg',
+                              'images/avatar2.jpg',
+                              'images/avatar3.jpg',
+                            ],
+                          ),
+                        ),
+                        icon: Icons.people_outline,
+                      ),
+                      TrekItem(
+                        subTitle: '45 messages',
+                        title: 'Chats',
+                        icon: Icons.chat_bubble_outline,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(context, ChatScreen.route());
+                          },
+                          child: AvatarList(
+                            imgSrcs: [
+                              'images/avatar1.jpg',
+                              'images/avatar2.jpg',
+                              'images/avatar3.jpg',
                             ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ];
-        },
-        body: Container(
-          padding: EdgeInsets.symmetric(vertical: 30, horizontal: 24),
-          color: Color(0xff2A2E43),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Description',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-                SizedBox(height: 15),
-                Text(
-                  'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
-                  style: TextStyles.base,
-                ),
-                SizedBox(height: 41),
-                Text('Time', style: TextStyles.base),
-                SizedBox(height: 12),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      MyIconButton(icon: Icons.access_time),
-                      SizedBox(width: 16),
-                      Text(
-                        '12:00',
-                        style: TextStyles.normal,
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text('Phone', style: TextStyles.base),
-                SizedBox(height: 12),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      MyIconButton(),
-                      SizedBox(width: 16),
-                      Text(
-                        '+1 (828) 832-4256',
-                        style: TextStyles.normal,
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text('Attending', style: TextStyles.base),
-                SizedBox(height: 12),
-                AvatarList(imgSrcs: [
-                  'images/avatar1.jpg',
-                  'images/avatar2.jpg',
-                  'images/avatar3.jpg',
-                ]),
-                SizedBox(height: 16),
-                Text('Path Details', style: TextStyles.base),
-                SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HistoryScreen()),
-                    );
-                  },
-                  child: Container(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'images/dark_map.png',
-                        height: 128,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                      TrekItem(
+                        subTitle: '5 pictures',
+                        title: 'Direction Details',
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(context,
+                                PathScreen.route(widget.trek.direction));
+                          },
+                          child: Container(
+                            height: 44,
+                            width: size.width - 136,
+                            child: Text(
+                              'Start At Address and move on to Address',
+                              style: TextStyles.darkMinor,
+                            ),
+                          ),
+                        ),
+                        icon: Icons.directions_walk,
                       ),
-                    ),
+                      TrekItem(
+                        subTitle: '5 pictures',
+                        title: 'Pictures',
+                        child: Container(
+                          height: 44,
+                          width: size.width - 136,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              Image.asset('images/sushi.jpg', height: 44),
+                              Image.asset('images/museum.jpg', height: 44),
+                              Image.asset('images/ice_cream.jpg', height: 44),
+                            ],
+                          ),
+                        ),
+                        icon: Icons.save,
+                      ),
+                      SizedBox(height: 16),
+//                      for(var step in )
+
+                      MyButton('GO THERE'),
+                    ],
                   ),
                 ),
-                SizedBox(height: 30),
-                MyButton('GO THERE'),
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),
@@ -174,27 +157,67 @@ class TrekScreen extends StatelessWidget {
   }
 }
 
-class TrekDetails extends StatelessWidget {
+class TrekItem extends StatelessWidget {
+  final IconData icon;
+  final subTitle;
+  final String title;
+  final Widget? child;
+  const TrekItem({
+    Key? key,
+    required this.icon,
+    required this.subTitle,
+    required this.title,
+    this.child,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: EdgeInsets.only(top: 20, left: 16, right: 16),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HistoryItem(
-            subTitle: '9:00 (25 mins)',
-            title: 'Shopping',
-            imgSrcs: [
-              'images/avatar1.jpg',
-              'images/avatar2.jpg',
-              'images/avatar3.jpg',
-            ],
-            icon: Icons.save,
+          Container(
+            child: Column(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: WeTrekColors.blue4,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                ),
+//                Container(
+//                  width: 2,
+//                  height: 100,
+//                  color: Color(0x20959DAD),
+//                )
+              ],
+            ),
           ),
+          SizedBox(width: 40),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                subTitle,
+                style: TextStyles.darkMinor,
+              ),
+              Text(
+                title,
+                style: TextStyles.darkNormal,
+              ),
+              SizedBox(height: 11),
+              child ?? Container(),
+              SizedBox(height: 26),
+            ],
+          )
         ],
       ),
     );

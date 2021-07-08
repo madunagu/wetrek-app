@@ -2,12 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({required this.user});
   final User user;
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => ProfileScreen(user: UserRepository.dummy()),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
