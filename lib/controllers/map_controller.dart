@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/repositories/maps_repository.dart';
 
 class MapController extends ChangeNotifier {
   MapState? _mapState = MapState.initialized;
   Trek? selectedItem;
+  Direction? direction;
 
   search() async {
     _mapState = MapState.searchCompleted;
@@ -26,7 +29,10 @@ class MapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  createTrek(Address startAddress, Address endAddress) {
+  createTrek(Address startAddress, Address endAddress) async {
+    _mapState = MapState.loading;
+    notifyListeners();
+    direction = await MapsRepository.getDirections(startAddress, endAddress);
     _mapState = MapState.creatingTrek;
     notifyListeners();
   }
@@ -34,6 +40,7 @@ class MapController extends ChangeNotifier {
   dispose() {
     _mapState = null;
     selectedItem = null;
+    direction = null;
     super.dispose();
   }
 }
@@ -46,4 +53,5 @@ enum MapState {
   itemSelected,
   creatingTrek,
   waiting,
+  loading,
 }
