@@ -67,14 +67,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           username: state.username.value,
           password: state.password.value,
         );
-        yield state.copyWith(status: FormzStatus.submissionSuccess);
+        yield state.copyWith(
+            status: FormzStatus.submissionSuccess, error: null);
       } on ValidationErrorException catch (e, _) {
         log(e.errors.toString());
-
-        yield state.copyWith(status: FormzStatus.invalid);
-      } on Exception catch (_) {
-        log(_.toString());
-        yield state.copyWith(status: FormzStatus.submissionFailure);
+        yield state.copyWith(
+            status: FormzStatus.invalid, validationErrors: e.errors);
+      } on MyException catch (e, _) {
+        yield state.copyWith(status: FormzStatus.submissionFailure, error: e);
+      } on Exception catch (e) {
+        log(e.toString());
+        yield state.copyWith(status: FormzStatus.submissionFailure, error: e);
       }
     }
   }

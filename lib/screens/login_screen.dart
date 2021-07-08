@@ -22,14 +22,15 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return DefaultTabController(
       length: 2,
       initialIndex: 0,
       child: Scaffold(
         body: Container(
           color: Colors.white,
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
+          height: size.height,
+          width: size.width,
           child: SingleChildScrollView(
             child: Column(children: [
               SizedBox(
@@ -77,8 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height - 122,
+                width: size.width,
+                height: size.height - 122,
                 child: TabBarView(children: [
                   LoginForm(),
                   RegisterForm(),
@@ -139,7 +140,9 @@ class _EmailInput extends StatelessWidget {
           key: const Key('loginForm_usernameInput_textField'),
           onChanged: (username) =>
               context.read<LoginBloc>().add(LoginUsernameChanged(username)),
-          errorText: state.username.invalid ? 'invalid username' : null,
+          errorText: state.username.invalid
+              ? state.validationErrors['email'] ?? state.username.error
+              : null,
           hintText: 'Email',
         );
       },
@@ -159,7 +162,9 @@ class _PasswordInput extends StatelessWidget {
               context.read<LoginBloc>().add(LoginPasswordChanged(password)),
           obscureText: true,
           hintText: 'Password',
-          errorText: state.password.invalid ? 'invalid password' : null,
+          errorText: state.password.invalid
+              ? state.validationErrors['password'] ?? state.password.error
+              : null,
         );
       },
     );

@@ -3,6 +3,7 @@
     "end_address": "$Address",
     "users?": "$[]User",
     "name": "Trek Name",
+    "direction": "$Direction",
     "locations": "$[]Location",
     "starting_at": "@datetime",
     "ending_at?": "@datetime",

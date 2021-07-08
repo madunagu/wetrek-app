@@ -2,16 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:wetrek/models/model.dart';
 import 'address.dart';
 import 'user.dart';
+import 'direction.dart';
 import 'location.dart';
 
 @immutable
-class Trek extends Model {
+class Trek extends Model{
 
   const Trek({
     required this.startAddress,
     required this.endAddress,
     this.users,
     required this.name,
+    required this.direction,
     required this.locations,
     required this.startingAt,
     this.endingAt,
@@ -22,6 +24,7 @@ class Trek extends Model {
   final Address endAddress;
   final List<User>? users;
   final String name;
+  final Direction direction;
   final List<Location> locations;
   final DateTime startingAt;
   final DateTime? endingAt;
@@ -32,6 +35,7 @@ class Trek extends Model {
     endAddress: json['end_address'] as Address,
     users: json['users'] != null ? (json['users'] as List? ?? []).map((e) => e as User).toList() : null,
     name: json['name'] as String,
+    direction: json['direction'] as Direction,
     locations: (json['locations'] as List? ?? []).map((e) => e as Location).toList(),
     startingAt: DateTime.parse(json['starting_at'] as String),
     endingAt: json['ending_at'] != null ? DateTime.parse(json['ending_at'] as String) : null,
@@ -43,6 +47,7 @@ class Trek extends Model {
     'end_address': endAddress,
     'users': users?.map((e) => e.toString()).toList(),
     'name': name,
+    'direction': direction,
     'locations': locations.map((e) => e.toString()).toList(),
     'starting_at': startingAt.toIso8601String(),
     'ending_at': endingAt?.toIso8601String(),
@@ -54,6 +59,7 @@ class Trek extends Model {
     endAddress: endAddress,
     users: users?.toList(),
     name: name,
+    direction: direction,
     locations: locations.toList(),
     startingAt: startingAt,
     endingAt: endingAt,
@@ -66,6 +72,7 @@ class Trek extends Model {
     Address? endAddress,
     List<User>? users,
     String? name,
+    Direction? direction,
     List<Location>? locations,
     DateTime? startingAt,
     DateTime? endingAt,
@@ -75,19 +82,17 @@ class Trek extends Model {
     endAddress: endAddress ?? this.endAddress,
     users: users ?? this.users,
     name: name ?? this.name,
+    direction: direction ?? this.direction,
     locations: locations ?? this.locations,
     startingAt: startingAt ?? this.startingAt,
     endingAt: endingAt ?? this.endingAt,
     createdAt: createdAt ?? this.createdAt,
   );
 
-  String distance(){
-    return '5.3 Miles';
-  }
   @override
   bool operator ==(Object other) => identical(this, other)
-    || other is Trek && startAddress == other.startAddress && endAddress == other.endAddress && users == other.users && name == other.name && locations == other.locations && startingAt == other.startingAt && endingAt == other.endingAt && createdAt == other.createdAt;
+    || other is Trek && startAddress == other.startAddress && endAddress == other.endAddress && users == other.users && name == other.name && direction == other.direction && locations == other.locations && startingAt == other.startingAt && endingAt == other.endingAt && createdAt == other.createdAt;
 
   @override
-  int get hashCode => startAddress.hashCode ^ endAddress.hashCode ^ users.hashCode ^ name.hashCode ^ locations.hashCode ^ startingAt.hashCode ^ endingAt.hashCode ^ createdAt.hashCode;
+  int get hashCode => startAddress.hashCode ^ endAddress.hashCode ^ users.hashCode ^ name.hashCode ^ direction.hashCode ^ locations.hashCode ^ startingAt.hashCode ^ endingAt.hashCode ^ createdAt.hashCode;
 }

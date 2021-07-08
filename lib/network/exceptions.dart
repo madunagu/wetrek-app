@@ -1,20 +1,34 @@
 import 'package:meta/meta.dart';
 
-abstract class ApiException implements Exception {}
+abstract class MyException implements Exception {
+  final message = 'An Error Occurred, Try Again';
+}
 
-class EmptyResultException extends ApiException {}
+class EmptyResultException extends MyException {
+  final message = 'Error, Empty Response, Try Again';
+}
 
-class ConnectionException extends ApiException {}
+class ConnectionException extends MyException {
+  final message = 'Network Connection Error, Try Again';
+}
 
-class ServerErrorException extends ApiException {}
+class ServerErrorException extends MyException {
+  final message = 'Server Error, Try Again';
+}
 
-class ClientErrorException extends ApiException {}
+class ClientErrorException extends MyException {}
 
-class AuthenticationException extends ApiException {}
+class AuthenticationException extends MyException {
+  final message = 'Error, Your Request Is Not Authenticated. Login';
+}
 
-class ValidationErrorException extends ApiException {
+class ValidationErrorException extends MyException {
+  final message = 'Validation Error, Check Input';
   final Map<String, dynamic> errors;
   ValidationErrorException({required this.errors});
 }
 
-class UnknownException extends ApiException {}
+class UnknownException extends MyException {
+  UnknownException({this.message = 'Unknown Error Occurred!'});
+  final String message;
+}

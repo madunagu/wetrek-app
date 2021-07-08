@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 
 @immutable
@@ -26,6 +27,10 @@ class Location {
     lat: lat,
     lng: lng
   );
+
+  LatLng transform(){
+    return LatLng(lat, lng);
+  }
 
 
   Location copyWith({

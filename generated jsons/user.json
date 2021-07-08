@@ -3,5 +3,6 @@
     "name": "Ekene Madunagu",
     "email": "ekenemadunagu@gmail.com",
     "avatar": "avatarlinktosite.com",
-    "token?": "averylongtoken"
+    "token?": "averylongtoken",
+    "following?": [1,2,3,5,5,3,5,6]
 }
