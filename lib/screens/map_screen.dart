@@ -117,58 +117,46 @@ class _MapScreenState extends State<MapScreen> with GoogleMapMixin {
   @override
   Widget build(BuildContext context) {
     final Size view = MediaQuery.of(context).size;
-    return Scaffold(
-      drawer: AppNavigationDrawer(),
-      body: BlocProvider<ListBloc>(
-          create: (context) => ListBloc(
-              repository: TrekRepository(
-                  RepositoryProvider.of<AuthenticationRepository>(context)
-                      .token!)),
+    return BlocProvider<ListBloc>(
+      create: (context) => ListBloc(
+        repository: TrekRepository(
+            RepositoryProvider.of<AuthenticationRepository>(context).token!),
+      ),
+      child: Scaffold(
+        drawer: AppNavigationDrawer(),
+        bottomSheet: MapLowerSheet(
+          controller: homeController,
+        ),
+        appBar: PlaceSearchBar(
+          controller: homeController,
+        ),
+        body: Container(
+          height: view.height,
+          width: view.width,
+          color: Colors.white,
           child: Container(
             height: view.height,
             width: view.width,
-            color: Colors.white,
-            child: Stack(
-              children: [
-                Container(
-                  height: view.height,
-                  width: view.width,
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(6.4584252, 3.2721445),
-                      zoom: 15,
-                    ),
-                    zoomControlsEnabled: false,
-                    myLocationEnabled: true,
-                    tiltGesturesEnabled: false,
-                    compassEnabled: true,
-                    scrollGesturesEnabled: true,
-                    zoomGesturesEnabled: true,
-                    onMapCreated: onMapCreated,
-                    rotateGesturesEnabled: false,
-                    markers: Set<Marker>.of(markers.values),
-                    polylines: Set<Polyline>.of(polyLines.values),
-                    onTap: _onMapTap,
-                  ),
-                ),
-                Positioned(
-                  top: 36,
-                  width: view.width,
-//              height: 52,
-                  child: PlaceSearchBar(
-                    controller: homeController,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  width: view.width,
-                  child: MapLowerSheet(
-                    controller: homeController,
-                  ),
-                ),
-              ],
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(6.4584252, 3.2721445),
+                zoom: 15,
+              ),
+              zoomControlsEnabled: false,
+              myLocationEnabled: true,
+              tiltGesturesEnabled: false,
+              compassEnabled: true,
+              scrollGesturesEnabled: true,
+              zoomGesturesEnabled: true,
+              onMapCreated: onMapCreated,
+              rotateGesturesEnabled: false,
+              markers: Set<Marker>.of(markers.values),
+              polylines: Set<Polyline>.of(polyLines.values),
+              onTap: _onMapTap,
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -211,6 +199,7 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
       case HomePageStatus.initial:
         return MapSheet(
           child: MapSheetDetails(
+            controller: widget.controller,
             rightContent: Text(
               '18',
               style: TextStyle(
@@ -223,9 +212,8 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
         );
       case HomePageStatus.creating:
         return MapSheet(
-            child: TrekForm(
-          controller: widget.controller,
-        ));
+          child: TrekForm(controller: widget.controller),
+        );
       case HomePageStatus.loading:
         return MapSheet(child: CircularProgressIndicator());
       case HomePageStatus.searching:
@@ -239,6 +227,7 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
       case HomePageStatus.selecting:
         return MapSheet(
           child: MapSheetDetails(
+            controller: widget.controller,
             child: PlaceDetailsPreview(
               trek: widget.controller.trek!,
             ),
@@ -254,7 +243,7 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
         );
 
       default:
-        return MapSheet(child: MapSheetDetails());
+        return MapSheet(child: MapSheetDetails(controller: widget.controller));
     }
   }
 }

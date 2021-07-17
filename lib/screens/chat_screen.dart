@@ -207,11 +207,8 @@ class _ChatTextInputState extends State<ChatTextInput> {
   }
 
   catchExceptions(e) {
-    List<String> _m = ['UNKNOWN ERROR OCCURED', 'Could not Send Message'];
-    if (e is ValidationErrorException) _m[0] = 'CONTENT NOT FORMATTED PROPERLY';
-    if (e is ServerErrorException) _m[0] = 'SERVER ERROR OCCRED';
-    if (e is AuthenticationException) _m[0] = 'USER NOT LOGGED IN';
-
+    List<String> _m = ['ERROR OCCURRED', 'Could not Send Message'];
+    if (e is MyException) _m[1] = e.toString();
     showDialog(
       context: context,
       builder: (BuildContext context) => NotificationPopup(

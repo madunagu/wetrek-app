@@ -259,12 +259,14 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   _onRegisterPressed() {
-//    BlocProvider.of<LoginBloc>(context).add(
-//      LoginButtonPressed(
-//        username: emailController.text,
-//        password: passwordController.text,
-//      ),
-//    );
+    context.read<LoginBloc>().add(
+          RegisterSubmitted(
+            firstName: firstNameController.value.text,
+            lastName: lastNameController.value.text,
+            email: emailController.value.text,
+            password: passwordController.value.text,
+          ),
+        );
   }
 
   @override

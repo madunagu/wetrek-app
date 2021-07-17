@@ -27,8 +27,11 @@ class MessagesScreen extends StatelessWidget {
         rightIcon: Icons.search,
       ),
       body: BlocProvider(
-        create: (BuildContext context) =>
-            ListBloc(repository: MessageRepository(RepositoryProvider.of<AuthenticationRepository>(context).token!))..add(ListFetched()),
+        create: (BuildContext context) => ListBloc(
+            repository: MessageRepository(
+                RepositoryProvider.of<AuthenticationRepository>(context)
+                    .token!))
+          ..add(ListFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(horizontal: 24),
