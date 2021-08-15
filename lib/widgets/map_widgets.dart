@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/controllers/home_controller.dart';
-import 'package:wetrek/controllers/map_controller.dart';
-import 'package:wetrek/controllers/search_controller.dart';
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/option.dart';
@@ -130,36 +130,38 @@ class _TrekFormState extends State<TrekForm> {
 }
 
 class MapSheet extends StatelessWidget {
-  MapSheet({required this.child, this.topBorder = const GradientLine()});
+  MapSheet({
+    required this.child,
+    this.height = 101,
+    this.topBorder = const GradientLine(),
+  });
   final Widget child;
   final Widget topBorder;
+  final double height;
   @override
   Widget build(BuildContext context) {
     final Size view = MediaQuery.of(context).size;
     return Container(
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        children: [
-          LocationButton(),
-          SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(6),
-              topRight: Radius.circular(6),
+      width: view.width,
+      alignment: Alignment.bottomCenter,
+      height: height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(6),
+          topRight: Radius.circular(6),
+        ),
+        child: Column(
+          children: [
+            topBorder,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              width: view.width,
+              alignment: Alignment.bottomCenter,
+              color: Color(0xff2A2E43),
+              child: child,
             ),
-            child: Column(
-              children: [
-                topBorder,
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  width: view.width,
-                  color: Color(0xff2A2E43),
-                  child: child,
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -168,25 +170,22 @@ class MapSheet extends StatelessWidget {
 class LocationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        width: 92,
-        height: 52,
-        alignment: Alignment.center,
-        padding: EdgeInsets.only(left: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12),
-            bottomLeft: Radius.circular(12),
-          ),
+    return Container(
+      width: 92,
+      height: 52,
+      alignment: Alignment.center,
+      padding: EdgeInsets.only(left: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          bottomLeft: Radius.circular(12),
         ),
-        child: Icon(
-          Icons.location_searching,
-          color: Color(0xff454F63),
-          size: 18,
-        ),
+      ),
+      child: Icon(
+        Icons.my_location,
+        color: Color(0xff454F63),
+        size: 18,
       ),
     );
   }
@@ -195,6 +194,7 @@ class LocationButton extends StatelessWidget {
 class MapSheetDetails extends StatelessWidget {
   const MapSheetDetails({
     Key? key,
+    required this.controller,
     this.child,
     this.title = 'Nearby',
     this.subTitle = 'Foods, drinks, places',
@@ -204,6 +204,8 @@ class MapSheetDetails extends StatelessWidget {
   final Widget? rightContent;
   final String title;
   final String subTitle;
+  final HomeController controller;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -214,9 +216,7 @@ class MapSheetDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              //here expand the size of the sheet
-            },
+            onTap: () => this.controller.search,
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Icon(
@@ -264,14 +264,14 @@ class _PlacesNearbyState extends State<PlacesNearby> {
 
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late SearchBloc _postBloc;
   late final StreamSubscription<String> subscription;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
+    _postBloc = BlocProvider.of<SearchBloc>(context);
 //    _postBloc.add(ListFetched());
     subscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
@@ -289,14 +289,12 @@ class _PlacesNearbyState extends State<PlacesNearby> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
+      _postBloc.add(SearchFetched());
     }
   }
 
   void onSearch(String query) {
-    if (query.length > 3) {
-      _postBloc.add(ListFetched(query: query));
-    }
+    _postBloc.add(SearchFetched(query: query));
   }
 
   String distance(trek) {
@@ -604,8 +602,8 @@ class TrekCard extends StatelessWidget {
         child: Column(
           children: [
             LocationPairCard(
-              originAddress: trek.startAddress.formattedAddress,
-              destinationAddress: trek.endAddress.formattedAddress,
+              originAddress: trek.startAddress.description,
+              destinationAddress: trek.endAddress.description,
             ),
             Container(
               child: Row(
@@ -673,7 +671,7 @@ class LocationPairCard extends StatelessWidget {
   }
 }
 
-class PlaceSearchBar extends StatefulWidget {
+class PlaceSearchBar extends StatefulWidget implements PreferredSizeWidget {
   PlaceSearchBar({
     required this.controller,
   });
@@ -681,6 +679,10 @@ class PlaceSearchBar extends StatefulWidget {
 
   @override
   _PlaceSearchBarState createState() => _PlaceSearchBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => Size.fromHeight(200);
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
@@ -704,13 +706,26 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: currentSearchWidget(),
+    return Column(
+      children: [
+        SizedBox(height: 36),
+        searchBarStatus == SearchBarStatus.expanded
+            ? Padding(
+                padding:
+                    const EdgeInsets.only(left: 16.0, right: 16, bottom: 6),
+                child: MyAppBarNavigation(
+                    onBackPressed: widget.controller.collapseSearchBar),
+              )
+            : Container(),
+        Container(
+          margin: EdgeInsets.only(left: 16, right: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: currentSearchWidget(),
+        ),
+      ],
     );
   }
 
@@ -792,7 +807,7 @@ class CompressedSearchBar extends StatelessWidget {
               text: TextSpan(
                 style: TextStyles.darkNormal,
                 text: controller.destinationAddress?.toString() != null
-                    ? controller.destinationAddress!.formattedAddress
+                    ? controller.destinationAddress!.description
                     : 'Your Location',
               ),
             ),
@@ -830,7 +845,7 @@ class _NormalSearchBarState extends State<NormalSearchBar> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer,
+          onTap: () => Scaffold.of(context).openDrawer(),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Icon(
@@ -1210,7 +1225,7 @@ class SearchResultRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(address.formattedAddress, style: TextStyles.darkNormal),
+                Text(address.description, style: TextStyles.darkNormal),
                 Text('2Km.', style: TextStyles.darkMinor),
               ],
             ),

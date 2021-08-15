@@ -2,7 +2,12 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/index.dart';
+import 'package:wetrek/models/location.dart';
+import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
@@ -11,6 +16,7 @@ class HomeController extends ChangeNotifier {
   HomeController() {
 //    _searchBarStatusController.sink.add(SearchBarStatus.normal);
 //    _homePageStatusController.sink.add(HomePageStatus.initial);
+    myLocation = LatLng(1, 1);
   }
 
   Address? originAddress;
@@ -19,6 +25,7 @@ class HomeController extends ChangeNotifier {
   Direction? direction;
   String? searchQuery;
   bool? isOriginAddress;
+  late LatLng myLocation;
 
   final _searchBarStatusController =
       StreamController<SearchBarStatus>.broadcast();
@@ -26,6 +33,7 @@ class HomeController extends ChangeNotifier {
       StreamController<HomePageStatus>.broadcast();
   final _searchQueryController = StreamController<String>.broadcast();
   final _errorMessageController = StreamController<Exception>.broadcast();
+  final _mapLocationController = StreamController<Location>.broadcast();
 
   Stream<SearchBarStatus> get searchBarStatus =>
       _searchBarStatusController.stream;
@@ -34,11 +42,15 @@ class HomeController extends ChangeNotifier {
 
   Stream<Exception> get errorMessageStream => _errorMessageController.stream;
 
+  Stream<Location> get mapLocationStream => _mapLocationController.stream;
+
   Stream<String> get searchQueryStream => _searchQueryController.stream;
 
-  search(String query) {
-    searchQuery = query;
-    _searchQueryController.sink.add(query);
+   setLocation(location) => _mapLocationController.add(location);
+
+  search(String? query) {
+    searchQuery = query ?? searchQuery;
+    _searchQueryController.sink.add(searchQuery ?? '');
   }
 
   setHomeStatus(HomePageStatus status) =>
@@ -61,17 +73,17 @@ class HomeController extends ChangeNotifier {
   }
 
   String destination() {
-    return destinationAddress?.formattedAddress ?? searchQuery ?? '';
+    return destinationAddress?.description ?? searchQuery ?? '';
   }
 
   String origin() {
     //TODO: read users location as seed data here
-    return originAddress?.formattedAddress ?? 'Your Location';
+    return originAddress?.description ?? 'Your Location';
   }
 
-  selectTrek(Trek trek) {
-    trek = trek;
-    _homePageStatusController.sink.add(HomePageStatus.selecting);
+  selectTrek(Trek selectedTrek) {
+    trek = selectedTrek;
+    _homePageStatusController.sink.add(HomePageStatus.showing);
   }
 
   addError(Exception e) {
@@ -133,6 +145,7 @@ class HomeController extends ChangeNotifier {
     _homePageStatusController.close();
     _searchQueryController.close();
     _errorMessageController.close();
+    _mapLocationController.close();
     super.dispose();
   }
 }

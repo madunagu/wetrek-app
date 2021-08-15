@@ -1,13 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/user.dart';
+import 'package:wetrek/network/exceptions.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/user_repository.dart';
+import 'package:wetrek/screens/map_screen.dart';
 import 'package:wetrek/screens/payment_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
-class PhoneScreen extends StatelessWidget {
+class PhoneScreen extends StatefulWidget {
   static MaterialPageRoute route() {
     return MaterialPageRoute(
       builder: (context) => PhoneScreen(),
     );
+  }
+
+  @override
+  _PhoneScreenState createState() => _PhoneScreenState();
+}
+
+class _PhoneScreenState extends State<PhoneScreen> {
+  late final TextEditingController _phoneController;
+  late final User user;
+
+  @override
+  void initState() {
+    _phoneController = TextEditingController();
+    super.initState();
+  }
+
+  catchExceptions(e) {
+    List<String> _m = ['ERROR OCCURRED', 'Could not Send Message'];
+    if (e is MyException) _m[1] = e.toString();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ErrorPopup(
+        title: _m[0],
+        body: _m[1],
+      ),
+    );
+  }
+
+  void _submitForm() async {
+    user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+
+    UserRepository userRepository = UserRepository(
+        RepositoryProvider.of<AuthenticationRepository>(context).token);
+    User updatedUser = user.copyWith(phone: _phoneController.value.text);
+    try {
+      User u = await userRepository.update(updatedUser);
+      RepositoryProvider.of<AuthenticationRepository>(context).refresh(u);
+      Navigator.push(context, MapScreen.route());
+    } catch (e, _) {
+      print(_);
+      catchExceptions(e);
+    }
   }
 
   @override
@@ -28,9 +77,12 @@ class PhoneScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 38),
-                MyInput(isDark: true),
+                MyInput(
+                  isDark: true,
+                  controller: _phoneController,
+                ),
                 SizedBox(height: 56),
-                MyButton('NEXT STEP'),
+                MyButton('NEXT STEP', onTap: _submitForm),
               ],
             ),
           ),

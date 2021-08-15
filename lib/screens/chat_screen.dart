@@ -3,10 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/messagable.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/user.dart';
@@ -17,30 +21,30 @@ import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
-  static MaterialPageRoute route() {
+  static MaterialPageRoute route(Messagable to) {
     return MaterialPageRoute(
-      builder: (context) => ChatScreen(title: 'Group Chat'),
+      builder: (context) => ChatScreen(to: to),
     );
   }
 
-  ChatScreen({required this.title});
-  final String title;
+  ChatScreen({required this.to});
+  final Messagable to;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(
-        title: title,
+        title: to.name,
         rightIcon: Icons.search,
       ),
       bottomSheet: ChatTextInput(
-        to: 1,
+        to: to,
       ),
       body: BlocProvider(
-        create: (BuildContext context) => ListBloc(
+        create: (BuildContext context) => SearchBloc(
             repository: MessageRepository(
                 RepositoryProvider.of<AuthenticationRepository>(context)
                     .token!))
-          ..add(ListFetched()),
+          ..add(SearchFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -64,14 +68,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
   List<Message> messages = [];
 
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late final SearchBloc _searchBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
+    _searchBloc = BlocProvider.of<SearchBloc>(context);
   }
 
   @override
@@ -81,88 +84,94 @@ class _ChatMessageListState extends State<ChatMessageList> {
   }
 
   void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void onSearch(String query) {
-    if (query.length > 1) {
-      _postBloc.add(ListFetched(query: query));
+    if (query.length > 0) {
+      _searchBloc.add(SearchFetched(query: query));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BlocBuilder<ListBloc, ListState>(
-                builder: (context, state) {
-                  if (state is ListInitial) {
-                    return Container(
-                      height: 100,
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (state is ListFailure) {
-                    //TODO: design widget for this particular function
-                    //let the popups be for other exceptions
-                    return Container(
-                      height: 100,
-                      child: Text('fetch failed'),
-                    );
-                  }
-                  if (state is ListSuccess) {
-                    if (state.models.isEmpty) {
-                      return Container(
-                        height: 100,
-                        child: Text('no messages'),
-                      );
-                    }
-                    return Column(children: chatMessages(state.models));
-                  }
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: BlocBuilder<SearchBloc, SearchState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case SearchStatus.failure:
+              return const Center(child: Text('failed to fetch posts'));
+            case SearchStatus.success:
+              if (state.models.isEmpty) {
+                return const Center(child: Text('no posts'));
+              }
+              return ListView.separated(
+                reverse: true,
+                padding: EdgeInsets.only(bottom: 60, top: 40),
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.models.length
+                      ? BottomLoader()
+                      : ChatItem(
+                          message: state.models[index] as Message,
+                          size: size,
+                        );
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  Message message = state.models[index] as Message;
+                  Message messageBefore =
+                      state.models[index > 0 ? index - 1 : index] as Message;
+                  if (index > 0 &&
+                      message.createdAt.difference(messageBefore.createdAt) >
+                          Duration(days: 1))
+                    return ChatDateChanged(message.createdAt);
                   return Container();
                 },
-              ),
-            ],
-          )),
+                itemCount: state.hasReachedMax
+                    ? state.models.length
+                    : state.models.length + 1,
+                controller: _scrollController,
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 
-  List<Widget> chatMessages(List<Model> messages) {
-    messages as List<Message>;
-    Random r = Random();
-    Size size = MediaQuery.of(context).size;
-    return [
-      for (var i = 0; i < messages.length; i++)
-        if (i > 0 &&
-            messages[i].createdAt.difference(messages[i - 1].createdAt) >
-                Duration(days: 1))
-          ChatDateChanged(messages[i].createdAt),
-      for (var i = 0; i < messages.length; i++)
-        ChatItem(
-          size: size,
-          message: messages[i].message,
-          user: messages[i].from,
-          isSender: r.nextBool(),
-        ),
-      ImageChatItem(image: 'images/sushi.jpg'),
-    ];
-  }
+//  List<Widget> chatMessages(List<Model> messages) {
+//    messages as List<Message>;
+//    Random r = Random();
+//    Size size = MediaQuery.of(context).size;
+//    return [
+//      for (var i = 0; i < messages.length; i++)
+//        if (i > 0 &&
+//            messages[i].createdAt.difference(messages[i - 1].createdAt) >
+//                Duration(days: 1))
+//          ChatDateChanged(messages[i].createdAt),
+//      for (var i = 0; i < messages.length; i++)
+//        ChatItem(
+//          size: size,
+//          message: messages[i],
+//          isSender: r.nextBool(),
+//        ),
+//      ImageChatItem(image: 'images/sushi.jpg'),
+//    ];
+//  }
 }
 
 class ChatTextInput extends StatefulWidget {
-  ChatTextInput({required this.to, this.isGroup = false});
-  final int to;
-  final bool isGroup;
+  ChatTextInput({required this.to});
+  final Messagable to;
   @override
   _ChatTextInputState createState() => _ChatTextInputState();
 }
@@ -192,7 +201,8 @@ class _ChatTextInputState extends State<ChatTextInput> {
           RepositoryProvider.of<AuthenticationRepository>(context).token!;
       Message m = await MessageRepository(token).create({
         'message': controller.value.text,
-        'to': widget.to,
+        'to': widget.to.id,
+        'is_group': widget.to.isGroup,
       });
       setState(() {
         isSending = false;
@@ -202,6 +212,8 @@ class _ChatTextInputState extends State<ChatTextInput> {
       setState(() {
         isSending = false;
       });
+      print(e);
+      print(_);
       catchExceptions(e);
     }
   }
@@ -211,7 +223,7 @@ class _ChatTextInputState extends State<ChatTextInput> {
     if (e is MyException) _m[1] = e.toString();
     showDialog(
       context: context,
-      builder: (BuildContext context) => NotificationPopup(
+      builder: (BuildContext context) => ErrorPopup(
         title: _m[0],
         body: _m[1],
       ),
@@ -341,14 +353,13 @@ class ImageChatItem extends StatelessWidget {
 }
 
 class ChatItem extends StatelessWidget {
-  ChatItem(
-      {required this.message,
-      required this.user,
-      required this.size,
-      this.isSender = false});
+  ChatItem({
+    required this.message,
+    required this.size,
+    this.isSender = false,
+  });
   final isSender;
-  final String message;
-  final User user;
+  final Message message;
   final Size size;
   @override
   Widget build(BuildContext context) {
@@ -376,7 +387,7 @@ class ChatItem extends StatelessWidget {
                 color: isSender ? WeTrekColors.darkPurple1 : WeTrekColors.blue2,
               ),
               child: Text(
-                message,
+                message.message,
                 style: TextStyle(
                   color: Colors.white,
                   height: 20 / 14,
@@ -395,8 +406,8 @@ class ChatItem extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  user.avatar,
+                child: Image.network(
+                  message.from.picture.small,
                   width: 28,
                   height: 28,
                 ),

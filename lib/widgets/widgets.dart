@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
 class MyButton extends StatelessWidget {
@@ -18,6 +23,8 @@ class MyButton extends StatelessWidget {
         height: isLarge ? 52 : 44,
         alignment: Alignment.center,
         width: double.infinity,
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: color,
@@ -37,6 +44,19 @@ class MyButton extends StatelessWidget {
                   height: 17 / 13,
                 ),
         ),
+      ),
+    );
+  }
+}
+
+class BottomLoader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        height: 24,
+        width: 24,
+        child: CircularProgressIndicator(strokeWidth: 1.5),
       ),
     );
   }
@@ -162,14 +182,16 @@ class ReviewBar extends StatelessWidget {
 class MyAppBarNavigation extends StatelessWidget {
   const MyAppBarNavigation({
     Key? key,
-    required this.onPressed,
-    this.rightIcon = Icons.filter_list,
+    this.onPressed,
+    this.onBackPressed,
+    this.rightIcon,
     this.fontColor = const Color(0xff454F63),
   }) : super(key: key);
 
   final Color fontColor;
-  final VoidCallback onPressed;
-  final IconData rightIcon;
+  final VoidCallback? onPressed;
+  final VoidCallback? onBackPressed;
+  final IconData? rightIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -179,13 +201,22 @@ class MyAppBarNavigation extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back, color: fontColor),
+            onTap: () => onBackPressed == null
+                ? Navigator.pop(context)
+                : onBackPressed!(),
+            child: Container(
+              width: 30,
+              height: 30,
+              color: Colors.transparent,
+              child: Icon(Icons.arrow_back, color: fontColor),
+            ),
           ),
-          GestureDetector(
-            onTap: onPressed,
-            child: Icon(rightIcon, color: fontColor),
-          ),
+          rightIcon == null
+              ? GestureDetector(
+                  onTap: onPressed,
+                  child: Icon(rightIcon, color: fontColor),
+                )
+              : Container(),
         ],
       ),
     );
@@ -305,8 +336,64 @@ class MovementPainter extends CustomPainter {
   }
 }
 
-class NotificationPopup extends StatelessWidget {
-  NotificationPopup({
+class Popup extends StatelessWidget {
+  Popup({
+    required this.title,
+    required this.body,
+    this.buttonsWidget,
+  });
+  final String title;
+  final String body;
+  final Widget? buttonsWidget;
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        color: Colors.white60,
+        alignment: Alignment.center,
+        child: Container(
+          width: MediaQuery.of(context).size.width - 48,
+//        height: 200,
+          constraints: BoxConstraints(
+            minHeight: 200,
+            maxHeight: 330,
+          ),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 16,
+            bottom: 24,
+          ),
+          decoration: BoxDecoration(
+            color: Color(0xff2A2E43),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(title, style: TextStyles.large),
+              SizedBox(height: 15),
+              Container(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  body,
+                  style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
+                ),
+              ),
+              SizedBox(height: 23),
+              Container(
+                child: buttonsWidget,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ConfirmPopup extends StatelessWidget {
+  ConfirmPopup({
     required this.title,
     required this.body,
   });
@@ -314,74 +401,152 @@ class NotificationPopup extends StatelessWidget {
   final String body;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white60,
-      alignment: Alignment.center,
-      child: Container(
-        width: MediaQuery.of(context).size.width - 48,
-//        height: 200,
-        constraints: BoxConstraints(
-          minHeight: 200,
-          maxHeight: 330,
-        ),
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 16,
-          bottom: 24,
-        ),
-        decoration: BoxDecoration(
-          color: Color(0xff2A2E43),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(title, style: TextStyles.large),
-            SizedBox(height: 15),
-            Container(
-              alignment: Alignment.topLeft,
-              child: Text(
-                body,
-                style: TextStyle(color: Color(0xaeffffff), height: 22 / 14),
-              ),
-            ),
-            SizedBox(height: 23),
-            Container(
+    return Popup(
+      title: title,
+      body: body,
+      buttonsWidget: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              width: 52,
               height: 52,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(112),
-                        color: Color(0xffC840E9),
-                      ),
-                      child: Icon(Icons.close, color: Colors.white, size: 24),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Container(
-                    width: 52,
-                    height: 52,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(112),
-                      color: Color(0xff3ACCE1),
-                    ),
-                    child: Icon(Icons.done, color: Colors.white, size: 24),
-                  ),
-                ],
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(112),
+                color: Color(0xffC840E9),
               ),
+              child: Icon(Icons.close, color: Colors.white, size: 24),
             ),
-          ],
+          ),
+          SizedBox(width: 8),
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(112),
+              color: Color(0xff3ACCE1),
+            ),
+            child: Icon(Icons.done, color: Colors.white, size: 24),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DialogPopup extends StatelessWidget {
+  DialogPopup({
+    required this.title,
+    required this.body,
+    this.okText = 'OK',
+    this.cancelText = 'CANCEL',
+    this.okFunction,
+  });
+  final String title;
+  final String body;
+  final String okText;
+  final String cancelText;
+  final VoidCallback? okFunction;
+  @override
+  Widget build(BuildContext context) {
+    return Popup(
+      title: title,
+      body: body,
+      buttonsWidget: Column(
+        children: [
+          MyButton(
+            okText,
+            onTap: okFunction,
+            color: Color(0xff3ACCE1),
+          ),
+          MyButton(
+            cancelText,
+            onTap: () {
+              Navigator.pop(context);
+            },
+            color: Color(0xff454F63),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ErrorPopup extends StatelessWidget {
+  ErrorPopup({
+    required this.title,
+    required this.body,
+    this.text = 'OK',
+//    this.callbackFunction,
+  });
+  final String title;
+  final String body;
+  final String text;
+//  final VoidCallback? callbackFunction;
+  @override
+  Widget build(BuildContext context) {
+    return Popup(
+      title: title,
+      body: body,
+      buttonsWidget: MyButton(
+        text,
+        onTap: () {
+          Navigator.pop(context);
+        },
+        color: Color(0xff3ACCE1),
+      ),
+    );
+  }
+}
+
+class FollowButton extends StatefulWidget {
+  FollowButton(this.user);
+  final User user;
+
+  @override
+  _FollowButtonState createState() => _FollowButtonState();
+}
+
+class _FollowButtonState extends State<FollowButton> {
+  late bool isFollowing;
+  @override
+  initState() {
+    List<int> followers =
+        BlocProvider.of<AuthenticationBloc>(context).state.user?.following ??
+            [];
+    isFollowing = followers.contains(widget.user.id);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        UserRepository userRepository =
+            RepositoryProvider.of<UserRepository>(context);
+        isFollowing = await userRepository.follow(widget.user);
+      },
+      child: Container(
+        height: 32,
+        alignment: Alignment.center,
+        width: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: isFollowing ? Color(0xffE9EBEF) : Color(0xff665EFF),
+        ),
+        child: Text(
+          isFollowing ? 'UNFOLLOW' : 'FOLLOW',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: isFollowing ? Color(0xff78849E) : Colors.white,
+            height: 17 / 13,
+          ),
         ),
       ),
     );

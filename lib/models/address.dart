@@ -1,78 +1,133 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:wetrek/models/model.dart';
-import 'field.dart';
-import 'geometry.dart';
-import 'plus_code.dart';
+import 'Match.dart';
+import 'Match.dart';
+import 'Match.dart';
 
 @immutable
 class Address extends Model {
 
   const Address({
-    required this.addressComponents,
-    required this.formattedAddress,
-    required this.geometry,
+    required this.description,
     required this.placeId,
-    required this.plusCode,
-    required this.types,
+    required this.reference,
+    this.matchedSubstrings,
+    this.structuredFormatting,
+    this.terms,
+    this.types,
   });
 
-  final List<Field> addressComponents;
-  final String formattedAddress;
-  final Geometry geometry;
+  final String description;
   final String placeId;
-  final PlusCode plusCode;
-  final List<String> types;
+  final String reference;
+  final List<Match>? matchedSubstrings;
+  final StructuredFormatting? structuredFormatting;
+  final List<Match>? terms;
+  final List<String>? types;
 
   factory Address.fromJson(Map<String,dynamic> json) => Address(
-    addressComponents: (json['address_components'] as List? ?? []).map((e) => e as Field).toList(),
-    formattedAddress: json['formatted_address'] as String,
-    geometry: json['geometry'] as Geometry,
+    description: json['description'] as String,
     placeId: json['place_id'] as String,
-    plusCode: PlusCode.fromJson(json['plus_code'] as Map<String, dynamic>),
-    types: (json['types'] as List? ?? []).map((e) => e as String).toList()
+    reference: json['reference'] as String,
+    matchedSubstrings: json['matched_substrings'] != null ? (json['matched_substrings'] as List? ?? []).map((e) => e as Match).toList() : null,
+    structuredFormatting: json['structured_formatting'] != null ? StructuredFormatting.fromJson(json['structured_formatting'] as Map<String, dynamic>) : null,
+    terms: json['terms'] != null ? (json['terms'] as List? ?? []).map((e) => e as Match).toList() : null,
+//    types: json['types'] != null ? (json['types'] as List? ?? []).map((e) => e as String).toList() : null
   );
   
   Map<String, dynamic> toJson() => {
-    'address_components': addressComponents.map((e) => e.toString()).toList(),
-    'formatted_address': formattedAddress,
-    'geometry': geometry,
+    'description': description,
     'place_id': placeId,
-    'plus_code': plusCode.toJson(),
-    'types': types.map((e) => e.toString()).toList()
+    'reference': reference,
+    'matched_substrings': matchedSubstrings?.map((e) => e.toString()).toList(),
+    'structured_formatting': structuredFormatting?.toJson(),
+    'terms': terms?.map((e) => e.toString()).toList(),
+    'types': types?.map((e) => e.toString()).toList()
   };
 
   Address clone() => Address(
-    addressComponents: addressComponents.toList(),
-    formattedAddress: formattedAddress,
-    geometry: geometry,
+    description: description,
     placeId: placeId,
-    plusCode: plusCode.clone(),
-    types: types.toList()
+    reference: reference,
+    matchedSubstrings: matchedSubstrings?.toList(),
+    structuredFormatting: structuredFormatting?.clone(),
+    terms: terms?.toList(),
+    types: types?.toList()
   );
 
 
   Address copyWith({
-    List<Field>? addressComponents,
-    String? formattedAddress,
-    Geometry? geometry,
+    String? description,
     String? placeId,
-    PlusCode? plusCode,
+    String? reference,
+    List<Match>? matchedSubstrings,
+    StructuredFormatting? structuredFormatting,
+    List<Match>? terms,
     List<String>? types
   }) => Address(
-    addressComponents: addressComponents ?? this.addressComponents,
-    formattedAddress: formattedAddress ?? this.formattedAddress,
-    geometry: geometry ?? this.geometry,
+    description: description ?? this.description,
     placeId: placeId ?? this.placeId,
-    plusCode: plusCode ?? this.plusCode,
+    reference: reference ?? this.reference,
+    matchedSubstrings: matchedSubstrings ?? this.matchedSubstrings,
+    structuredFormatting: structuredFormatting ?? this.structuredFormatting,
+    terms: terms ?? this.terms,
     types: types ?? this.types,
   );
 
   @override
   bool operator ==(Object other) => identical(this, other)
-    || other is Address && addressComponents == other.addressComponents && formattedAddress == other.formattedAddress && geometry == other.geometry && placeId == other.placeId && plusCode == other.plusCode && types == other.types;
+    || other is Address && description == other.description && placeId == other.placeId && reference == other.reference && matchedSubstrings == other.matchedSubstrings && structuredFormatting == other.structuredFormatting && terms == other.terms && types == other.types;
 
   @override
-  int get hashCode => addressComponents.hashCode ^ formattedAddress.hashCode ^ geometry.hashCode ^ placeId.hashCode ^ plusCode.hashCode ^ types.hashCode;
+  int get hashCode => description.hashCode ^ placeId.hashCode ^ reference.hashCode ^ matchedSubstrings.hashCode ^ structuredFormatting.hashCode ^ terms.hashCode ^ types.hashCode;
+}
+
+@immutable
+class StructuredFormatting {
+
+  const StructuredFormatting({
+    required this.mainText,
+    required this.mainTextMatchedSubstrings,
+    required this.secondaryText,
+  });
+
+  final String mainText;
+  final List<Match> mainTextMatchedSubstrings;
+  final String secondaryText;
+
+  factory StructuredFormatting.fromJson(Map<String,dynamic> json) => StructuredFormatting(
+    mainText: json['main_text'] as String,
+    mainTextMatchedSubstrings: (json['main_text_matched_substrings'] as List? ?? []).map((e) => e as Match).toList(),
+    secondaryText: json['secondary_text'] as String
+  );
+  
+  Map<String, dynamic> toJson() => {
+    'main_text': mainText,
+    'main_text_matched_substrings': mainTextMatchedSubstrings.map((e) => e.toString()).toList(),
+    'secondary_text': secondaryText
+  };
+
+  StructuredFormatting clone() => StructuredFormatting(
+    mainText: mainText,
+    mainTextMatchedSubstrings: mainTextMatchedSubstrings.toList(),
+    secondaryText: secondaryText
+  );
+
+
+  StructuredFormatting copyWith({
+    String? mainText,
+    List<Match>? mainTextMatchedSubstrings,
+    String? secondaryText
+  }) => StructuredFormatting(
+    mainText: mainText ?? this.mainText,
+    mainTextMatchedSubstrings: mainTextMatchedSubstrings ?? this.mainTextMatchedSubstrings,
+    secondaryText: secondaryText ?? this.secondaryText,
+  );
+
+  @override
+  bool operator ==(Object other) => identical(this, other)
+    || other is StructuredFormatting && mainText == other.mainText && mainTextMatchedSubstrings == other.mainTextMatchedSubstrings && secondaryText == other.secondaryText;
+
+  @override
+  int get hashCode => mainText.hashCode ^ mainTextMatchedSubstrings.hashCode ^ secondaryText.hashCode;
 }

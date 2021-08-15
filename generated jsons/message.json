@@ -1,7 +1,8 @@
 {
     "message":"this is a string",
-    "from": "$User",
+    "from": "$Messagable",
     "created_at": "@datetime",
     "modified_at": "@datetime",
-    "seen_at": "@datetime"
+    "seen_by?": [2,6],
+    "seen_at?": ["@datetime"]
 }

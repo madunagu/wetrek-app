@@ -1,48 +1,36 @@
 import 'package:equatable/equatable.dart';
 import 'package:wetrek/models/model.dart';
 
-abstract class SearchState extends Equatable {
-  const SearchState();
+enum SearchStatus { initial, success, failure }
 
-  @override
-  List<Object> get props => [];
-}
-
-class SearchInitial extends SearchState {}
-
-class SearchFailure extends SearchState {}
-
-class SearchSuccess extends SearchState {
-  final List<Model> models;
-  final int currentPage;
-  final int totalPages;
-
-  const SearchSuccess({
-    required this.models,
-    required this.currentPage,
-    required this.totalPages,
+class SearchState extends Equatable {
+  const SearchState({
+    this.status = SearchStatus.initial,
+    this.models = const <Model>[],
+    this.hasReachedMax = false,
   });
 
-  SearchSuccess copyWith({
+  final SearchStatus status;
+  final List<Model> models;
+  final bool hasReachedMax;
+
+  SearchState copyWith({
+    SearchStatus? status,
     List<Model>? models,
-    int? totalPages,
-    int? currentPage,
+    bool? hasReachedMax,
   }) {
-    return SearchSuccess(
+    return SearchState(
+      status: status ?? this.status,
       models: models ?? this.models,
-      currentPage: currentPage ?? this.currentPage,
-      totalPages: totalPages ?? this.totalPages,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
   @override
-  List<Object> get props => [
-        models,
-        currentPage,
-        totalPages,
-      ];
+  String toString() {
+    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, posts: ${models.length} }''';
+  }
 
   @override
-  String toString() =>
-      'ListSuccess { Lists: ${models.length}, total Pages: $totalPages ,Current Pages $currentPage }';
+  List<Object> get props => [status, models, hasReachedMax];
 }

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/trek_screen.dart';
-import '../widgets/widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
 import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
+
+import 'package:timeago/timeago.dart' as timeago;
 
 class TripsScreen extends StatefulWidget {
   @override
@@ -24,7 +29,6 @@ class TripsScreen extends StatefulWidget {
 
 class _TripsScreenState extends State<TripsScreen>
     with SingleTickerProviderStateMixin {
-  List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
   late final TabController tabController;
 
   @override
@@ -47,8 +51,8 @@ class _TripsScreenState extends State<TripsScreen>
       body: TabBarView(
         controller: tabController,
         children: [
-          BlocProvider<ListBloc>(
-            create: (context) => ListBloc(
+          BlocProvider<SearchBloc>(
+            create: (context) => SearchBloc(
                 repository: TrekRepository(
                     RepositoryProvider.of<AuthenticationRepository>(context)
                         .token!)),
@@ -97,14 +101,15 @@ class TrekList extends StatefulWidget {
 class _TrekListState extends State<TrekList> {
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late SearchBloc _searchBloc;
 
   @override
   void initState() {
     super.initState();
+
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
-    _postBloc.add(ListFetched());
+    _searchBloc = context.read<SearchBloc>();
+    _searchBloc.add(SearchFetched());
   }
 
   @override
@@ -114,67 +119,58 @@ class _TrekListState extends State<TrekList> {
   }
 
   void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void onSearch(String query) {
-    if (query.length > 3) {
-      _postBloc.add(ListFetched(query: query));
-    }
+    _searchBloc.add(SearchFetched(query: query));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
-      builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
-            );
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Color(0xffF7F7FA),
+          ],
+        ),
+      ),
+      child: BlocBuilder<SearchBloc, SearchState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case SearchStatus.failure:
+              return const Center(child: Text('failed to fetch posts'));
+            case SearchStatus.success:
+              if (state.models.isEmpty) {
+                return const Center(child: Text('no posts'));
+              }
+              return ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.models.length
+                      ? BottomLoader()
+                      : SingleTrek(trek: state.models[index] as Trek);
+                },
+                itemCount: state.hasReachedMax
+                    ? state.models.length
+                    : state.models.length + 1,
+                controller: _scrollController,
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
           }
-          return this.listTreks(state.models);
-        }
-        return Container();
-      },
-    );
-  }
-
-  Widget listTreks(treks) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xffF7F7FA),
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [for (Trek trek in treks) SingleTrek(trek: trek)],
-        ),
+        },
       ),
     );
   }
@@ -256,7 +252,7 @@ class SingleTrek extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          trek.startingAt.toString(),
+          readableTime(trek.startingAt),
           style: TextStyles.darkMinor.copyWith(
             color: Color(0x9278849E),
           ),
@@ -268,7 +264,7 @@ class SingleTrek extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TrekScreen(trek: TrekRepository.dummy()),
+                builder: (context) => TrekScreen(trek: trek),
               ),
             );
           },
@@ -277,4 +273,30 @@ class SingleTrek extends StatelessWidget {
       ],
     );
   }
+}
+
+List<String> kMonths = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+
+String readableTime(DateTime time) {
+  DateTime timeNow = DateTime.now();
+  String result = '';
+  if (timeNow.difference(time) > Duration(days: 365)) result += "${time.year} ";
+  if (timeNow.difference(time) > Duration(days: 10))
+    result += "${kMonths[time.month -1]} ${time.day}";
+  else
+    return timeago.format(time);
+  return result;
 }

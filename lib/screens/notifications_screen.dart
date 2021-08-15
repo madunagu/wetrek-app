@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/index.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/notification_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
+
+import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationScreen extends StatelessWidget {
   static MaterialPageRoute route() {
@@ -25,11 +31,10 @@ class NotificationScreen extends StatelessWidget {
         rightIcon: Icons.search,
       ),
       body: BlocProvider(
-        create: (BuildContext context) => ListBloc(
-            repository: NotificationRepository(
-                RepositoryProvider.of<AuthenticationRepository>(context)
-                    .token!))
-          ..add(ListFetched()),
+        create: (BuildContext context) => SearchBloc(
+          repository: NotificationRepository(
+              RepositoryProvider.of<AuthenticationRepository>(context).token!),
+        )..add(SearchFetched()),
         child: Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width,
@@ -53,14 +58,13 @@ class _NotificationListState extends State<NotificationList> {
   List<Message> messages = [];
 
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late SearchBloc _searchBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
+    _searchBloc = BlocProvider.of<SearchBloc>(context);
   }
 
   @override
@@ -70,86 +74,61 @@ class _NotificationListState extends State<NotificationList> {
   }
 
   void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void onSearch(String query) {
     if (query.length > 3) {
-      _postBloc.add(ListFetched());
+      _searchBloc.add(SearchFetched(query: query));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
+    return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
+        switch (state.status) {
+          case SearchStatus.failure:
+            return const Center(child: Text('failed to fetch posts'));
+          case SearchStatus.success:
+            if (state.models.isEmpty) {
+              return const Center(child: Text('no posts'));
+            }
+            return ListView.builder(
+              padding: EdgeInsets.only(bottom: 60, top: 40),
+              itemBuilder: (BuildContext context, int index) {
+                return index >= state.models.length
+                    ? BottomLoader()
+                    : NotificationListItem(
+                        notification: state.models[index] as Message,
+                      );
+              },
+              itemCount: state.hasReachedMax
+                  ? state.models.length
+                  : state.models.length + 1,
+              controller: _scrollController,
             );
-          }
-          return this.chatMessages(state.models);
+          default:
+            return const Center(child: CircularProgressIndicator());
         }
-        return Container();
       },
-    );
-  }
-
-  Widget chatMessages(messages) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Column(
-        children: [
-          for (var i = 0; i < messages.length; i++)
-            NotificationListItem(
-              message: messages[i].message,
-              name: messages[i].from.name,
-              isNew: true,
-              imageURL: messages[i].from.avatar,
-            ),
-        ],
-      ),
     );
   }
 }
 
 class NotificationListItem extends StatelessWidget {
   NotificationListItem({
-    required this.imageURL,
-    required this.name,
-    required this.message,
-    required this.isNew,
+    required this.notification
   });
-  final String imageURL;
-  final String name;
-  final String message;
-  final bool isNew;
+  final Message notification;
 
-  factory NotificationListItem.random() {
-    return NotificationListItem(
-      name: 'Marie Winter',
-      imageURL: 'images/avatar3.jpg',
-      message: 'If you\'re offered a seat on a rocket ship',
-      isNew: true,
-    );
-  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -158,13 +137,15 @@ class NotificationListItem extends StatelessWidget {
         border: Border(
           bottom: BorderSide(width: 1.0, color: Color(0xffF4F4F6)),
         ),
+//        color: notification.readAt ? Colors.white: Color(0xff665EFF),
+//        borderRadius: notification.readAt
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.asset(
-              imageURL,
+              notification.from.picture.small,
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -181,14 +162,14 @@ class NotificationListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Text(name, style: TextStyles.darkNormal),
-                      Text('12min ago', style: TextStyles.darkMinor),
+                      Text(notification.from.name, style: TextStyles.darkNormal),
+                      Text(timeago.format(notification.createdAt), style: TextStyles.darkMinor),
                     ],
                   ),
                 ),
                 SizedBox(height: 3),
                 Text(
-                  message,
+                  notification.message,
                   style: TextStyles.base.copyWith(
                     color: Color(0xff78849E),
                   ),

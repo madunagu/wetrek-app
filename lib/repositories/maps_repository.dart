@@ -6,6 +6,7 @@ import 'package:wetrek/models/detail.dart';
 import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/leg.dart';
 import 'package:wetrek/models/location.dart';
+import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/polyline.dart';
 import 'package:wetrek/models/step.dart';
 import 'package:wetrek/models/track.dart';
@@ -13,37 +14,37 @@ import 'package:wetrek/models/waypoint.dart';
 import 'package:wetrek/network/api.dart';
 
 class MapsRepository {
+  static final String _mapsKey = 'AIzaSyAXYH6jQZSQ6vr6WWgTVpx_Bph2TzEYOY8';
   static Future<Direction> getDirections(
     Address origin,
     Address destination,
   ) async {
-    return MapsRepository.dummy();
+//    return MapsRepository.dummy();
     final Map<String, dynamic> res = await API.getExternal(
       "https://maps.googleapis.com/maps/api/directions/json",
       params: {
         'origin': 'place_id:' + origin.placeId,
         'destination': 'place_id:' + destination.placeId,
-        'key': 'myapikey',
+        'key': _mapsKey,
       },
     );
     return Direction.fromJson(res);
   }
 
-//  Future<Address> getAddress(
-//      String q,
-//      ) async {
-//
+  Future<Paginated<Address>> getAddress(
+    String q,
+  ) async {
 //    return DirectionsRepository.dummy();
-//    final Map<String, dynamic> res = await API.getExternal(
-//      "https://maps.googleapis.com/maps/api/directions/json",
-//      params: {
-//        'origin': 'place_id:' + origin.placeId,
-//        'destination': 'place_id:' + destination.placeId,
-//        'key': 'myapikey',
-//      },
-//    );
-//    return Direction.fromJson(res);
-//  }
+    final Map<String, dynamic> res = await API.getExternal(
+      "https://maps.googleapis.com/maps/api/place/findplacefromtext/output",
+      params: {
+//        'locationbias ': 'point:lat,lng',
+        'input ': q,
+        'key': _mapsKey,
+      },
+    );
+    return Paginated<Address>.fromJson(res);
+  }
 
   static Direction dummy() {
     return Direction(geocodedWaypoints: [

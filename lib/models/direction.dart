@@ -16,8 +16,8 @@ class Direction {
   final String status;
 
   factory Direction.fromJson(Map<String,dynamic> json) => Direction(
-    geocodedWaypoints: (json['geocoded_waypoints'] as List? ?? []).map((e) => e as Waypoint).toList(),
-    routes: (json['routes'] as List? ?? []).map((e) => e as Track).toList(),
+    geocodedWaypoints: (json['geocoded_waypoints'] as List? ?? []).map((e) => Waypoint.fromJson(e)).toList(),
+    routes: (json['routes'] as List? ?? []).map((e) => Track.fromJson(e)).toList(),
     status: json['status'] as String
   );
   

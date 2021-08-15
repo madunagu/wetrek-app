@@ -3,7 +3,6 @@ import 'location.dart';
 
 @immutable
 class Bounds {
-
   const Bounds({
     required this.northeast,
     required this.southwest,
@@ -12,33 +11,27 @@ class Bounds {
   final Location northeast;
   final Location southwest;
 
-  factory Bounds.fromJson(Map<String,dynamic> json) => Bounds(
-    northeast: json['northeast'] as Location,
-    southwest: json['southwest'] as Location
-  );
-  
-  Map<String, dynamic> toJson() => {
-    'northeast': northeast,
-    'southwest': southwest
-  };
+  factory Bounds.fromJson(Map<String, dynamic> json) => Bounds(
+        northeast: Location.fromJson(json['northeast']),
+        southwest: Location.fromJson(json['southwest']),
+      );
 
-  Bounds clone() => Bounds(
-    northeast: northeast,
-    southwest: southwest
-  );
+  Map<String, dynamic> toJson() =>
+      {'northeast': northeast, 'southwest': southwest};
 
+  Bounds clone() => Bounds(northeast: northeast, southwest: southwest);
 
-  Bounds copyWith({
-    Location? northeast,
-    Location? southwest
-  }) => Bounds(
-    northeast: northeast ?? this.northeast,
-    southwest: southwest ?? this.southwest,
-  );
+  Bounds copyWith({Location? northeast, Location? southwest}) => Bounds(
+        northeast: northeast ?? this.northeast,
+        southwest: southwest ?? this.southwest,
+      );
 
   @override
-  bool operator ==(Object other) => identical(this, other)
-    || other is Bounds && northeast == other.northeast && southwest == other.southwest;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Bounds &&
+          northeast == other.northeast &&
+          southwest == other.southwest;
 
   @override
   int get hashCode => northeast.hashCode ^ southwest.hashCode;

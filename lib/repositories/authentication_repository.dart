@@ -14,9 +14,12 @@ class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
   late String _token;
 
+
   Stream<AuthenticationStatus> get status async* {
-    User? user = await getUser();
-    if (user != null) {
+    String? token = await storage.read(key: 'token');
+//    token = 'akkyyad12kidlz';
+    if (token != null) {
+      _token = token;
       yield AuthenticationStatus.authenticated;
     } else {
       yield AuthenticationStatus.unauthenticated;
@@ -25,17 +28,36 @@ class AuthenticationRepository {
   }
 
   Future<void> logIn({
-    required String username,
+    required String email,
     required String password,
   }) async {
     final Map<String, dynamic> res = await API.postWithoutToken(
       '/login',
-      {'email': username, 'password': password},
+      {'email': email, 'password': password},
     );
     log(res.toString());
     await saveToken(res['token']);
 
-//    await Future.delayed(const Duration(milliseconds: 300));
+    _controller.add(AuthenticationStatus.authenticated);
+  }
+
+  Future<void> signUp({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
+    final Map<String, dynamic> res = await API.postWithoutToken(
+      '/register',
+      {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'password': password
+      },
+    );
+    log(res.toString());
+    await saveToken(res['token']);
     _controller.add(AuthenticationStatus.authenticated);
   }
 
@@ -45,6 +67,7 @@ class AuthenticationRepository {
   }
 
   Future<void> saveToken(String token) async {
+    _token = token;
     await storage.write(key: 'token', value: token);
     return;
   }
@@ -57,15 +80,13 @@ class AuthenticationRepository {
   void dispose() => _controller.close();
 
   Future<User?> getUser() async {
-//    String? userStr = await storage.read(key: 'user');
-//    if (userStr != null) {
-//      return User.fromJson(jsonDecode(userStr));
-//    }
-    log('Get User Called');
-    String? t = await storage.read(key: 'token');
-    if (t == null) return null;
-    _token = t;
-    return UserRepository(_token).current();
+//    return UserRepository.dummy();
+    String? token = await storage.read(key: 'token');
+    return await UserRepository(token).current();
+  }
+
+  void refresh(User u){
+    _controller.add(AuthenticationStatus.authenticated);
   }
 
   String? get token => _token;

@@ -1,20 +1,30 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/controllers/home_controller.dart';
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/bounds.dart';
 import 'package:wetrek/models/direction.dart';
+import 'package:wetrek/models/location.dart';
+import 'package:wetrek/models/paginated.dart';
+import 'package:wetrek/models/parameters.dart';
+import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/address_repository.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
+import 'package:wetrek/screens/login_screen.dart';
+import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/app_navigation_bar.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 import 'package:wetrek/widgets/widgets.dart';
@@ -30,48 +40,150 @@ class MapScreen extends StatefulWidget {
   _MapScreenState createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> with GoogleMapMixin {
-  late final GoogleMapController mapController;
-  Completer<GoogleMapController> _controller = Completer();
+class _MapScreenState extends State<MapScreen> {
   late final HomeController homeController;
-  late final String mapStyle;
-  late StreamSubscription<HomePageStatus> sub;
-  late StreamSubscription<Exception> errorSub;
-
-//  late final GoogleMapController _googleMapController;
-  Map<MarkerId, Marker> markers = {};
-  Map<PolylineId, Polyline> polyLines = {};
+  late final User user;
   @override
   void initState() {
     homeController = HomeController();
-    errorSub = homeController.errorMessageStream.listen(showError);
+
+    user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    homeController.dispose();
+    super.dispose();
+  }
+
+  void showUserLocation() {
+    homeController.setLocation(user.locations.last);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Size view = MediaQuery.of(context).size;
+    return BlocProvider<SearchBloc>(
+      create: (context) => SearchBloc(
+        repository: TrekRepository(
+            RepositoryProvider.of<AuthenticationRepository>(context).token!),
+      ),
+      child: Scaffold(
+          drawer: AppNavigationDrawer(),
+          bottomSheet: BottomSheetContainer(controller: homeController),
+          extendBodyBehindAppBar: true,
+          primary: true,
+          appBar: PlaceSearchBar(controller: homeController),
+          floatingActionButton: InkWell(
+            onTap: showUserLocation,
+            child: LocationButton(),
+          ),
+          body: GoogleMapContainer(controller: homeController)),
+    );
+  }
+}
+
+class GoogleMapContainer extends StatefulWidget {
+  GoogleMapContainer({required this.controller});
+  final HomeController controller;
+  @override
+  _GoogleMapContainerState createState() => _GoogleMapContainerState();
+}
+
+class _GoogleMapContainerState extends State<GoogleMapContainer>
+    with GoogleMapMixin {
+  late final String _mapStyle;
+  late StreamSubscription<HomePageStatus> _sub;
+  late StreamSubscription<Exception> _errorSub;
+  late StreamSubscription<Location> _locationSub;
+
+  late final GoogleMapController _mapController;
+  Completer<GoogleMapController> _controller = Completer();
+
+  Map<MarkerId, Marker> _markers = {};
+  Map<PolylineId, Polyline> _polyLines = {};
+
+  @override
+  void initState() {
+    _errorSub = widget.controller.errorMessageStream.listen(showError);
+    getCloseTreks();
     super.initState();
   }
 
   showError(Exception e) {
+    if (e is AuthenticationException) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => DialogPopup(
+          title: 'Error Occurred!',
+          body: e.toString(),
+          okFunction: () => Navigator.of(context).push(LoginScreen.route()),
+          okText: 'LOGOUT',
+        ),
+      );
+    }
     showDialog(
       context: context,
-      builder: (BuildContext context) => NotificationPopup(
+      builder: (BuildContext context) => ErrorPopup(
         title: 'Error Occurred!',
         body: e.toString(),
       ),
     );
   }
 
-  @override
-  void dispose() {
-    sub.cancel();
-    errorSub.cancel();
-    mapController.dispose();
-    homeController.dispose();
-    super.dispose();
-  }
-
   void onMapCreated(GoogleMapController controller) async {
     _controller.complete(controller);
     log('map created');
-    mapController = await _controller.future;
-    sub = homeController.homePageStatus.listen(refreshMap);
+    _mapController = await _controller.future;
+    _sub = widget.controller.homePageStatus.listen(refreshMap);
+  }
+
+  getCloseTreks() async {
+    try {
+      String token =
+          RepositoryProvider.of<AuthenticationRepository>(context).token!;
+      Paginated<Trek> treks = await TrekRepository(token).list(Parameters());
+      BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+          ImageConfiguration(size: Size.fromWidth(63)), 'assets/marker.png');
+      for (Trek trek in treks.data) {
+        MarkerId markerId = MarkerId(trek.createdAt.toString());
+        _markers[markerId] = Marker(
+          markerId: markerId,
+          onTap: () {
+            Navigator.push(context, TrekScreen.route(trek));
+          },
+          icon: customIcon,
+          infoWindow: InfoWindow(
+            title: trek.name,
+            snippet: trek.description,
+            onTap: () => Navigator.push(context, TrekScreen.route(trek)),
+          ),
+          position: (trek.locations == null || trek.locations!.isEmpty)
+              ? LatLng(
+                  trek.direction.routes.first.legs.first.startLocation.lat,
+                  trek.direction.routes.first.legs.first.startLocation.lng,
+                )
+              : LatLng(
+                  trek.locations!.last.lat,
+                  trek.locations!.last.lng,
+                ),
+        );
+      }
+
+      setState(() {});
+    } on Exception catch (e, _) {
+      print(_);
+      showError(e);
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    _errorSub.cancel();
+    _locationSub.cancel();
+    super.dispose();
   }
 
   void _onMapTap(LatLng point) {
@@ -82,30 +194,30 @@ class _MapScreenState extends State<MapScreen> with GoogleMapMixin {
 
   void refreshMap(HomePageStatus status) async {
     if (!_controller.isCompleted) {
-      showError(UnknownException(message: 'Google Maps Failure Occured'));
+      showError(UnknownException(message: 'Google Maps Failure Occurred'));
       return;
     }
     switch (status) {
       case HomePageStatus.creating:
         panCamera(
-          homeController.direction!.routes[0].bounds,
-          mapController,
+          widget.controller.direction!.routes[0].bounds,
+          _mapController,
         );
         setState(() {
-          Polyline poly = getPolyline(homeController.direction!);
-          polyLines[poly.polylineId] = poly;
-          markers.addAll(getMarkers(poly));
+          Polyline poly = getPolyline(widget.controller.direction!);
+          _polyLines[poly.polylineId] = poly;
+          _markers.addAll(getMarkers(poly));
         });
         break;
       case HomePageStatus.selecting:
         panCamera(
-          homeController.direction!.routes[0].bounds,
-          mapController,
+          widget.controller.direction!.routes[0].bounds,
+          _mapController,
         );
         setState(() {
-          Polyline poly = getPolyline(homeController.direction!);
-          polyLines[poly.polylineId] = poly;
-          markers.addAll(getMarkers(poly));
+          Polyline poly = getPolyline(widget.controller.direction!);
+          _polyLines[poly.polylineId] = poly;
+          _markers.addAll(getMarkers(poly));
         });
         break;
 
@@ -114,55 +226,42 @@ class _MapScreenState extends State<MapScreen> with GoogleMapMixin {
     }
   }
 
+  void panToLocation(Location location) {
+    LatLng lastLocation = LatLng(location.lat, location.lng);
+    _mapController.animateCamera(
+      CameraUpdate.newLatLng(lastLocation),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Size view = MediaQuery.of(context).size;
-    return BlocProvider<ListBloc>(
-      create: (context) => ListBloc(
-        repository: TrekRepository(
-            RepositoryProvider.of<AuthenticationRepository>(context).token!),
-      ),
-      child: Scaffold(
-        drawer: AppNavigationDrawer(),
-        bottomSheet: MapLowerSheet(
-          controller: homeController,
+    Size view = MediaQuery.of(context).size;
+    return Container(
+      height: view.height,
+      width: view.width,
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(6.4584252, 3.2721445),
+          zoom: 15,
         ),
-        appBar: PlaceSearchBar(
-          controller: homeController,
-        ),
-        body: Container(
-          height: view.height,
-          width: view.width,
-          color: Colors.white,
-          child: Container(
-            height: view.height,
-            width: view.width,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(6.4584252, 3.2721445),
-                zoom: 15,
-              ),
-              zoomControlsEnabled: false,
-              myLocationEnabled: true,
-              tiltGesturesEnabled: false,
-              compassEnabled: true,
-              scrollGesturesEnabled: true,
-              zoomGesturesEnabled: true,
-              onMapCreated: onMapCreated,
-              rotateGesturesEnabled: false,
-              markers: Set<Marker>.of(markers.values),
-              polylines: Set<Polyline>.of(polyLines.values),
-              onTap: _onMapTap,
-            ),
-          ),
-        ),
+        zoomControlsEnabled: false,
+        myLocationEnabled: true,
+        tiltGesturesEnabled: false,
+        compassEnabled: true,
+        scrollGesturesEnabled: true,
+        zoomGesturesEnabled: true,
+        onMapCreated: onMapCreated,
+        rotateGesturesEnabled: false,
+        markers: Set<Marker>.of(_markers.values),
+        polylines: Set<Polyline>.of(_polyLines.values),
+        onTap: _onMapTap,
       ),
     );
   }
 }
 
-class MapLowerSheet extends StatefulWidget {
-  const MapLowerSheet({
+class BottomSheetContainer extends StatefulWidget {
+  const BottomSheetContainer({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -170,10 +269,10 @@ class MapLowerSheet extends StatefulWidget {
   final HomeController controller;
 
   @override
-  _MapLowerSheetState createState() => _MapLowerSheetState();
+  _BottomSheetContainerState createState() => _BottomSheetContainerState();
 }
 
-class _MapLowerSheetState extends State<MapLowerSheet> {
+class _BottomSheetContainerState extends State<BottomSheetContainer> {
   HomePageStatus homePageStatus = HomePageStatus.initial;
   late StreamSubscription<HomePageStatus> sub;
   @override
@@ -212,20 +311,23 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
         );
       case HomePageStatus.creating:
         return MapSheet(
+          height: 297,
           child: TrekForm(controller: widget.controller),
         );
       case HomePageStatus.loading:
         return MapSheet(child: CircularProgressIndicator());
       case HomePageStatus.searching:
-        return Container();
-      case HomePageStatus.showing:
-        return PlacesNearby(
-          controller: widget.controller,
+        return Container(
+          height: 200,
+          child: PlacesNearby(
+            controller: widget.controller,
+          ),
         );
       case HomePageStatus.waiting:
         return MapSheet(child: TripInfo());
-      case HomePageStatus.selecting:
+      case HomePageStatus.showing:
         return MapSheet(
+          height: 125,
           child: MapSheetDetails(
             controller: widget.controller,
             child: PlaceDetailsPreview(
@@ -249,18 +351,19 @@ class _MapLowerSheetState extends State<MapLowerSheet> {
 }
 
 mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
-  Map<MarkerId, Marker> markAddress(Address address) {
-    //add markers on address update
-    MarkerId mId = MarkerId(address.placeId);
-    Marker m = Marker(
-      markerId: mId,
-      position: LatLng(
-        address.geometry.location.lat,
-        address.geometry.location.lng,
-      ),
-    );
-    return {mId: m};
-  }
+//  Map<MarkerId, Marker> markAddress(Address address) {
+//    //add markers on address update
+//    MarkerId mId = MarkerId(address.placeId);
+//    Marker m = Marker(
+//      markerId: mId,
+//
+//      position: LatLng(
+//        address.geometry.location.lat,
+//        address.geometry.location.lng,
+//      ),
+//    );
+//    return {mId: m};
+//  }
 
   Polyline getPolyline(Direction direction) {
     String base64Points = direction.routes[0].overviewPolyline.points;

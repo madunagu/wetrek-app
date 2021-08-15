@@ -26,6 +26,13 @@ class TrekScreen extends StatefulWidget {
 }
 
 class _TrekScreenState extends State<TrekScreen> {
+  late Trek trek;
+  @override
+  void initState() {
+    trek = widget.trek;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -39,15 +46,18 @@ class _TrekScreenState extends State<TrekScreen> {
             color: WeTrekColors.blue3,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(Icons.share,color: Colors.white,)),
+          child: Icon(
+            Icons.share,
+            color: Colors.white,
+          )),
       body: Container(
         width: size.width,
         height: size.height,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Image.asset(
-                'images/dark_map.png',
+              Image.network(
+                trek.picture.large,
                 width: size.width,
                 fit: BoxFit.cover,
               ),
@@ -64,10 +74,10 @@ class _TrekScreenState extends State<TrekScreen> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Text('ABULE ADO TREK', style: TextStyles.darkLarge),
+                      Text(trek.name, style: TextStyles.darkLarge),
                       SizedBox(height: 16),
                       Text(
-                        'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
+                        widget.trek.name,
                         style: TextStyles.darkMinor,
                       ),
                       SizedBox(height: 16),
@@ -79,11 +89,10 @@ class _TrekScreenState extends State<TrekScreen> {
                             Navigator.push(context, UsersScreen.route());
                           },
                           child: AvatarList(
-                            imgSrcs: [
-                              'images/avatar1.jpg',
-                              'images/avatar2.jpg',
-                              'images/avatar3.jpg',
-                            ],
+                            imgSrcs: trek.users
+                                    ?.map((e) => e.picture.small)
+                                    .toList() ??
+                                [],
                           ),
                         ),
                         icon: Icons.people_outline,
@@ -94,19 +103,21 @@ class _TrekScreenState extends State<TrekScreen> {
                         icon: Icons.chat_bubble_outline,
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(context, ChatScreen.route());
+                            Navigator.push(
+                              context,
+                              ChatScreen.route(widget.trek),
+                            );
                           },
                           child: AvatarList(
-                            imgSrcs: [
-                              'images/avatar1.jpg',
-                              'images/avatar2.jpg',
-                              'images/avatar3.jpg',
-                            ],
+                            imgSrcs: trek.users
+                                    ?.map((e) => e.picture.small)
+                                    .toList() ??
+                                [],
                           ),
                         ),
                       ),
                       TrekItem(
-                        subTitle: '5 pictures',
+                        subTitle: trek.direction.routes.first.summary,
                         title: 'Direction Details',
                         child: InkWell(
                           onTap: () {
@@ -117,7 +128,7 @@ class _TrekScreenState extends State<TrekScreen> {
                             height: 44,
                             width: size.width - 136,
                             child: Text(
-                              'Start At Address and move on to Address',
+                              "Start At ${trek.startAddress.description} and move on to ${trek.endAddress.description}",
                               style: TextStyles.darkMinor,
                             ),
                           ),

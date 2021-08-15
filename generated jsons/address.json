@@ -1,8 +1,18 @@
 {
-    "address_components" : "$[]Field",
-    "formatted_address" : "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
-    "geometry" :"$Geometry",
-    "place_id" : "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
-    "plus_code": "$plus_code",
-    "types" : [ "street_address" ]
- }
+    "description": "GTB Nagar, Delhi, India",
+    "place_id": "ChIJB8v08-39DDkRWPhGf6EnSHE",
+    "reference": "ChIJB8v08-39DDkRWPhGf6EnSHE",
+    "matched_substrings?": "$[]Match",
+    "structured_formatting?": {
+        "main_text": "GTB Nagar",
+        "main_text_matched_substrings":"$[]Match",
+        "secondary_text": "Delhi, India"
+    },
+    "terms?":"$[]Match",
+    "types?": [
+        "sublocality_level_1",
+        "sublocality",
+        "political",
+        "geocode"
+    ]
+}

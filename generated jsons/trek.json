@@ -1,0 +1,24 @@
+{
+    "id": 1,
+    "name": "Trek Name",
+    "start_address": "$Address",
+    "end_address": "$Address",
+    "start_address_id": 2,
+    "end_address_id": 1,
+    "repeat?": "skkd",
+    "users?": "$[]User",
+    "picture": "$Picture",
+    "direction": "$Direction",
+    "locations?": "$[]Location",
+    "starting_at": "@datetime",
+    "user_id": "9",
+
+    "description": "4",
+    "users_count": "4",
+    "pictures?": "$[]Picture",
+
+    "duration": "1235",
+    "ending_at?": "@datetime",
+    "created_at": "@datetime",
+    "updated_at": "@datetime"
+}

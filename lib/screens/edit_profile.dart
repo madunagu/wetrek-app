@@ -7,6 +7,7 @@ import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
+import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class EditProfile extends StatefulWidget {
@@ -20,9 +21,7 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile> {
   late User user;
-
-  late TextEditingController firstNameController;
-  late TextEditingController lastNameController;
+  late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
   late TextEditingController confirmPasswordController;
@@ -36,8 +35,8 @@ class _EditProfileState extends State<EditProfile> {
     super.initState();
   }
 
-  void logout() {
-    //TODO: implement logout
+  void logout() async {
+    RepositoryProvider.of<AuthenticationRepository>(context).logOut();
   }
 
   catchExceptions(e) {
@@ -45,7 +44,7 @@ class _EditProfileState extends State<EditProfile> {
     if (e is MyException) _m[1] = e.toString();
     showDialog(
       context: context,
-      builder: (BuildContext context) => NotificationPopup(
+      builder: (BuildContext context) => Popup(
         title: _m[0],
         body: _m[1],
       ),
@@ -53,8 +52,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void initControllers() {
-    firstNameController = TextEditingController(text: user.firstName);
-    lastNameController = TextEditingController(text: user.lastName);
+    nameController = TextEditingController(text: user.name);
+//    lastNameController = TextEditingController(text: user.lastName);
 
     emailController = TextEditingController(text: user.email);
     passwordController = TextEditingController();
@@ -62,21 +61,18 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void _submitForm() async {
-    UserRepository rep = UserRepository(
+    UserRepository userRepository = UserRepository(
         RepositoryProvider.of<AuthenticationRepository>(context).token);
-    User updatedUser = User(
+    User updatedUser = user.copyWith(
       email: emailController.value.text,
-      firstName: firstNameController.value.text,
-      lastName: lastNameController.value.text,
-      id: user.id,
-      avatar: '',
-      following: [],
-      token: '',
+      name: nameController.value.text,
     );
     try {
-      User u = await rep.update(updatedUser);
-      //TODO: refresh the auth repository
-    } catch (e) {
+      User u = await userRepository.update(updatedUser);
+      RepositoryProvider.of<AuthenticationRepository>(context).refresh(u);
+      Navigator.push(context, ProfileScreen.route(u));
+    } catch (e, _) {
+      print(_);
       catchExceptions(e);
     }
   }
@@ -97,12 +93,12 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
             SizedBox(height: 20),
-            Text('Maria Snow', style: TextStyles.darkLarge),
+            Text(user.name, style: TextStyles.darkLarge),
             Text('San Fransico CA', style: TextStyles.darkNormal),
             // Nick name or alias should be part of the profile
             SizedBox(height: 23),
-            MyInput(controller: firstNameController, hintText: 'First Name'),
-            MyInput(controller: lastNameController, hintText: 'Last Name'),
+            MyInput(controller: nameController, hintText: 'Name'),
+//            MyInput(controller: lastNameController, hintText: 'Last Name'),
             MyInput(controller: emailController, hintText: 'Email'),
             MyButton('SUBMIT', onTap: _submitForm),
           ],

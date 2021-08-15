@@ -25,10 +25,10 @@ class Track {
   final List<int> waypointOrder;
 
   factory Track.fromJson(Map<String,dynamic> json) => Track(
-    bounds: json['bounds'] as Bounds,
+    bounds:Bounds.fromJson(json['bounds']),
     copyrights: json['copyrights'] as String,
-    legs: (json['legs'] as List? ?? []).map((e) => e as Leg).toList(),
-    overviewPolyline: json['overview_polyline'] as Polyline,
+    legs: (json['legs'] as List? ?? []).map((e) => Leg.fromJson(e)).toList(),
+    overviewPolyline: Polyline.fromJson(json['overview_polyline']),
     summary: json['summary'] as String,
     warnings: (json['warnings'] as List? ?? []).map((e) => e as dynamic).toList(),
     waypointOrder: (json['waypoint_order'] as List? ?? []).map((e) => e as int).toList()

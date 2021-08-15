@@ -6,16 +6,16 @@ import 'package:http/http.dart' as http;
 import 'package:wetrek/network/exceptions.dart';
 
 class API {
-  static String host = 'https://devotion.wakabout.com.ng/api';
+  static String host = 'https://wetrek.zirite.tech/api';
   // String _rootURL = 'http://10.0.2.2:8000/api';
   late String _token;
 //  static Uri base = Uri(
-//    host: 'devotion.wakabout.com.ng',
+//    host: 'wetrek.wakabout.com.ng',
 //    scheme: 'https',
 //    path: '/api',
 //    port: 80,
 //  );
-  static Uri base = Uri.parse('https://devotion.wakabout.com.ng/api');
+  static Uri base = Uri.parse('https://wetrek.zirite.tech/api');
 
   API(token) {
     this._token = token;
@@ -52,7 +52,7 @@ class API {
   }
 
   Future<Map<String, dynamic>> get(String url,
-      {Map<String, String>? params}) async {
+      {Map<String, dynamic>? params}) async {
     http.Response response = await http.get(
       API.base.replace(path: '/api' + url, queryParameters: params),
       headers: this.headers(),
@@ -61,7 +61,7 @@ class API {
     return prepareResponse(response);
   }
 
-  Future<Map<String, dynamic>> post(String url, dynamic data) async {
+  Future<Map<String, dynamic>> post(String url, Map<String, dynamic> data) async {
     String jsonData = jsonEncode(data);
     Map<String, String> headers = this.headers();
 

@@ -64,16 +64,16 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     }
   }
 
-  // @override
-  // Stream<Transition<ListEvent, ListState>> transformEvents(
-  //   Stream<ListEvent> events,
-  //   TransitionFunction<ListEvent, ListState> transitionFn,
-  // ) {
-  //   return super.transformEvents(
-  //     events.debounceTime(const Duration(milliseconds: 500)),
-  //     transitionFn,
-  //   );
-  // }
+//   @override
+//   Stream<Transition<ListEvent, ListState>> transformEvents(
+//     Stream<ListEvent> events,
+//     TransitionFunction<ListEvent, ListState> transitionFn,
+//   ) {
+//     return super.transformEvents(
+//       events.debounceTime(const Duration(milliseconds: 500)),
+//       transitionFn,
+//     );
+//   }
 
   bool _hasReachedMax(ListState state) =>
       state is ListSuccess && state.currentPage >= state.totalPages;

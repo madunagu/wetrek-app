@@ -1,7 +1,9 @@
 {
-    "avatar": "string",
+    "id": 1,
     "small": "small",
     "medium": "medium",
     "large": "l",
-    "full": "f"
+    "full": "f",
+    "created_at":"@datetime",
+    "updated_at":"@datetime"
 }

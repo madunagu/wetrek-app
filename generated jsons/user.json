@@ -1,8 +1,11 @@
 {
     "id": 3,
-    "name": "Ekene Madunagu",
+    "name": "Ekene",
     "email": "ekenemadunagu@gmail.com",
-    "avatar": "avatarlinktosite.com",
     "token?": "averylongtoken",
-    "following?": [1,2,3,5,5,3,5,6]
+    "phone?": "+2348012345678",
+    "picture": "$Picture",
+    "following?": [1,2,3,5,5,3,5,6],
+    "followers?": [1,2,3,5,5,3,5,6],
+    "locations": "$[]Location"
 }

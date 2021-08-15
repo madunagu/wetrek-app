@@ -1,6 +1,0 @@
-{
-    "message": "$Message",
-    "count": 5,
-    "from": "$User",
-    "created_at": "@datetime"
-}

@@ -25,8 +25,10 @@ import 'package:wetrek/screens/trips_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 
 // import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
-void main() {
+void main() async {
   // await DotEnv.load(fileName: '.env');
+//  AuthenticationRepository a = AuthenticationRepository();
+//  await a.initToken();
   runApp(
     RepositoryProvider(
       create: (context) => AuthenticationRepository(),

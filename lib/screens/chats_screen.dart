@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/user.dart';
@@ -12,10 +15,10 @@ import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
-class MessagesScreen extends StatelessWidget {
+class ChatsScreen extends StatelessWidget {
   static MaterialPageRoute route() {
     return MaterialPageRoute(
-      builder: (context) => MessagesScreen(),
+      builder: (context) => ChatsScreen(),
     );
   }
 
@@ -23,15 +26,15 @@ class MessagesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(
-        title: 'Messages',
+        title: 'Chats',
         rightIcon: Icons.search,
       ),
       body: BlocProvider(
-        create: (BuildContext context) => ListBloc(
+        create: (BuildContext context) => SearchBloc(
             repository: MessageRepository(
                 RepositoryProvider.of<AuthenticationRepository>(context)
                     .token!))
-          ..add(ListFetched()),
+          ..add(SearchFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(horizontal: 24),
@@ -54,14 +57,13 @@ class _MessageListState extends State<MessageList> {
   List<Message> messages = [];
 
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late final SearchBloc _searchBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
+    _searchBloc = context.read<SearchBloc>();
   }
 
   @override
@@ -71,86 +73,65 @@ class _MessageListState extends State<MessageList> {
   }
 
   void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
+    if (_isBottom) _searchBloc.add(SearchFetched());
   }
 
-  void onSearch(String query) {
-    if (query.length > 3) {
-      _postBloc.add(ListFetched());
-    }
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
+    final Size size = MediaQuery.of(context).size;
+    return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
+        switch (state.status) {
+          case SearchStatus.failure:
+            return const Center(child: Text('failed to fetch posts'));
+          case SearchStatus.success:
+            if (state.models.isEmpty) {
+              return const Center(child: Text('no posts'));
+            }
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return index >= state.models.length
+                    ? BottomLoader()
+                    : MessageListItem(
+                        message: state.models[index] as Message,
+                        size: size,
+                      );
+              },
+              itemCount: state.hasReachedMax
+                  ? state.models.length
+                  : state.models.length + 1,
+              controller: _scrollController,
             );
-          }
-          return this.chatMessages(state.models);
+          default:
+            return const Center(child: CircularProgressIndicator());
         }
-        return Container();
       },
-    );
-  }
-
-  Widget chatMessages(messages) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Column(
-        children: [
-          for (var i = 0; i < messages.length; i++)
-            MessageListItem(
-              message: messages[i].message,
-              user: messages[i].from,
-            ),
-        ],
-      ),
     );
   }
 }
 
 class MessageListItem extends StatelessWidget {
   MessageListItem({
-    required this.user,
     required this.message,
+    required this.size,
     this.isNew = false,
   });
-  final User user;
-  final String message;
+  final Message message;
   final bool isNew;
+  final Size size;
 
-  factory MessageListItem.random() {
-    return MessageListItem(
-      user: UserRepository.dummy(),
-      message: 'If you\'re offered a seat on a rocket ship',
-      isNew: true,
-    );
-  }
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, ChatScreen.route());
+        Navigator.push(context, ChatScreen.route(message.from));
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 22),
@@ -163,8 +144,8 @@ class MessageListItem extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                user.avatar,
+              child: Image.network(
+                message.from.picture.small,
                 width: 62,
                 height: 62,
                 fit: BoxFit.cover,
@@ -181,7 +162,7 @@ class MessageListItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Text(user.name, style: TextStyles.darkNormal),
+                        Text(message.from.name, style: TextStyles.darkNormal),
                         Container(
                           width: 8,
                           height: 8,
@@ -194,13 +175,16 @@ class MessageListItem extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 7),
-                  RichText(
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      text: message,
-                      style: TextStyles.base.copyWith(
-                        color: Color(0xff78849E),
+                  Container(
+                    width: MediaQuery.of(context).size.width - 126,
+                    child: RichText(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        text: message.message,
+                        style: TextStyles.base.copyWith(
+                          color: Color(0xff78849E),
+                        ),
                       ),
                     ),
                   ),

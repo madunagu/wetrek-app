@@ -175,7 +175,7 @@ class LoginForm extends StatelessWidget {
   onForgotPassword(context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => NotificationPopup(
+      builder: (BuildContext context) => Popup(
         body: 'Hello!',
         title: 'Popup Title',
       ),
@@ -189,7 +189,7 @@ class LoginForm extends StatelessWidget {
         if (state.status.isSubmissionFailure) {
           showDialog(
             context: context,
-            builder: (BuildContext context) => NotificationPopup(
+            builder: (BuildContext context) => ErrorPopup(
               title: 'Login Failed!',
               body: 'could not login due to error',
             ),
@@ -208,7 +208,9 @@ class LoginForm extends StatelessWidget {
             height: 13,
           ),
           GestureDetector(
-//            onTap: onForgotPassword,
+            onTap: () {
+              onForgotPassword(context);
+            },
             child: Text(
               'FORGOT PASSWORD?',
               style: TextStyle(

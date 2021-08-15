@@ -3,14 +3,11 @@ import 'dart:convert';
 
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/bounds.dart';
-import 'package:wetrek/models/field.dart';
-import 'package:wetrek/models/geometry.dart';
 import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/pagination.dart';
 import 'package:wetrek/models/parameters.dart';
-import 'package:wetrek/models/plus_code.dart';
 import 'package:wetrek/network/api.dart';
 import 'package:wetrek/repositories/repository.dart';
 
@@ -20,7 +17,7 @@ class AddressRepository extends Repository {
   AddressRepository(token) : super(token);
 
   Future<Paginated<Address>> list(Parameters params) async {
-    List<Address> addresses = AddressRepository.dummies();
+//    List<Address> addresses = AddressRepository.dummies();
 
 //    final Map<String, dynamic> res = await api.get("/addresses", params: {
 //      "page": params.page.toString(),
@@ -32,7 +29,7 @@ class AddressRepository extends Repository {
 //      addresses.add(Address.fromJson(res['data'][i]));
 //    }
     return Paginated<Address>(
-      data: addresses,
+      data: [],
       pagination: Pagination(
         count: 10,
         currentPage: 1,
@@ -50,7 +47,7 @@ class AddressRepository extends Repository {
 
   Future<Address> create(Map<String, dynamic> address) async {
     final Map<String, dynamic> res =
-        await api.post('/addresses', jsonEncode(address));
+        await api.post('/addresses', address);
     return Address.fromJson(res['data']);
   }
 
@@ -60,44 +57,5 @@ class AddressRepository extends Repository {
     return res['success'] == 'true';
   }
 
-  static Address dummy() {
-    return Address(
-        formattedAddress: 'Winnetka, Los Angeles, CA, USA',
-        placeId: 'ChIJ0fd4S_KbwoAR2hRDrsr3HmQ',
-        types: ['neighborhood', 'political'],
-        geometry: Geometry(
-          location: Location(lng: 133.333, lat: 133.323),
-          locationType: 'political',
-          viewport: Bounds(
-            northeast: Location(lng: 133.333, lat: 133.323),
-            southwest: Location(lng: 133.333, lat: 133.323),
-          ),
-        ),
-        plusCode: PlusCode(compoundCode: 'kkk', globalCode: 'jj'),
-        addressComponents: [
-          Field(
-            longName: 'Winnetka',
-            shortName: 'Winnetka',
-            types: ['neighborhood', 'political'],
-          ),
-          Field(
-            longName: 'Los Angeles',
-            shortName: 'LA',
-            types: ['locality', 'political'],
-          ),
-          Field(
-            longName: 'California',
-            shortName: 'CA',
-            types: ['administrative_area_level_1', 'political'],
-          ),
-        ]);
-  }
 
-  static List<Address> dummies() {
-    List<Address> addresses = [];
-    for (int i = 0; i < 10; i++) {
-      addresses.add(AddressRepository.dummy());
-    }
-    return addresses;
-  }
 }

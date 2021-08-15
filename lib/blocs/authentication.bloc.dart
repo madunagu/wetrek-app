@@ -62,7 +62,9 @@ class AuthenticationBloc
     try {
       final user = await _authenticationRepository.getUser();
       return user;
-    } on Exception {
+    } catch (e, _) {
+      print(e);
+      print(_);
       return null;
     }
   }

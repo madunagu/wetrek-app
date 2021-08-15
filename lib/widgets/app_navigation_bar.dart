@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/constants/colors.dart';
+import 'package:wetrek/models/user.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
-import 'package:wetrek/screens/messages_screen.dart';
+import 'package:wetrek/screens/chats_screen.dart';
 import 'package:wetrek/screens/notifications_screen.dart';
 import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
@@ -17,6 +18,17 @@ class AppNavigationDrawer extends StatefulWidget {
 }
 
 class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
+  late final User user;
+  void goToProfile() {
+    Navigator.push(context, ProfileScreen.route(user));
+  }
+
+  @override
+  void initState() {
+    user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -46,9 +58,7 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.push(context, ProfileScreen.route());
-                  },
+                  onTap: goToProfile,
                   child: Container(
                     padding: EdgeInsets.only(top: 60, left: 40),
                     child: Column(
@@ -64,7 +74,7 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          'Ekene Madunagu',
+                          user.name,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -74,7 +84,7 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                         ),
                         SizedBox(height: 7),
                         Text(
-                          '@ekenemadunagu',
+                          user.email,
                           style: TextStyle(
                             color: Color(0x8fffffff),
                           ),
@@ -108,7 +118,7 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                   icon: CustomIcons.icons_comment,
                   title: 'Chats',
                   onTap: () {
-                    Navigator.push(context, MessagesScreen.route());
+                    Navigator.push(context, ChatsScreen.route());
                   },
                 ),
                 DrawerLink(

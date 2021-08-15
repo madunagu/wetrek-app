@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
+
 abstract class LoginEvent extends Equatable {
   const LoginEvent();
 
@@ -29,21 +30,23 @@ class LoginSubmitted extends LoginEvent {
   const LoginSubmitted();
 }
 
-class RegisterButtonPressed extends LoginEvent {
-  final String name;
+class RegisterSubmitted extends LoginEvent {
+  final String firstName;
+  final String lastName;
   final String email;
-  final String phone;
+  final String password;
 
-  const RegisterButtonPressed({
-    required this.name,
+  const RegisterSubmitted({
+    required this.firstName,
+    required this.lastName,
     required this.email,
-    required this.phone,
+    required this.password,
   });
 
   @override
-  List<Object> get props => [name,  email, phone];
+  List<Object> get props => [firstName, lastName, email];
 
   @override
   String toString() =>
-      'LoginButtonPressed { name: $name, email: $email, phone: $phone }';
+      'RegisterSubmitted { name: $firstName $lastName, email: $email }';
 }

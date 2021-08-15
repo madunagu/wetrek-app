@@ -161,8 +161,8 @@ class SingleUser extends StatelessWidget {
             },
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                user.avatar,
+              child: Image.network(
+                user.picture.small,
                 width: 48,
                 height: 48,
               ),
@@ -192,50 +192,3 @@ class SingleUser extends StatelessWidget {
   }
 }
 
-class FollowButton extends StatefulWidget {
-  FollowButton(this.user);
-  final User user;
-
-  @override
-  _FollowButtonState createState() => _FollowButtonState();
-}
-
-class _FollowButtonState extends State<FollowButton> {
-  late bool isFollowing ;
-  @override
-  initState() {
-    // perform check of if the user is following this user
-
-    isFollowing = math.Random().nextBool();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        UserRepository userRepository =
-            RepositoryProvider.of<UserRepository>(context);
-        isFollowing = await userRepository.follow(widget.user);
-      },
-      child: Container(
-        height: 32,
-        alignment: Alignment.center,
-        width: 80,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: isFollowing ? Color(0xffE9EBEF) : Color(0xff665EFF),
-        ),
-        child: Text(
-          isFollowing ? 'UNFOLLOW' : 'FOLLOW',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: isFollowing ? Color(0xff78849E) : Colors.white,
-            height: 17 / 13,
-          ),
-        ),
-      ),
-    );
-  }
-}

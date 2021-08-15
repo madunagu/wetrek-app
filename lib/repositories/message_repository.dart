@@ -17,45 +17,36 @@ class MessageRepository extends Repository {
   MessageRepository(token) : super(token);
 
   Future<Paginated<Message>> list(Parameters params) async {
-    List<Message> messages = [];
-    String? chatId = params.where['chat_id'];
-    await Future.delayed(Duration.zero);
-    return Paginated<Message>(
-        data: dummies(),
-        pagination: Pagination(
-          count: 10,
-          perPage: 10,
-          currentPage: 1,
-          total: 40,
-          totalPages: 4,
-        ));
+//    await Future.delayed(Duration(seconds: 5));
+//    return Paginated<Message>(
+//        data: dummies(),
+//        pagination: Pagination(
+//          count: 10,
+//          perPage: 10,
+//          currentPage: 1,
+//          total: 40,
+//          totalPages: 4,
+//        ));
 
-    dummies();
+    final Map<String, dynamic> res =
+        await api.get("/messages", params: params.toJson());
 
-//    final Map<String, dynamic> res = await api.get("/messages", params: {
-//      "chat_id": chatId!,
-//      "page": params.page.toString(),
-//      "length": params.length.toString(),
-//      "q": params.q,
-//    });
-//
-//    return Paginated<Message>.fromJson(res);
+    return Paginated(
+      data:
+      (res['data'] as List? ?? []).map((e) => Message.fromJson(e)).toList(),
+      pagination: Pagination.fromJson(res['pagination']),
+    );
   }
 
-  Future<Paginated> getChats(Parameters params) async {
-    List<Message> messages = [];
-
-    final Map<String, dynamic> res = await api.get("/messages", params: {
+  Future<Paginated<Message>> getChats(Parameters params) async {
+    final Map<String, dynamic> res = await api.get("/chats", params: {
       "page": params.page.toString(),
       "length": params.length.toString(),
       "q": params.q,
     });
-
-    for (var i = 0; i < res.length; i++) {
-      messages.add(Message.fromJson(res['data'][i]));
-    }
     return Paginated(
-      data: messages,
+      data:
+          (res['data'] as List? ?? []).map((e) => Message.fromJson(e)).toList(),
       pagination: Pagination.fromJson(res['pagination']),
     );
   }
@@ -65,9 +56,8 @@ class MessageRepository extends Repository {
     return Message.fromJson(res);
   }
 
-  Future<Message> create(Map<String,dynamic> message) async {
-    final Map<String, dynamic> res =
-        await api.post('/messages', jsonEncode(message));
+  Future<Message> create(Map<String, dynamic> message) async {
+    final Map<String, dynamic> res = await api.post('/messages', message);
     return Message.fromJson(res['data']);
   }
 
@@ -91,8 +81,10 @@ class MessageRepository extends Repository {
     return Message(
       createdAt: DateTime.now(),
       from: UserRepository.dummy(),
-      message: mm[i%mm.length],
+      message: "$i " + mm[i % mm.length],
       modifiedAt: DateTime.now(),
+      seenAt: [],
+      seenBy: [],
     );
   }
 
@@ -100,7 +92,7 @@ class MessageRepository extends Repository {
     List<Message> messages = [];
     Random r = Random();
     for (int i = 0; i < 10; i++) {
-      messages.add(MessageRepository.dummy(i: 10));
+      messages.add(MessageRepository.dummy(i: i));
     }
     return messages;
   }
