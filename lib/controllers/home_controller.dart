@@ -13,11 +13,7 @@ import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 
 class HomeController extends ChangeNotifier {
-  HomeController() {
-//    _searchBarStatusController.sink.add(SearchBarStatus.normal);
-//    _homePageStatusController.sink.add(HomePageStatus.initial);
-    myLocation = LatLng(1, 1);
-  }
+  HomeController(this.myLocation);
 
   Address? originAddress;
   Address? destinationAddress;
@@ -25,7 +21,7 @@ class HomeController extends ChangeNotifier {
   Direction? direction;
   String? searchQuery;
   bool? isOriginAddress;
-  late LatLng myLocation;
+  LatLng myLocation;
 
   final _searchBarStatusController =
       StreamController<SearchBarStatus>.broadcast();
@@ -46,7 +42,7 @@ class HomeController extends ChangeNotifier {
 
   Stream<String> get searchQueryStream => _searchQueryController.stream;
 
-   setLocation(location) => _mapLocationController.add(location);
+  setLocation(location) => _mapLocationController.add(location);
 
   search(String? query) {
     searchQuery = query ?? searchQuery;
@@ -108,9 +104,11 @@ class HomeController extends ChangeNotifier {
     try {
       direction = await MapsRepository.getDirections(
           originAddress!, destinationAddress!);
-    } on MyException catch (_) {
-      _errorMessageController.sink.add(_);
-    } catch (_) {
+    } on MyException catch (e, _) {
+      print(_);
+      _errorMessageController.sink.add(e);
+    } catch (e, _) {
+      print(_);
       log(_.toString());
       _errorMessageController.add(
           UnknownException(message: 'Couldn\'t Get Directions!. Try Again'));

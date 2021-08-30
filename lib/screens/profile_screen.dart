@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset('images/avatar1.jpg', fit: BoxFit.cover, height: 400),
+          Image.network(widget.user.picture.large, fit: BoxFit.cover, height: 400),
           Container(
             height: 400,
             color: Colors.black26,

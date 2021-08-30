@@ -163,14 +163,17 @@ class MessageListItem extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(message.from.name, style: TextStyles.darkNormal),
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Color(0xffff4f9a),
-                          ),
-                        )
+                        (message.messageCount != null &&
+                                message.messageCount! > 0)
+                            ? Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Color(0xffff4f9a),
+                                ),
+                              )
+                            : Container()
                       ],
                     ),
                   ),

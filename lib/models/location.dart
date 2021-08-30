@@ -23,6 +23,9 @@ class Location {
     'lng': lng
   };
 
+
+  toLatLng() => LatLng(lat, lng);
+
   Location clone() => Location(
     lat: lat,
     lng: lng

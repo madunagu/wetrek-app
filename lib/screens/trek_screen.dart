@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/models/user.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/path_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
@@ -27,10 +32,34 @@ class TrekScreen extends StatefulWidget {
 
 class _TrekScreenState extends State<TrekScreen> {
   late Trek trek;
+  bool isJoining = false;
+  late bool isAttending;
   @override
   void initState() {
     trek = widget.trek;
+    getTrek();
     super.initState();
+  }
+
+  void getTrek() async {
+    String token =
+        RepositoryProvider.of<AuthenticationRepository>(context).token!;
+    User user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    trek = await TrekRepository(token).get(widget.trek.id);
+    //TODO: edit the strictness of the contains check due to differences in contained variables
+    isAttending = trek.users?.contains(user) ?? false;
+  }
+
+  _joinTrek() async {
+    isJoining = true;
+    String token =
+        RepositoryProvider.of<AuthenticationRepository>(context).token!;
+    isAttending = await TrekRepository(token).join(trek.id);
+  }
+
+  Color _joinColor() {
+    if (isJoining || isAttending) return Colors.grey;
+    return WeTrekColors.blue1;
   }
 
   @override
@@ -82,7 +111,7 @@ class _TrekScreenState extends State<TrekScreen> {
                       ),
                       SizedBox(height: 16),
                       TrekItem(
-                        subTitle: '15 treks',
+                        subTitle: "{$trek.usersCount} Trekkers",
                         title: 'Trekkers',
                         child: InkWell(
                           onTap: () {
@@ -98,7 +127,7 @@ class _TrekScreenState extends State<TrekScreen> {
                         icon: Icons.people_outline,
                       ),
                       TrekItem(
-                        subTitle: '45 messages',
+                        subTitle: 'group messages',
                         title: 'Chats',
                         icon: Icons.chat_bubble_outline,
                         child: InkWell(
@@ -136,18 +165,18 @@ class _TrekScreenState extends State<TrekScreen> {
                         icon: Icons.directions_walk,
                       ),
                       TrekItem(
-                        subTitle: '5 pictures',
+                        subTitle: "${trek.pictures?.length} pictures",
                         title: 'Pictures',
                         child: Container(
                           height: 44,
                           width: size.width - 136,
                           child: ListView(
                             scrollDirection: Axis.horizontal,
-                            children: [
-                              Image.asset('images/sushi.jpg', height: 44),
-                              Image.asset('images/museum.jpg', height: 44),
-                              Image.asset('images/ice_cream.jpg', height: 44),
-                            ],
+                            children: trek.pictures
+                                    ?.map((e) =>
+                                        Image.network(e.small, height: 44))
+                                    .toList() ??
+                                [],
                           ),
                         ),
                         icon: Icons.save,
@@ -155,7 +184,11 @@ class _TrekScreenState extends State<TrekScreen> {
                       SizedBox(height: 16),
 //                      for(var step in )
 
-                      MyButton('GO THERE'),
+                      MyButton(
+                        'GO THERE',
+                        onTap: _joinTrek,
+                        color: _joinColor(),
+                      ),
                     ],
                   ),
                 ),

@@ -3,7 +3,7 @@ import 'package:wetrek/models/model.dart';
 import 'pagination.dart';
 
 @immutable
-class Paginated<T> {
+class Paginated<T extends Model> {
 
   const Paginated({
     required this.data,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
@@ -187,13 +189,25 @@ class LoginForm extends StatelessWidget {
     return BlocListener<LoginBloc, LoginState>(
       listener: (BuildContext context, LoginState state) {
         if (state.status.isSubmissionFailure) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) => ErrorPopup(
-              title: 'Login Failed!',
-              body: 'could not login due to error',
-            ),
-          );
+          switch (state.error.runtimeType) {
+            case SocketException:
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => ErrorPopup(
+                  title: 'NETWORK ERROR OCCURED',
+                  body: state.error.toString(),
+                ),
+              );
+              break;
+            default:
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => ErrorPopup(
+                  title: 'LOGIN FAILED!',
+                  body: state.error.toString(),
+                ),
+              );
+          }
         }
       },
       child: Container(

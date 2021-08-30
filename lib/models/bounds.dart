@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'location.dart';
 
 @immutable
@@ -25,6 +26,13 @@ class Bounds {
         northeast: northeast ?? this.northeast,
         southwest: southwest ?? this.southwest,
       );
+
+  LatLngBounds toLatLng() {
+    return LatLngBounds(
+      southwest: LatLng(southwest.lat, southwest.lng),
+      northeast: LatLng(northeast.lat, northeast.lng),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

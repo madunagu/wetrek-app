@@ -8,6 +8,7 @@ import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/controllers/home_controller.dart';
@@ -260,18 +261,15 @@ class PlacesNearby extends StatefulWidget {
 }
 
 class _PlacesNearbyState extends State<PlacesNearby> {
-  List<Trek> treks = [];
-
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late SearchBloc _postBloc;
+  late SearchBloc _searchBloc;
   late final StreamSubscription<String> subscription;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<SearchBloc>(context);
+    _searchBloc = BlocProvider.of<SearchBloc>(context);
 //    _postBloc.add(ListFetched());
     subscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
@@ -286,15 +284,18 @@ class _PlacesNearbyState extends State<PlacesNearby> {
   }
 
   void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(SearchFetched());
-    }
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void onSearch(String query) {
-    _postBloc.add(SearchFetched(query: query));
+    _searchBloc.add(SearchFetched(query: query));
   }
 
   String distance(trek) {
@@ -303,49 +304,41 @@ class _PlacesNearbyState extends State<PlacesNearby> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
-      builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
-            );
-          }
-          return this.cards(state.models);
-        }
-        return Container();
-      },
-    );
-  }
-
-  Widget cards(List<Model> models) {
-    models as List<Trek>;
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 200,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: models
-            .map((e) => GestureDetector(
-                  onTap: () => widget.controller.selectTrek(e),
-                  child: PlacedCard(
-                    title: e.name,
-                    subTitle: distance(e),
-                  ),
-                ))
-            .toList(),
+      child: BlocBuilder<SearchBloc, SearchState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case SearchStatus.failure:
+              return const Center(child: Text('failed to fetch suggestions'));
+            case SearchStatus.success:
+              if (state.models.isEmpty) {
+                return const Center(child: Text('no suggestions'));
+              }
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.models.length
+                      ? BottomLoader()
+                      : GestureDetector(
+                          onTap: () => widget.controller
+                              .selectTrek(state.models[index] as Trek),
+                          child: PlacedCard(
+                            title: (state.models[index] as Trek).name,
+                            subTitle: distance(state.models[index] as Trek),
+                          ),
+                        );
+                },
+                itemCount: state.hasReachedMax
+                    ? state.models.length
+                    : state.models.length + 1,
+                controller: _scrollController,
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }
@@ -1090,16 +1083,14 @@ class SearchResults extends StatefulWidget {
 }
 
 class _SearchResultsState extends State<SearchResults> {
-  List<Address> results = [];
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late SearchBloc _searchBloc;
 
   late final StreamSubscription<String> searchSubscription;
   @override
   void initState() {
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
+    _searchBloc = BlocProvider.of<SearchBloc>(context);
 //    _postBloc.add(ListFetched());
     searchSubscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
@@ -1108,100 +1099,74 @@ class _SearchResultsState extends State<SearchResults> {
     super.initState();
   }
 
-  void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
-  }
-
   void onSearch(String query) {
 //    if (query.length > 3) {
-    _postBloc.add(ListFetched(query: query));
+    _searchBloc.add(SearchFetched(query: query));
 //    }
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     searchSubscription.cancel();
     _scrollController.dispose();
     super.dispose();
   }
 
-  List<Widget> addresses(List<Model> models) {
-    models as List<Address>;
-    return models
-        .map(
-          (e) => GestureDetector(
-            onTap: () => widget.controller.selectAddress(e),
-            child: SearchResultRow(e),
-          ),
-        )
-        .toList();
+  void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xffF7F7FA),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      height: 200,
-      child: SingleChildScrollView(
-        controller: _scrollController,
+        color: Color(0xffF7F7FA),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        height: 200,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'SEARCH RESULTS',
-              style: TextStyle(
-                color: Color(0x9278849E),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Container(child: Text('SEARCH RESULTS')),
             Container(
-              child: BlocBuilder<ListBloc, ListState>(
+              child: BlocBuilder<SearchBloc, SearchState>(
                 builder: (context, state) {
-                  if (state is ListProgress) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (state is ListInitial) {
-                    return Center(
-                      child: Container(),
-                    );
-                  }
-                  if (state is ListFailure) {
-                    //TODO: design widget for this particular function
-                    //let the popups be for other exceptions
-                    return Center(
-                      child: Text('fetch failed'),
-                    );
-                  }
-                  if (state is ListSuccess) {
-                    if (state.models.isEmpty) {
-                      return Center(
-                        child: Text('no messages'),
+                  switch (state.status) {
+                    case SearchStatus.failure:
+                      return const Center(
+                          child: Text('failed to fetch suggestions'));
+                    case SearchStatus.success:
+                      if (state.models.isEmpty) {
+                        return const Center(child: Text('no suggestions'));
+                      }
+                      return ListView.builder(
+                        itemBuilder: (BuildContext context, int index) {
+                          return index >= state.models.length
+                              ? BottomLoader()
+                              : GestureDetector(
+                                  onTap: () => widget.controller.selectAddress(
+                                      state.models[index] as Address),
+                                  child: SearchResultRow(
+                                      state.models[index] as Address),
+                                );
+                        },
+                        itemCount: state.hasReachedMax
+                            ? state.models.length
+                            : state.models.length + 1,
+                        controller: _scrollController,
                       );
-                    }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ...addresses(state.models),
-                      ],
-                    );
+                    default:
+                      return const Center(child: CircularProgressIndicator());
                   }
-                  return Container();
                 },
               ),
             ),
           ],
-        ),
-      ),
-    );
+        ));
   }
 }
 
@@ -1226,7 +1191,7 @@ class SearchResultRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(address.description, style: TextStyles.darkNormal),
-                Text('2Km.', style: TextStyles.darkMinor),
+//                Text('2Km.', style: TextStyles.darkMinor),
               ],
             ),
           ),

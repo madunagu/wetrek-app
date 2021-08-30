@@ -54,4 +54,10 @@ class TrekRepository extends Repository {
     //TODO: chech if boolean true is parsed already
     return res['success'] == 'true';
   }
+
+  Future<bool> join(int id) async {
+    final Map<String, dynamic> res = await api.post("/treks/$id",{});
+    //TODO: chech if boolean true is parsed already
+    return res['success'] == 'true';
+  }
 }

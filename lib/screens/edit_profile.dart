@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/states/authentication.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
+import 'package:wetrek/repositories/address_repository.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/profile_screen.dart';
@@ -25,6 +28,7 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController emailController;
   late TextEditingController passwordController;
   late TextEditingController confirmPasswordController;
+  late String readableAddress;
 
   @override
   void initState() {
@@ -64,7 +68,7 @@ class _EditProfileState extends State<EditProfile> {
     UserRepository userRepository = UserRepository(
         RepositoryProvider.of<AuthenticationRepository>(context).token);
     User updatedUser = user.copyWith(
-      email: emailController.value.text,
+//      email: emailController.value.text,
       name: nameController.value.text,
     );
     try {
@@ -77,6 +81,12 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+  Future<String> readableLocation(List<Location> location) async{
+    await Future.delayed(Duration.zero);
+//    Address address = AddressRepository(RepositoryProvider.of<AuthenticationRepository>(context).token).get(id);
+    return 'Location';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,16 +96,16 @@ class _EditProfileState extends State<EditProfile> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'images/avatar1.jpg',
+              child: Image.network(
+                user.picture.large,
                 width: 128,
                 height: 128,
               ),
             ),
             SizedBox(height: 20),
             Text(user.name, style: TextStyles.darkLarge),
-            Text('San Fransico CA', style: TextStyles.darkNormal),
-            // Nick name or alias should be part of the profile
+            Text(readableAddress,
+                style: TextStyles.darkNormal),
             SizedBox(height: 23),
             MyInput(controller: nameController, hintText: 'Name'),
 //            MyInput(controller: lastNameController, hintText: 'Last Name'),

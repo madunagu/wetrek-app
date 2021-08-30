@@ -1,17 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:html';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/controllers/home_controller.dart';
-import 'package:wetrek/models/address.dart';
-import 'package:wetrek/models/bounds.dart';
 import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/paginated.dart';
@@ -28,6 +25,7 @@ import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/app_navigation_bar.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 import 'package:wetrek/widgets/widgets.dart';
+import 'dart:ui' as ui;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -45,9 +43,11 @@ class _MapScreenState extends State<MapScreen> {
   late final User user;
   @override
   void initState() {
-    homeController = HomeController();
-
     user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    LatLng loc = user.locations.isNotEmpty
+        ? user.locations.last.toLatLng()
+        : LatLng(6.4584252, 3.2721445);
+    homeController = HomeController(loc);
     super.initState();
   }
 
@@ -58,7 +58,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void showUserLocation() {
-    homeController.setLocation(user.locations.last);
+    homeController.setLocation(homeController.myLocation);
   }
 
   @override
@@ -70,16 +70,17 @@ class _MapScreenState extends State<MapScreen> {
             RepositoryProvider.of<AuthenticationRepository>(context).token!),
       ),
       child: Scaffold(
-          drawer: AppNavigationDrawer(),
-          bottomSheet: BottomSheetContainer(controller: homeController),
-          extendBodyBehindAppBar: true,
-          primary: true,
-          appBar: PlaceSearchBar(controller: homeController),
-          floatingActionButton: InkWell(
-            onTap: showUserLocation,
-            child: LocationButton(),
-          ),
-          body: GoogleMapContainer(controller: homeController)),
+        drawer: AppNavigationDrawer(),
+        bottomSheet: BottomSheetContainer(controller: homeController),
+        extendBodyBehindAppBar: true,
+        primary: true,
+        appBar: PlaceSearchBar(controller: homeController),
+        floatingActionButton: InkWell(
+          onTap: showUserLocation,
+          child: LocationButton(),
+        ),
+        body: GoogleMapContainer(controller: homeController),
+      ),
     );
   }
 }
@@ -107,9 +108,10 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
   @override
   void initState() {
     _errorSub = widget.controller.errorMessageStream.listen(showError);
-    getCloseTreks();
+    _getCloseTreks();
     super.initState();
   }
+
 
   showError(Exception e) {
     if (e is AuthenticationException) {
@@ -122,6 +124,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
           okText: 'LOGOUT',
         ),
       );
+      return;
     }
     showDialog(
       context: context,
@@ -139,42 +142,46 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     _sub = widget.controller.homePageStatus.listen(refreshMap);
   }
 
-  getCloseTreks() async {
+  _getCloseTreks() async {
     try {
       String token =
           RepositoryProvider.of<AuthenticationRepository>(context).token!;
       Paginated<Trek> treks = await TrekRepository(token).list(Parameters());
       BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
-          ImageConfiguration(size: Size.fromWidth(63)), 'assets/marker.png');
+        ImageConfiguration(size: ui.Size(63, 58), devicePixelRatio: 2),
+        'assets/marker.png',
+      );
+      List<LatLng> _positions = [];
       for (Trek trek in treks.data) {
-        MarkerId markerId = MarkerId(trek.createdAt.toString());
+        MarkerId markerId = MarkerId(trek.id.toString());
+        LatLng _pos = _getPos(trek);
+        _positions.add(_pos);
         _markers[markerId] = Marker(
           markerId: markerId,
-          onTap: () {
-            Navigator.push(context, TrekScreen.route(trek));
-          },
+          onTap: () => Navigator.push(context, TrekScreen.route(trek)),
           icon: customIcon,
           infoWindow: InfoWindow(
             title: trek.name,
             snippet: trek.description,
             onTap: () => Navigator.push(context, TrekScreen.route(trek)),
           ),
-          position: (trek.locations == null || trek.locations!.isEmpty)
-              ? LatLng(
-                  trek.direction.routes.first.legs.first.startLocation.lat,
-                  trek.direction.routes.first.legs.first.startLocation.lng,
-                )
-              : LatLng(
-                  trek.locations!.last.lat,
-                  trek.locations!.last.lng,
-                ),
+          position: _pos,
         );
       }
+      _mapController.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          _getBounds(_positions),
+          1,
+        ),
+      );
 
       setState(() {});
     } on Exception catch (e, _) {
       print(_);
       showError(e);
+    } catch (e, _) {
+      print(_);
+      showError(UnknownException());
     }
   }
 
@@ -199,9 +206,11 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     }
     switch (status) {
       case HomePageStatus.creating:
-        panCamera(
-          widget.controller.direction!.routes[0].bounds,
-          _mapController,
+        _mapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            widget.controller.direction!.routes[0].bounds.toLatLng(),
+            1,
+          ),
         );
         setState(() {
           Polyline poly = getPolyline(widget.controller.direction!);
@@ -210,9 +219,11 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
         });
         break;
       case HomePageStatus.selecting:
-        panCamera(
-          widget.controller.direction!.routes[0].bounds,
-          _mapController,
+        _mapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            widget.controller.direction!.routes[0].bounds.toLatLng(),
+            1,
+          ),
         );
         setState(() {
           Polyline poly = getPolyline(widget.controller.direction!);
@@ -226,13 +237,6 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     }
   }
 
-  void panToLocation(Location location) {
-    LatLng lastLocation = LatLng(location.lat, location.lng);
-    _mapController.animateCamera(
-      CameraUpdate.newLatLng(lastLocation),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Size view = MediaQuery.of(context).size;
@@ -241,7 +245,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
       width: view.width,
       child: GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: LatLng(6.4584252, 3.2721445),
+          target: widget.controller.myLocation,
           zoom: 15,
         ),
         zoomControlsEnabled: false,
@@ -336,8 +340,8 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
           ),
         );
       case HomePageStatus.suggesting:
-        return BlocProvider<ListBloc>(
-          create: (BuildContext context) => ListBloc(
+        return BlocProvider<SearchBloc>(
+          create: (BuildContext context) => SearchBloc(
             repository: AddressRepository(
                 RepositoryProvider.of<AuthenticationRepository>(context).token),
           ),
@@ -365,6 +369,34 @@ mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
 //    return {mId: m};
 //  }
 
+  LatLng _getPos(trek) {
+    double _lat = 0, _lng = 0;
+    if (trek.locations != null || trek.locations!.isNotEmpty) {
+      _lat = trek.locations!.last.lat;
+      _lng = trek.locations!.last.lng;
+    } else {
+      _lat = trek.direction.routes.first.legs.first.startLocation.lat;
+      _lng = trek.direction.routes.first.legs.first.startLocation.lng;
+    }
+    return LatLng(_lat, _lng);
+  }
+
+  LatLngBounds _getBounds(List<LatLng> positions) {
+    double _maxLat = 0, _maxLng = 0;
+    double _minLat = 0, _minLng = 0;
+    for (LatLng pos in positions) {
+      _maxLat = math.max(_maxLat, pos.latitude);
+      _maxLng = math.max(_maxLng, pos.longitude);
+
+      _minLat = math.min(_minLat, pos.latitude);
+      _minLng = math.min(_minLat, pos.longitude);
+    }
+    return LatLngBounds(
+      southwest: LatLng(_maxLat, _maxLng),
+      northeast: LatLng(_minLat, _minLng),
+    );
+  }
+
   Polyline getPolyline(Direction direction) {
     String base64Points = direction.routes[0].overviewPolyline.points;
 
@@ -389,25 +421,6 @@ mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
       originMarker.markerId: originMarker,
       destinationMarker.markerId: destinationMarker
     };
-  }
-
-  void panCamera(Bounds bounds, GoogleMapController controller) {
-    //here add the polylines
-    controller.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          northeast: LatLng(
-            bounds.northeast.lat,
-            bounds.northeast.lng,
-          ),
-          southwest: LatLng(
-            bounds.southwest.lat,
-            bounds.southwest.lng,
-          ),
-        ),
-        1,
-      ),
-    );
   }
 
   List<LatLng> decodeEncodedPolyline(String encoded) {

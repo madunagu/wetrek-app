@@ -15,7 +15,8 @@ class API {
 //    path: '/api',
 //    port: 80,
 //  );
-  static Uri base = Uri.parse('https://wetrek.zirite.tech/api');
+  static Uri base = Uri.parse('http://10.0.2.2:8000/api');
+//  static Uri base = Uri.parse('https://wetrek.zirite.tech/api');
 
   API(token) {
     this._token = token;

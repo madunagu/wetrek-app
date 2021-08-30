@@ -37,8 +37,8 @@ class Trek extends Messagable {
   final String name;
   final Address startAddress;
   final Address endAddress;
-  final String startAddressId;
-  final String endAddressId;
+  final int startAddressId;
+  final int endAddressId;
   final String? repeat;
   final List<User>? users;
   final Picture picture;
@@ -59,8 +59,8 @@ class Trek extends Messagable {
       name: json['name'] as String,
       startAddress: Address.fromJson(json['start_address']),
       endAddress: Address.fromJson(json['end_address']),
-      startAddressId: json['start_address_id'] as String,
-      endAddressId: json['end_address_id'] as String,
+      startAddressId: json['start_address_id'] as int,
+      endAddressId: json['end_address_id'] as int,
       repeat: json['repeat'] != null ? json['repeat'] as String : null,
       users: json['users'] != null
           ? (json['users'] as List? ?? []).map((e) => User.fromJson(e)).toList()
@@ -138,8 +138,8 @@ class Trek extends Messagable {
           String? name,
           Address? startAddress,
           Address? endAddress,
-          String? startAddressId,
-          String? endAddressId,
+          int? startAddressId,
+          int? endAddressId,
           String? repeat,
           List<User>? users,
           Picture? picture,
