@@ -15,8 +15,8 @@ class API {
 //    path: '/api',
 //    port: 80,
 //  );
-  static Uri base = Uri.parse('http://10.0.2.2:8000/api');
-//  static Uri base = Uri.parse('https://wetrek.zirite.tech/api');
+  // static Uri base = Uri.parse('http://10.0.2.2:8000/api');
+  static Uri base = Uri.parse('https://wetrek.zirite.tech/api');
 
   API(token) {
     this._token = token;
@@ -62,7 +62,8 @@ class API {
     return prepareResponse(response);
   }
 
-  Future<Map<String, dynamic>> post(String url, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> post(
+      String url, Map<String, dynamic> data) async {
     String jsonData = jsonEncode(data);
     Map<String, String> headers = this.headers();
 

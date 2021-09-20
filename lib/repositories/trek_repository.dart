@@ -1,19 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:wetrek/models/User.dart';
-import 'package:wetrek/models/address.dart';
-import 'package:wetrek/models/bounds.dart';
-import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/pagination.dart';
 import 'package:wetrek/models/parameters.dart';
-import 'package:wetrek/models/picture.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/api.dart';
-import 'package:flutter/material.dart';
-import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/repository.dart';
 
 class TrekRepository extends Repository {
@@ -24,7 +17,7 @@ class TrekRepository extends Repository {
   Future<Paginated<Trek>> list(Parameters params) async {
     final Map<String, dynamic> p = params.toJson();
     final Map<String, dynamic> res = await api.get('/treks',params: p);
-    return Paginated(
+    return Paginated<Trek>(
       data:
       (res['data'] as List? ?? []).map((e) => Trek.fromJson(e)).toList(),
       pagination: Pagination.fromJson(res['pagination']),
@@ -34,7 +27,7 @@ class TrekRepository extends Repository {
 
   Future<Trek> get(int id) async {
     final Map<String, dynamic> res = await api.get("/treks/$id");
-    return Trek.fromJson(res);
+    return Trek.fromJson(res['data']);
   }
 
   Future<Trek> create(Map<String, dynamic> trek) async {

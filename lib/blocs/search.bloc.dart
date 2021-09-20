@@ -6,7 +6,7 @@ import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/repositories/repository.dart';
-//import 'package:rxdart/rxdart';
+import 'package:rxdart/rxdart.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchBloc({
@@ -18,11 +18,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   @override
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
     if (event is SearchFetched) {
-      yield await _mapPostFetchedToState(state);
+      yield await _mapPostFetchedToState(event, state);
     }
   }
 
-  Future<SearchState> _mapPostFetchedToState(SearchState state) async {
+  Future<SearchState> _mapPostFetchedToState(
+      SearchFetched event, SearchState state) async {
     if (state.hasReachedMax) return state;
     try {
       if (state.status == SearchStatus.initial) {
@@ -30,7 +31,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           Parameters(
             page: 0,
             length: 20,
-            q: '',
+            q: event.query ?? '',
           ),
         );
 
@@ -44,14 +45,17 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         Parameters(
           page: 0,
           length: 20,
-          q: '',
+          q: event.query ?? '',
         ),
       );
-      return paginatedList.data.isEmpty
+      return paginatedList.pagination.isLastPage()
           ? state.copyWith(hasReachedMax: true)
           : state.copyWith(
               status: SearchStatus.success,
-              models: List.of(state.models)..addAll(paginatedList.data),
+              models: event.query != null
+                  ? List.of(paginatedList.data)
+                  : List.of(state.models)
+                ..addAll(paginatedList.data),
               hasReachedMax: false,
             );
     } on Exception {
@@ -59,16 +63,14 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     }
   }
 
-//  @override
-//  Stream<Transition<SearchEvent, SearchState>> transformEvents(
-//      Stream<SearchEvent> events,
-//      TransitionFunction<SearchEvent, SearchState> transitionFn,
-//      ) {
-//    return super.transformEvents(
-//      events.debounceTime(const Duration(milliseconds: 500)),
-//      transitionFn,
-//    );
-//  }
-
-
+  @override
+  Stream<Transition<SearchEvent, SearchState>> transformEvents(
+    Stream<SearchEvent> events,
+    TransitionFunction<SearchEvent, SearchState> transitionFn,
+  ) {
+    return super.transformEvents(
+      events.debounceTime(const Duration(milliseconds: 500)),
+      transitionFn,
+    );
+  }
 }

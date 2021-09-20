@@ -2,10 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/chat.bloc.dart';
+import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
+import 'package:wetrek/blocs/states/chat.state.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/colors.dart';
@@ -31,6 +34,8 @@ class ChatScreen extends StatelessWidget {
   final Messagable to;
   @override
   Widget build(BuildContext context) {
+    String token =
+        RepositoryProvider.of<AuthenticationRepository>(context).token!;
     return Scaffold(
       appBar: MyAppBar(
         title: to.name,
@@ -40,11 +45,9 @@ class ChatScreen extends StatelessWidget {
         to: to,
       ),
       body: BlocProvider(
-        create: (BuildContext context) => SearchBloc(
-            repository: MessageRepository(
-                RepositoryProvider.of<AuthenticationRepository>(context)
-                    .token!))
-          ..add(SearchFetched()),
+        create: (BuildContext context) =>
+            ChatBloc(repository: MessageRepository(token), token: token)
+              ..add(ChatFetched()),
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -68,13 +71,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
   List<Message> messages = [];
 
   final _scrollController = ScrollController();
-  late final SearchBloc _searchBloc;
+  late final ChatBloc _chatBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _searchBloc = BlocProvider.of<SearchBloc>(context);
+    _chatBloc = BlocProvider.of<ChatBloc>(context);
   }
 
   @override
@@ -84,7 +87,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _searchBloc.add(SearchFetched());
+    if (_isBottom) _chatBloc.add(ChatFetched());
   }
 
   bool get _isBottom {
@@ -96,7 +99,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
   void onSearch(String query) {
     if (query.length > 0) {
-      _searchBloc.add(SearchFetched(query: query));
+      _chatBloc.add(ChatFetched(query: query));
     }
   }
 
@@ -105,12 +108,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
     final Size size = MediaQuery.of(context).size;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
-      child: BlocBuilder<SearchBloc, SearchState>(
+      child: BlocBuilder<ChatBloc, ChatState>(
         builder: (context, state) {
           switch (state.status) {
-            case SearchStatus.failure:
+            case ChatStatus.failure:
               return const Center(child: Text('failed to fetch posts'));
-            case SearchStatus.success:
+            case ChatStatus.success:
               if (state.models.isEmpty) {
                 return const Center(child: Text('no posts'));
               }

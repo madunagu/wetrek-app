@@ -33,7 +33,7 @@ class TrekScreen extends StatefulWidget {
 class _TrekScreenState extends State<TrekScreen> {
   late Trek trek;
   bool isJoining = false;
-  late bool isAttending;
+  late bool isAttending= false;
   @override
   void initState() {
     trek = widget.trek;
@@ -111,7 +111,7 @@ class _TrekScreenState extends State<TrekScreen> {
                       ),
                       SizedBox(height: 16),
                       TrekItem(
-                        subTitle: "{$trek.usersCount} Trekkers",
+                        subTitle: "${trek.usersCount} Trekkers",
                         title: 'Trekkers',
                         child: InkWell(
                           onTap: () {

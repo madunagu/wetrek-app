@@ -47,7 +47,7 @@ class Trek extends Messagable {
   final DateTime startingAt;
   final String userId;
   final String description;
-  final String usersCount;
+  final String? usersCount;
   final List<Picture>? pictures;
   final String duration;
   final DateTime? endingAt;
@@ -75,7 +75,7 @@ class Trek extends Messagable {
       startingAt: DateTime.parse(json['starting_at'] as String),
       userId: json['user_id'] as String,
       description: json['description'] as String,
-      usersCount: json['users_count'] as String,
+      usersCount: json['users_count'] as String?,
       pictures: json['pictures'] != null
           ? (json['pictures'] as List? ?? [])
               .map((e) => Picture.fromJson(e))

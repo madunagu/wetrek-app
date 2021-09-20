@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,22 +39,28 @@ class PlaceDetailsPreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-              flex: 2,
-              child: Container(
-                height: 44,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    Image.asset('images/sushi.jpg', height: 44),
-                    Image.asset('images/museum.jpg', height: 44),
-                    Image.asset('images/ice_cream.jpg', height: 44),
-                  ],
-                ),
-              )),
+            flex: 2,
+            child: Container(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: trek.pictures != null && trek.pictures!.isNotEmpty
+                    ? trek.pictures!
+                        .map((e) => Image.network(e.small, height: 44))
+                        .toList()
+                    : [],
+              ),
+            ),
+          ),
           Expanded(
             flex: 1,
-            child: Container(
-              child: MyButton('GO THERE'),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(TrekScreen.route(trek));
+              },
+              child: Container(
+                child: MyButton('GO THERE'),
+              ),
             ),
           )
         ],
@@ -73,6 +80,8 @@ class TrekForm extends StatefulWidget {
 class _TrekFormState extends State<TrekForm> {
   late final TextEditingController _titleController;
   late final TextEditingController _startingAtController;
+  bool isLoading = false;
+
   @override
   void initState() {
     _titleController = TextEditingController();
@@ -88,9 +97,10 @@ class _TrekFormState extends State<TrekForm> {
   }
 
   createTrek() async {
+    isLoading = true;
     Map<String, String> data = {
       "starting_at": _startingAtController.value.text,
-      "title": _titleController.value.text,
+      "name": _titleController.value.text,
       "start_address": widget.controller.originAddress!.toJson().toString(),
       "end_address": widget.controller.originAddress!.toJson().toString(),
       "directions": widget.controller.direction!.toJson().toString(),
@@ -101,6 +111,7 @@ class _TrekFormState extends State<TrekForm> {
           .create(data);
       Navigator.push(context, TrekScreen.route(trek));
     } on Exception catch (e) {
+      isLoading = false;
       widget.controller.addError(e);
     }
   }
@@ -122,7 +133,8 @@ class _TrekFormState extends State<TrekForm> {
           MyButton(
             'Continue',
             isLarge: true,
-            onTap: createTrek,
+            isLoading: isLoading,
+            onTap: isLoading ? null : createTrek,
           ),
         ],
       ),
@@ -1087,22 +1099,22 @@ class _SearchResultsState extends State<SearchResults> {
   late SearchBloc _searchBloc;
 
   late final StreamSubscription<String> searchSubscription;
+
   @override
   void initState() {
-    _scrollController.addListener(_onScroll);
-    _searchBloc = BlocProvider.of<SearchBloc>(context);
+    // _scrollController.addListener(_onScroll);
+    // _searchBloc = BlocProvider.of<SearchBloc>(context);
+    _searchBloc = context.read<SearchBloc>(); //Context.read
 //    _postBloc.add(ListFetched());
-    searchSubscription = widget.controller.searchQueryStream.listen((query) {
-      onSearch(query);
-    });
-
+    searchSubscription = widget.controller.searchQueryStream.listen(onSearch);
     super.initState();
   }
 
   void onSearch(String query) {
-//    if (query.length > 3) {
-    _searchBloc.add(SearchFetched(query: query));
-//    }
+    log("widget searching for $query");
+    if (query.length > 0) {
+      _searchBloc.add(SearchFetched(query: query));
+    }
   }
 
   @override
@@ -1112,61 +1124,71 @@ class _SearchResultsState extends State<SearchResults> {
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_isBottom) _searchBloc.add(SearchFetched());
-  }
+  // void _onScroll() {
+  //   if (_isBottom) _searchBloc.add(SearchFetched());
+  // }
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
-  }
+  // bool get _isBottom {
+  //   if (!_scrollController.hasClients) return false;
+  //   final maxScroll = _scrollController.position.maxScrollExtent;
+  //   final currentScroll = _scrollController.offset;
+  //   return currentScroll >= (maxScroll * 0.9);
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Color(0xffF7F7FA),
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        height: 200,
-        child: Column(
-          children: [
-            Container(child: Text('SEARCH RESULTS')),
-            Container(
-              child: BlocBuilder<SearchBloc, SearchState>(
-                builder: (context, state) {
-                  switch (state.status) {
-                    case SearchStatus.failure:
-                      return const Center(
-                          child: Text('failed to fetch suggestions'));
-                    case SearchStatus.success:
-                      if (state.models.isEmpty) {
-                        return const Center(child: Text('no suggestions'));
-                      }
-                      return ListView.builder(
-                        itemBuilder: (BuildContext context, int index) {
-                          return index >= state.models.length
-                              ? BottomLoader()
-                              : GestureDetector(
-                                  onTap: () => widget.controller.selectAddress(
-                                      state.models[index] as Address),
-                                  child: SearchResultRow(
-                                      state.models[index] as Address),
-                                );
-                        },
-                        itemCount: state.hasReachedMax
-                            ? state.models.length
-                            : state.models.length + 1,
-                        controller: _scrollController,
-                      );
-                    default:
-                      return const Center(child: CircularProgressIndicator());
-                  }
-                },
-              ),
+      color: Color(0xffF7F7FA),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      height: 200,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SEARCH RESULTS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0x9978849E),
             ),
-          ],
-        ));
+          ),
+          Container(
+            height: 180,
+            child: BlocBuilder<SearchBloc, SearchState>(
+              builder: (context, state) {
+                switch (state.status) {
+                  case SearchStatus.failure:
+                    return const Center(
+                        child: Text('failed to fetch suggestions'));
+                  case SearchStatus.success:
+                    if (state.models.isEmpty) {
+                      return const Center(child: Text('no suggestions'));
+                    }
+                    return ListView.builder(
+                      itemBuilder: (BuildContext context, int index) {
+                        return index >= state.models.length
+                            ? BottomLoader()
+                            : GestureDetector(
+                                onTap: () => widget.controller.selectAddress(
+                                    state.models[index] as Address),
+                                child: SearchResultRow(
+                                    state.models[index] as Address),
+                              );
+                      },
+                      itemCount: state.hasReachedMax
+                          ? state.models.length
+                          : state.models.length + 1,
+                      controller: _scrollController,
+                    );
+                  default:
+                    return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

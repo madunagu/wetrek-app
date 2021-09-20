@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/list.bloc.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
@@ -36,9 +39,11 @@ class _UsersScreenState extends State<UsersScreen> {
         title: 'Users',
         rightIcon: Icons.filter_list,
       ),
-      body: BlocProvider<ListBloc>(
-        create: (context) => ListBloc(repository: UserRepository(RepositoryProvider.of<AuthenticationRepository>(context)
-            .token!)),
+      body: BlocProvider<SearchBloc>(
+        create: (context) => SearchBloc(
+            repository: UserRepository(
+                RepositoryProvider.of<AuthenticationRepository>(context)
+                    .token!)),
         child: UserList(),
       ),
     );
@@ -56,15 +61,14 @@ class UserList extends StatefulWidget {
 
 class _UserListState extends State<UserList> {
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
-  late ListBloc _postBloc;
+  late final SearchBloc _searchBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _postBloc = BlocProvider.of<ListBloc>(context);
-    _postBloc.add(ListFetched());
+    _searchBloc = context.read<SearchBloc>();
+    _searchBloc.add(SearchFetched());
   }
 
   @override
@@ -74,44 +78,50 @@ class _UserListState extends State<UserList> {
   }
 
   void _onScroll() {
+    if (_isBottom) _searchBloc.add(SearchFetched());
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
-      _postBloc.add(ListFetched());
-    }
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void onSearch(String query) {
     if (query.length > 3) {
-      _postBloc.add(ListFetched(query: query));
+      _searchBloc.add(SearchFetched(query: query));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ListBloc, ListState>(
+    final Size size = MediaQuery.of(context).size;
+    return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        if (state is ListInitial) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (state is ListFailure) {
-          //TODO: design widget for this particular function
-          //let the popups be for other exceptions
-          return Center(
-            child: Text('fetch failed'),
-          );
-        }
-        if (state is ListSuccess) {
-          if (state.models.isEmpty) {
-            return Center(
-              child: Text('no messages'),
+        switch (state.status) {
+          case SearchStatus.failure:
+            return const Center(child: Text('failed to fetch users'));
+          case SearchStatus.success:
+            if (state.models.isEmpty) {
+              return const Center(child: Text('no users'));
+            }
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return index >= state.models.length
+                    ? BottomLoader()
+                    : SingleUser(
+                        user: state.models[index] as User,
+                      );
+              },
+              itemCount: state.hasReachedMax
+                  ? state.models.length
+                  : state.models.length + 1,
+              controller: _scrollController,
             );
-          }
-          return this.listTreks(state.models);
+          default:
+            return const Center(child: CircularProgressIndicator());
         }
-        return Container();
       },
     );
   }
@@ -191,4 +201,3 @@ class SingleUser extends StatelessWidget {
     );
   }
 }
-

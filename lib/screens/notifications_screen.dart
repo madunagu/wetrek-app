@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
-import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/models/index.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
-import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/notification_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
 

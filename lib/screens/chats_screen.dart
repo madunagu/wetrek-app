@@ -13,6 +13,7 @@ import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
+import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class ChatsScreen extends StatelessWidget {
@@ -42,6 +43,20 @@ class ChatsScreen extends StatelessWidget {
           child: MessageList(),
         ),
       ),
+      floatingActionButton: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(UsersScreen.route());
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color(0xff5773FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          width: 52,
+          height: 52,
+          child: Icon(Icons.add, color: Colors.white, size: 24),
+        ),
+      ),
     );
   }
 }
@@ -54,7 +69,6 @@ class MessageList extends StatefulWidget {
 }
 
 class _MessageListState extends State<MessageList> {
-  List<Message> messages = [];
 
   final _scrollController = ScrollController();
   late final SearchBloc _searchBloc;

@@ -96,6 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _LoginButton extends StatelessWidget {
+  _LoginButton({required this.onTap});
+  final Function onTap;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginBloc, LoginState>(
@@ -106,7 +108,7 @@ class _LoginButton extends StatelessWidget {
             : GestureDetector(
                 onTap: state.status.isValidated
                     ? () {
-                        context.read<LoginBloc>().add(const LoginSubmitted());
+                        onTap();
                       }
                     : null,
                 child: Container(
@@ -237,7 +239,11 @@ class LoginForm extends StatelessWidget {
           SizedBox(
             height: 47,
           ),
-          _LoginButton(),
+          _LoginButton(
+            onTap: () {
+              context.read<LoginBloc>().add(const LoginSubmitted());
+            },
+          ),
         ]),
       ),
     );
@@ -313,26 +319,7 @@ class _RegisterFormState extends State<RegisterForm> {
           SizedBox(
             height: 23,
           ),
-          GestureDetector(
-            onTap: _onRegisterPressed,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Color(0xff3ACCE1),
-              ),
-              padding: EdgeInsets.all(16),
-              width: double.infinity,
-              alignment: Alignment.center,
-              child: Text(
-                'CONTINUE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  height: 1.333,
-                ),
-              ),
-            ),
-          ),
+          _LoginButton(onTap: _onRegisterPressed),
         ]),
       );
     });

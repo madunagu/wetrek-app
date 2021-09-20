@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-
 @immutable
 class Pagination {
-
   const Pagination({
     required this.total,
     required this.count,
@@ -18,49 +16,59 @@ class Pagination {
   final int currentPage;
   final int totalPages;
 
-  factory Pagination.fromJson(Map<String,dynamic> json) => Pagination(
-    total: json['total'] as int,
-    count: json['count'] as int,
-    perPage: json['per_page'] as int,
-    currentPage: json['current_page'] as int,
-    totalPages: json['total_pages'] as int
-  );
-  
+  factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
+      total: json['total'] as int,
+      count: json['count'] as int,
+      perPage: json['per_page'] as int,
+      currentPage: json['current_page'] as int,
+      totalPages: json['total_pages'] as int);
+
+  bool isLastPage() => currentPage >= totalPages;
+
   Map<String, dynamic> toJson() => {
-    'total': total,
-    'count': count,
-    'per_page': perPage,
-    'current_page': currentPage,
-    'total_pages': totalPages
-  };
+        'total': total,
+        'count': count,
+        'per_page': perPage,
+        'current_page': currentPage,
+        'total_pages': totalPages
+      };
 
   Pagination clone() => Pagination(
-    total: total,
-    count: count,
-    perPage: perPage,
-    currentPage: currentPage,
-    totalPages: totalPages
-  );
+      total: total,
+      count: count,
+      perPage: perPage,
+      currentPage: currentPage,
+      totalPages: totalPages);
 
-
-  Pagination copyWith({
-    int? total,
-    int? count,
-    int? perPage,
-    int? currentPage,
-    int? totalPages
-  }) => Pagination(
-    total: total ?? this.total,
-    count: count ?? this.count,
-    perPage: perPage ?? this.perPage,
-    currentPage: currentPage ?? this.currentPage,
-    totalPages: totalPages ?? this.totalPages,
-  );
+  Pagination copyWith(
+          {int? total,
+          int? count,
+          int? perPage,
+          int? currentPage,
+          int? totalPages}) =>
+      Pagination(
+        total: total ?? this.total,
+        count: count ?? this.count,
+        perPage: perPage ?? this.perPage,
+        currentPage: currentPage ?? this.currentPage,
+        totalPages: totalPages ?? this.totalPages,
+      );
 
   @override
-  bool operator ==(Object other) => identical(this, other)
-    || other is Pagination && total == other.total && count == other.count && perPage == other.perPage && currentPage == other.currentPage && totalPages == other.totalPages;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Pagination &&
+          total == other.total &&
+          count == other.count &&
+          perPage == other.perPage &&
+          currentPage == other.currentPage &&
+          totalPages == other.totalPages;
 
   @override
-  int get hashCode => total.hashCode ^ count.hashCode ^ perPage.hashCode ^ currentPage.hashCode ^ totalPages.hashCode;
+  int get hashCode =>
+      total.hashCode ^
+      count.hashCode ^
+      perPage.hashCode ^
+      currentPage.hashCode ^
+      totalPages.hashCode;
 }

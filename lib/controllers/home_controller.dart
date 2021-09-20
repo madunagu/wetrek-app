@@ -45,6 +45,7 @@ class HomeController extends ChangeNotifier {
   setLocation(location) => _mapLocationController.add(location);
 
   search(String? query) {
+    log("searching for $query");
     searchQuery = query ?? searchQuery;
     _searchQueryController.sink.add(searchQuery ?? '');
   }

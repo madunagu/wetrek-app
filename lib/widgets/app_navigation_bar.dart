@@ -32,115 +32,118 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Container(
-      width: 325,
-      height: size.height,
-      color: Colors.white,
-      child: Column(
-        children: [
-          Container(
-            height: 250,
-            width: double.infinity,
-            child: Stack(
-              children: [
-                Container(
-                  height: 250,
-                  width: 325,
-                  color: Color(0xff2A2E43),
-                ),
-                Opacity(
-                  opacity: .18,
-                  child: Image.asset(
-                    'images/ice_cream.jpg',
-                    width: 325,
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Container(
+        width: 325,
+        height: size.height,
+        color: Colors.white,
+        child: Column(
+          children: [
+            Container(
+              height: 250,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Container(
                     height: 250,
-                    fit: BoxFit.cover,
+                    width: 325,
+                    color: Color(0xff2A2E43),
                   ),
-                ),
-                InkWell(
-                  onTap: goToProfile,
-                  child: Container(
-                    padding: EdgeInsets.only(top: 60, left: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            'images/avatar2.jpg',
-                            width: 64,
-                            height: 64,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          user.name,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            height: 32 / 24,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 7),
-                        Text(
-                          user.email,
-                          style: TextStyle(
-                            color: Color(0x8fffffff),
-                          ),
-                        ),
-                      ],
+                  Opacity(
+                    opacity: .18,
+                    child: Image.asset(
+                      'images/ice_cream.jpg',
+                      width: 325,
+                      height: 250,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-              ],
+                  InkWell(
+                    onTap: goToProfile,
+                    child: Container(
+                      padding: EdgeInsets.only(top: 60, left: 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'images/avatar2.jpg',
+                              width: 64,
+                              height: 64,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            user.name,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              height: 32 / 24,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 7),
+                          Text(
+                            user.email,
+                            style: TextStyle(
+                              color: Color(0x8fffffff),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          GradientLine(height: 8),
-          Container(
-            padding: EdgeInsets.only(top: 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DrawerLink(
-                  title: 'Home',
-                  active: true,
-                  icon: Icons.home_outlined,
-                ),
-                DrawerLink(
-                  title: 'Treks',
-                  icon: Icons.directions_walk,
-                  onTap: () {
-                    Navigator.push(context, TripsScreen.route());
-                  },
-                ),
-                DrawerLink(
-                  icon: CustomIcons.icons_comment,
-                  title: 'Chats',
-                  onTap: () {
-                    Navigator.push(context, ChatsScreen.route());
-                  },
-                ),
-                DrawerLink(
-                  title: 'Notifications',
-                  icon: Icons.notifications,
-                  onTap: () {
-                    Navigator.push(context, NotificationScreen.route());
-                  },
-                ),
-              ],
+            GradientLine(height: 8),
+            Container(
+              padding: EdgeInsets.only(top: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DrawerLink(
+                    title: 'Home',
+                    active: true,
+                    icon: Icons.home_outlined,
+                  ),
+                  DrawerLink(
+                    title: 'Treks',
+                    icon: Icons.directions_walk,
+                    onTap: () {
+                      Navigator.push(context, TripsScreen.route());
+                    },
+                  ),
+                  DrawerLink(
+                    icon: CustomIcons.icons_comment,
+                    title: 'Chats',
+                    onTap: () {
+                      Navigator.push(context, ChatsScreen.route());
+                    },
+                  ),
+                  DrawerLink(
+                    title: 'Notifications',
+                    icon: Icons.notifications,
+                    onTap: () {
+                      Navigator.push(context, NotificationScreen.route());
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          Spacer(),
-          DrawerLink(
-            title: 'Logout',
-            icon: Icons.logout,
-            onTap: () {
-              BlocProvider.of<AuthenticationBloc>(context)
-                  .add(AuthenticationLogoutRequested());
-            },
-          ),
-        ],
+            Spacer(),
+            DrawerLink(
+              title: 'Logout',
+              icon: Icons.logout,
+              onTap: () {
+                BlocProvider.of<AuthenticationBloc>(context)
+                    .add(AuthenticationLogoutRequested());
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

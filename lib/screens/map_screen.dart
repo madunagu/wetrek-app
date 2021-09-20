@@ -16,7 +16,6 @@ import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
-import 'package:wetrek/repositories/address_repository.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
@@ -111,7 +110,6 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     _getCloseTreks();
     super.initState();
   }
-
 
   showError(Exception e) {
     if (e is AuthenticationException) {
@@ -342,7 +340,7 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
       case HomePageStatus.suggesting:
         return BlocProvider<SearchBloc>(
           create: (BuildContext context) => SearchBloc(
-            repository: AddressRepository(
+            repository: MapsRepository(
                 RepositoryProvider.of<AuthenticationRepository>(context).token),
           ),
           child: SearchResults(controller: widget.controller),
@@ -371,7 +369,7 @@ mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
 
   LatLng _getPos(trek) {
     double _lat = 0, _lng = 0;
-    if (trek.locations != null || trek.locations!.isNotEmpty) {
+    if (trek.locations != null && trek.locations!.isNotEmpty) {
       _lat = trek.locations!.last.lat;
       _lng = trek.locations!.last.lng;
     } else {
@@ -392,8 +390,8 @@ mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
       _minLng = math.min(_minLat, pos.longitude);
     }
     return LatLngBounds(
-      southwest: LatLng(_maxLat, _maxLng),
-      northeast: LatLng(_minLat, _minLng),
+      southwest: LatLng(_minLat, _minLng),
+      northeast: LatLng(_maxLat, _maxLng),
     );
   }
 

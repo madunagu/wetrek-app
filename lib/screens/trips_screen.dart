@@ -201,9 +201,11 @@ class _MyTabBarState extends State<MyTabBar> {
   @override
   Widget build(BuildContext context) {
     return TabBar(
-      controller: widget.tabController,
-      indicator: BlueDashGradientDecoration(height: 6),
       labelPadding: EdgeInsets.all(0),
+      indicator: BlueDashGradientDecoration(height: 6),
+      unselectedLabelColor: Color(0xff959DAD),
+      labelColor: Color(0xff454F63),
+      controller: widget.tabController,
       onTap: (int i) {
 //        widget.tabController
 //            .animateTo(i, duration: Duration(seconds: 2));
@@ -295,7 +297,7 @@ String readableTime(DateTime time) {
   String result = '';
   if (timeNow.difference(time) > Duration(days: 365)) result += "${time.year} ";
   if (timeNow.difference(time) > Duration(days: 10))
-    result += "${kMonths[time.month -1]} ${time.day}";
+    result += "${kMonths[time.month - 1]} ${time.day}";
   else
     return timeago.format(time);
   return result;

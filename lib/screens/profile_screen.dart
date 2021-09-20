@@ -16,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
   final User user;
   static MaterialPageRoute route(User user) {
     return MaterialPageRoute(
-      builder: (context) => ProfileScreen(user: UserRepository.dummy()),
+      builder: (context) => ProfileScreen(user: user),
     );
   }
 
@@ -52,7 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Image.network(widget.user.picture.large, fit: BoxFit.cover, height: 400),
+          Image.network(widget.user.picture.large,
+              fit: BoxFit.cover, height: 400),
           Container(
             height: 400,
             color: Colors.black26,
@@ -556,4 +557,3 @@ class UserActionsBox extends StatelessWidget {
     );
   }
 }
-

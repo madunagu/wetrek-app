@@ -9,12 +9,18 @@ import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
 class MyButton extends StatelessWidget {
-  MyButton(this.text,
-      {this.onTap, this.isLarge = false, this.color = const Color(0xff3ACCE1)});
+  MyButton(
+    this.text, {
+    this.onTap,
+    this.isLarge = false,
+    this.isLoading = false,
+    this.color = const Color(0xff3ACCE1),
+  });
   final String text;
   final VoidCallback? onTap;
   final bool isLarge;
   final Color color;
+  final bool isLoading;
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -29,20 +35,23 @@ class MyButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color: color,
         ),
-        child: Text(
-          text,
-          style: isLarge
-              ? TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                )
-              : TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                  height: 17 / 13,
-                ),
+        child: Opacity(
+          opacity: isLoading ? 0.3 : 1,
+          child: Text(
+            text,
+            style: isLarge
+                ? TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  )
+                : TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    height: 17 / 13,
+                  ),
+          ),
         ),
       ),
     );
@@ -117,6 +126,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 198,
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
