@@ -44,7 +44,10 @@ class _UsersScreenState extends State<UsersScreen> {
             repository: UserRepository(
                 RepositoryProvider.of<AuthenticationRepository>(context)
                     .token!)),
-        child: UserList(),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: UserList(),
+        ),
       ),
     );
   }
@@ -123,19 +126,6 @@ class _UserListState extends State<UserList> {
             return const Center(child: CircularProgressIndicator());
         }
       },
-    );
-  }
-
-  Widget listTreks(treks) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [for (User user in treks) SingleUser(user: user)],
-        ),
-      ),
     );
   }
 }

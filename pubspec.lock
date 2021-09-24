@@ -380,6 +380,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.3.0"
+  laravel_echo:
+    dependency: "direct main"
+    description:
+      name: laravel_echo
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0-beta.1"
   logging:
     dependency: transitive
     description:
@@ -478,6 +485,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  pusher_client:
+    dependency: "direct main"
+    description:
+      name: pusher_client
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   rxdart:
     dependency: "direct main"
     description:

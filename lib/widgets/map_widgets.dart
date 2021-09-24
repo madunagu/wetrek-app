@@ -105,6 +105,7 @@ class _TrekFormState extends State<TrekForm> {
       "end_address": widget.controller.originAddress!.toJson().toString(),
       "directions": widget.controller.direction!.toJson().toString(),
     };
+    print(data);
     try {
       Trek trek = await TrekRepository(
               RepositoryProvider.of<AuthenticationRepository>(context).token!)
@@ -1140,7 +1141,7 @@ class _SearchResultsState extends State<SearchResults> {
     return Container(
       color: Color(0xffF7F7FA),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      height: 200,
+      height: 228,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -47,9 +47,9 @@ class Address extends Model {
         'place_id': placeId,
         'reference': reference,
         'matched_substrings':
-            matchedSubstrings?.map((e) => e.toString()).toList(),
+            matchedSubstrings?.map((e) => e.toJson()).toList(),
         'structured_formatting': structuredFormatting?.toJson(),
-        'terms': terms?.map((e) => e.toString()).toList(),
+        'terms': terms?.map((e) => e.toJson()).toList(),
         'types': types?.map((e) => e.toString()).toList()
       };
 
@@ -127,7 +127,7 @@ class StructuredFormatting {
   Map<String, dynamic> toJson() => {
         'main_text': mainText,
         'main_text_matched_substrings':
-            mainTextMatchedSubstrings.map((e) => e.toString()).toList(),
+            mainTextMatchedSubstrings.map((e) => e.toJson()).toList(),
         'secondary_text': secondaryText
       };
 

@@ -22,9 +22,9 @@ dependencies:
   # fluttericon:
   google_maps_flutter: ^2.0.6
   geolocator: ^7.2.0+1
-  # laravel_echo: ^0.2.9
+  laravel_echo: ^1.0.0-beta.1
   # flutter_pusher: ^1.0.3
-  # flutter_pusher_client: any
+  pusher_client: ^2.0.0
   rxdart: ^0.27.1
   timeago: ^3.1.0
 #  geolocator: ^7.0.3

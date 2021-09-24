@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
+import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/user.dart';
@@ -161,6 +163,96 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           SizedBox(height: 19),
           child ?? Container(),
+        ],
+      ),
+    );
+  }
+}
+
+class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final Color color;
+  final Color fontColor;
+  @override
+  final Size preferredSize;
+  SearchAppBar({
+    this.color = Colors.white,
+    this.fontColor = const Color(0xff454F63),
+  }) : preferredSize = Size.fromHeight(136.0);
+
+  @override
+  _SearchAppBarState createState() => _SearchAppBarState();
+}
+
+class _SearchAppBarState extends State<SearchAppBar> {
+  late TextEditingController _controller;
+  late final SearchBloc searchBloc;
+  @override
+  initState() {
+    _controller = TextEditingController();
+    searchBloc = context.read<SearchBloc>();
+    super.initState();
+  }
+
+  onBackPressed() {}
+
+  search(String s) {
+    searchBloc.add(SearchFetched(query: s));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 198,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 12),
+            color: Color(0xff2a455B63),
+            blurRadius: 16,
+          )
+        ],
+        color: widget.color,
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(left: 24, top: 46, right: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 26,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () => onBackPressed,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          color: Colors.transparent,
+                          child:
+                              Icon(Icons.arrow_back, color: widget.fontColor),
+                        ),
+                      ),
+                      TextField(
+                        controller: _controller,
+                        onChanged: search,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Search',
+                        ),
+                      ),
+                      // GestureDetector(
+                      //   onTap: search,
+                      //   child: Icon(Icons.search, color: widget.fontColor),
+                      // )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

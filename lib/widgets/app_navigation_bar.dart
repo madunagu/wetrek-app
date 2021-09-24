@@ -68,8 +68,8 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              'images/avatar2.jpg',
+                            child: Image.network(
+                              user.picture.small,
                               width: 64,
                               height: 64,
                             ),

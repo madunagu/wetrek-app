@@ -22,8 +22,8 @@ class Direction {
   );
   
   Map<String, dynamic> toJson() => {
-    'geocoded_waypoints': geocodedWaypoints.map((e) => e.toString()).toList(),
-    'routes': routes.map((e) => e.toString()).toList(),
+    'geocoded_waypoints': geocodedWaypoints.map((e) => e.toJson()).toList(),
+    'routes': routes.map((e) => e.toJson()).toList(),
     'status': status
   };
 

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:laravel_echo/laravel_echo.dart';
+import 'package:laravel_echo/laravel_echo.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/blocs/states/chat.state.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
+import 'package:wetrek/network/api.dart';
+import 'package:wetrek/pusher/pusher.dart';
 import 'package:wetrek/repositories/repository.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -22,26 +24,24 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     required this.token,
   }) : super(const ChatState()) {
     {
-      // // Create echo instance
-      // PusherOptions options = PusherOptions(
-      //   host: API.host,
-      //   port: 6001,
-      //   encrypted: false,
-      // );
+      // Create echo instance
+      PusherOptions options = PusherOptions(
+        host: API.host,
+        port: 6001,
+        encrypted: false,
+        auth: PusherAuth(API.host, headers: {'Authorization': 'Bearer $token'}),
+      );
 
-      // FlutterPusher pusher = FlutterPusher('app', options, enableLogging: true);
+      FlutterPusher pusher = FlutterPusher('app', options, enableLogging: true);
 
-      // Echo echo = new Echo({
-      //   'broadcaster': 'socket.io',
-      //   'client': pusher,
-      //   'auth': {
-      //     'headers': {'Authorization': 'Bearer $token'}
-      //   }
-      // });
+      Echo echo = new Echo(
+        broadcaster: EchoBroadcasterType.SocketIO,
+        client: pusher,
+      );
       // pusher.on('connect', (_) => print('connect'));
       // pusher.on('disconnect', (_) => print('disconnect'));
 
-      // echo.channel('chat-channel').listen('PublicEvent', _addMessage);
+      echo.channel('chat-channel').listen('PublicEvent', _addMessage);
     }
   }
 
