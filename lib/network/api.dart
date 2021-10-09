@@ -65,6 +65,7 @@ class API {
   Future<Map<String, dynamic>> post(
       String url, Map<String, dynamic> data) async {
     String jsonData = jsonEncode(data);
+    log(jsonData);
     Map<String, String> headers = this.headers();
 
     http.Response response = await http.post(

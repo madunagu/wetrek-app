@@ -34,17 +34,16 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MyAppBar(
-        title: 'Users',
-        rightIcon: Icons.filter_list,
-      ),
-      body: BlocProvider<SearchBloc>(
-        create: (context) => SearchBloc(
-            repository: UserRepository(
-                RepositoryProvider.of<AuthenticationRepository>(context)
-                    .token!)),
-        child: Container(
+    return BlocProvider<SearchBloc>(
+      create: (context) => SearchBloc(
+          repository: UserRepository(
+              RepositoryProvider.of<AuthenticationRepository>(context).token!)),
+      child: Scaffold(
+        appBar: MyAppBar(
+          title: 'Users',
+          rightIcon: Icons.search,
+        ),
+        body: Container(
           padding: EdgeInsets.symmetric(horizontal: 24),
           child: UserList(),
         ),

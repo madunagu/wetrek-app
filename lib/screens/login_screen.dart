@@ -212,39 +212,41 @@ class LoginForm extends StatelessWidget {
           }
         }
       },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
-        color: Color(0xffF7F7FA),
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height - 122,
-        child: Column(children: [
-          _EmailInput(),
-          _PasswordInput(),
-          SizedBox(
-            height: 13,
-          ),
-          GestureDetector(
-            onTap: () {
-              onForgotPassword(context);
-            },
-            child: Text(
-              'FORGOT PASSWORD?',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0x9078849E),
-                fontWeight: FontWeight.w500,
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
+          color: Color(0xffF7F7FA),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height - 122,
+          child: Column(children: [
+            _EmailInput(),
+            _PasswordInput(),
+            SizedBox(
+              height: 13,
+            ),
+            GestureDetector(
+              onTap: () {
+                onForgotPassword(context);
+              },
+              child: Text(
+                'FORGOT PASSWORD?',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0x9078849E),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 47,
-          ),
-          _LoginButton(
-            onTap: () {
-              context.read<LoginBloc>().add(const LoginSubmitted());
-            },
-          ),
-        ]),
+            SizedBox(
+              height: 47,
+            ),
+            _LoginButton(
+              onTap: () {
+                context.read<LoginBloc>().add(const LoginSubmitted());
+              },
+            ),
+          ]),
+        ),
       ),
     );
   }
@@ -294,33 +296,35 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
-        color: Color(0xffF7F7FA),
-        width: MediaQuery.of(context).size.width,
-        child: Column(children: [
-          MyInput(
-            hintText: 'First Name',
-            controller: firstNameController,
-          ),
-          MyInput(
-            hintText: 'Last Name',
-            controller: lastNameController,
-          ),
-          MyInput(
-            hintText: 'Email',
-            controller: emailController,
-          ),
-          MyInput(
-            hintText: 'Password',
-            obscureText: true,
-            controller: passwordController,
-          ),
-          SizedBox(
-            height: 23,
-          ),
-          _LoginButton(onTap: _onRegisterPressed),
-        ]),
+      return SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
+          color: Color(0xffF7F7FA),
+          width: MediaQuery.of(context).size.width,
+          child: Column(children: [
+            MyInput(
+              hintText: 'First Name',
+              controller: firstNameController,
+            ),
+            MyInput(
+              hintText: 'Last Name',
+              controller: lastNameController,
+            ),
+            MyInput(
+              hintText: 'Email',
+              controller: emailController,
+            ),
+            MyInput(
+              hintText: 'Password',
+              obscureText: true,
+              controller: passwordController,
+            ),
+            SizedBox(
+              height: 23,
+            ),
+            _LoginButton(onTap: _onRegisterPressed),
+          ]),
+        ),
       );
     });
   }

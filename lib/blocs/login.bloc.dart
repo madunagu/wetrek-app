@@ -2,16 +2,11 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:formz/formz.dart';
-import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
-import 'package:wetrek/blocs/authentication.bloc.dart';
-import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/blocs/events/login.event.dart';
 import 'package:wetrek/blocs/states/login.state.dart';
-import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
-import 'package:wetrek/repositories/user_repository.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({

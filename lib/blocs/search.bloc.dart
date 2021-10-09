@@ -38,26 +38,24 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         return state.copyWith(
           status: SearchStatus.success,
           models: paginatedList.data,
-          hasReachedMax: false,
+          hasReachedMax: paginatedList.pagination.isLastPage(),
         );
       }
       final Paginated<Model> paginatedList = await repository.list(
         Parameters(
-          page: 0,
+          page: state.pagination.currentPage + 1,
           length: 20,
           q: event.query ?? '',
         ),
       );
-      return paginatedList.pagination.isLastPage()
-          ? state.copyWith(hasReachedMax: true)
-          : state.copyWith(
-              status: SearchStatus.success,
-              models: event.query != null
-                  ? List.of(paginatedList.data)
-                  : List.of(state.models)
-                ..addAll(paginatedList.data),
-              hasReachedMax: false,
-            );
+      return state.copyWith(
+        status: SearchStatus.success,
+        models: event.query != null
+            ? List.of(paginatedList.data)
+            : List.of(state.models)
+          ..addAll(paginatedList.data),
+        hasReachedMax: paginatedList.pagination.isLastPage(),
+      );
     } on Exception {
       return state.copyWith(status: SearchStatus.failure);
     }

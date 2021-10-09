@@ -9,8 +9,9 @@ class Message extends Model {
   const Message({
     required this.message,
     required this.from,
+    required this.to,
     required this.createdAt,
-    required this.modifiedAt,
+    required this.updatedAt,
     this.messageCount,
     this.seenBy,
     this.seenAt,
@@ -18,8 +19,9 @@ class Message extends Model {
 
   final String message;
   final Messagable from;
+  final Messagable to;
   final DateTime createdAt;
-  final DateTime modifiedAt;
+  final DateTime updatedAt;
   final int? messageCount;
   final List<int>? seenBy;
   final List<String>? seenAt;
@@ -29,9 +31,12 @@ class Message extends Model {
       from: json['messagable_type'] as String == 'trek'
           ? Trek.fromJson(json['messagable'])
           : User.fromJson(json['messagable']),
-      messageCount: json['message_count'] as int,
+      to: User.fromJson(json['sender']),
+      messageCount: json['message_count'] != null
+          ? int.parse(json['message_count'] as String)
+          : 0,
       createdAt: DateTime.parse(json['created_at'] as String),
-      modifiedAt: DateTime.parse(json['modified_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
       seenBy: json['seen_by'] != null
           ? (json['seen_by'] as List? ?? []).map((e) => e as int).toList()
           : null,
@@ -42,9 +47,10 @@ class Message extends Model {
   Map<String, dynamic> toJson() => {
         'message': message,
         'from': from,
+        'to': to,
         'message_count': messageCount,
         'created_at': createdAt.toIso8601String(),
-        'modified_at': modifiedAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
         'seen_by': seenBy?.map((e) => e.toString()).toList(),
         'seen_at': seenAt?.map((e) => e.toString()).toList()
       };
@@ -52,23 +58,26 @@ class Message extends Model {
   Message clone() => Message(
       message: message,
       from: from,
+      to: to,
       createdAt: createdAt,
-      modifiedAt: modifiedAt,
+      updatedAt: updatedAt,
       seenBy: seenBy?.toList(),
       seenAt: seenAt?.toList());
 
   Message copyWith(
           {String? message,
           Messagable? from,
+          Messagable? to,
           DateTime? createdAt,
-          DateTime? modifiedAt,
+          DateTime? updatedAt,
           List<int>? seenBy,
           List<String>? seenAt}) =>
       Message(
         message: message ?? this.message,
         from: from ?? this.from,
+        to: from ?? this.to,
         createdAt: createdAt ?? this.createdAt,
-        modifiedAt: modifiedAt ?? this.modifiedAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         seenBy: seenBy ?? this.seenBy,
         seenAt: seenAt ?? this.seenAt,
       );
@@ -80,7 +89,7 @@ class Message extends Model {
           message == other.message &&
           from == other.from &&
           createdAt == other.createdAt &&
-          modifiedAt == other.modifiedAt &&
+          updatedAt == other.updatedAt &&
           seenBy == other.seenBy &&
           seenAt == other.seenAt;
 
@@ -89,7 +98,7 @@ class Message extends Model {
       message.hashCode ^
       from.hashCode ^
       createdAt.hashCode ^
-      modifiedAt.hashCode ^
+      updatedAt.hashCode ^
       seenBy.hashCode ^
       seenAt.hashCode;
 }

@@ -97,7 +97,9 @@ class _TrekFormState extends State<TrekForm> {
   }
 
   createTrek() async {
-    isLoading = true;
+    setState(() {
+      isLoading = true;
+    });
     Map<String, String> data = {
       "starting_at": _startingAtController.value.text,
       "name": _titleController.value.text,
@@ -112,7 +114,9 @@ class _TrekFormState extends State<TrekForm> {
           .create(data);
       Navigator.push(context, TrekScreen.route(trek));
     } on Exception catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
       widget.controller.addError(e);
     }
   }

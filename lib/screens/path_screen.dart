@@ -133,6 +133,17 @@ class DestinationPath extends StatelessWidget {
 //    int stop = htmlInstructions.indexOf(',');
     int stop = 8;
     return htmlInstructions.substring(3, stop);
+
+  }
+  
+String removeAllHtmlTags(String htmlText) {
+    RegExp exp = RegExp(
+      r"<[^>]*>",
+      multiLine: true,
+      caseSensitive: true
+    );
+
+    return htmlText.replaceAll(exp, '');
   }
 
   @override

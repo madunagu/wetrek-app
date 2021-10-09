@@ -8,6 +8,7 @@ class StatisticsScreen extends StatelessWidget {
       builder: (context) => StatisticsScreen(),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,8 +21,8 @@ class StatisticsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DetailCard(),
-              DetailCard(),
+              DetailCard(value: '25', unit: 'km'),
+              DetailCard(value: '25', unit: 'km'),
               SizedBox(height: 22),
               Text('FAVORITE PLACES', style: TextStyles.darkMinor),
               SizedBox(height: 15),
@@ -58,6 +59,16 @@ class StatisticsScreen extends StatelessWidget {
 }
 
 class DetailCard extends StatelessWidget {
+  final String value;
+  final String unit;
+  final String label;
+  final String buttonLabel;
+  DetailCard({
+    required this.value,
+    this.unit = "Units",
+    this.label = '',
+    this.buttonLabel = '',
+  });
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -105,11 +116,11 @@ class DetailCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total Time',
+                  label,
                   style: TextStyles.base,
                 ),
                 Text(
-                  'Set Goal',
+                  buttonLabel,
                   style: TextStyles.base.copyWith(
                     color: Colors.white,
                   ),

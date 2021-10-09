@@ -7,7 +7,9 @@ import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/models/where.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/trek_screen.dart';
@@ -39,52 +41,89 @@ class _TripsScreenState extends State<TripsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MyAppBar(
-        title: 'Trips',
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: Color(0xfff4f4f6)))),
+    return BlocProvider<SearchBloc>(
+      create: (context) => SearchBloc(
+          repository: TrekRepository(
+              RepositoryProvider.of<AuthenticationRepository>(context).token!)),
+      child: Scaffold(
+        appBar: MyAppBar(
+          title: 'Trips',
+          rightIcon: Icons.search,
+          hasSearch: true,
           child: MyTabBar(tabController: tabController),
         ),
+        body: TrekList(),
       ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          BlocProvider<SearchBloc>(
-            create: (context) => SearchBloc(
-                repository: TrekRepository(
-                    RepositoryProvider.of<AuthenticationRepository>(context)
-                        .token!)),
-            child: TrekList(),
-          ),
-          SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white,
-                    Color(0xffF7F7FA),
-                  ],
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-//                  SingleTrek(),
-//                  SingleTrek(),
-//                  SingleTrek(),
-//                  SingleTrek(),
-//                  SingleTrek(),
-                ],
-              ),
+    );
+  }
+}
+
+class MyTabBar extends StatefulWidget {
+  const MyTabBar({
+    Key? key,
+    required this.tabController,
+  }) : super(key: key);
+
+  final TabController tabController;
+
+  @override
+  _MyTabBarState createState() => _MyTabBarState();
+}
+
+class _MyTabBarState extends State<MyTabBar>  {
+  late final SearchBloc _searchBloc;
+  initState() {
+    _searchBloc = context.read<SearchBloc>();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TabBar(
+      labelPadding: EdgeInsets.all(0),
+      indicator: BlueDashGradientDecoration(height: 6),
+      unselectedLabelColor: Color(0xff959DAD),
+      labelColor: Color(0xff454F63),
+      controller: widget.tabController,
+      onTap: (int i) {
+        widget.tabController
+            .animateTo(i, duration: Duration(milliseconds: 500));
+        if (i > 0) {
+          _searchBloc.add(
+            SearchFetched(conditions: [Where(column: 'p', val: 'anything')]),
+          );
+        } else {
+          _searchBloc.add(SearchFetched());
+        }
+      },
+      tabs: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border(
+              right: BorderSide(color: Color(0xfff4f4f6)),
             ),
           ),
-        ],
-      ),
+          child: Tab(
+              child: Text(
+            'UPCOMING',
+            style: TextStyles.tab,
+          )),
+        ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border(
+              right: BorderSide(color: Color(0xfff4f4f6)),
+            ),
+          ),
+          child: Tab(
+              child: Text(
+            'HISTORY',
+            style: TextStyles.tab,
+          )),
+        ),
+      ],
     );
   }
 }
@@ -100,7 +139,6 @@ class TrekList extends StatefulWidget {
 
 class _TrekListState extends State<TrekList> {
   final _scrollController = ScrollController();
-  final _scrollThreshold = 200.0;
   late SearchBloc _searchBloc;
 
   @override
@@ -172,72 +210,6 @@ class _TrekListState extends State<TrekList> {
           }
         },
       ),
-    );
-  }
-}
-
-class MyTabBar extends StatefulWidget {
-  const MyTabBar({
-    Key? key,
-    required this.tabController,
-  }) : super(key: key);
-
-  final TabController tabController;
-
-  @override
-  _MyTabBarState createState() => _MyTabBarState();
-}
-
-class _MyTabBarState extends State<MyTabBar> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    widget.tabController.addListener(() {
-//      setState(() {});
-    });
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TabBar(
-      labelPadding: EdgeInsets.all(0),
-      indicator: BlueDashGradientDecoration(height: 6),
-      unselectedLabelColor: Color(0xff959DAD),
-      labelColor: Color(0xff454F63),
-      controller: widget.tabController,
-      onTap: (int i) {
-//        widget.tabController
-//            .animateTo(i, duration: Duration(seconds: 2));
-      },
-      tabs: [
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border(
-              right: BorderSide(color: Color(0xfff4f4f6)),
-            ),
-          ),
-          child: Tab(
-              child: Text(
-            'UPCOMING',
-            style: TextStyles.tab,
-          )),
-        ),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border(
-              right: BorderSide(color: Color(0xfff4f4f6)),
-            ),
-          ),
-          child: Tab(
-              child: Text(
-            'HISTORY',
-            style: TextStyles.tab,
-          )),
-        ),
-      ],
     );
   }
 }

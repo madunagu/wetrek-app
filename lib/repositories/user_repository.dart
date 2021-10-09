@@ -18,8 +18,8 @@ class UserRepository extends Repository {
   }
 
   Future<Paginated<User>> list(Parameters params) async {
-    final Map<String, dynamic> res = await api.get('/users');
-
+    final Map<String, dynamic> p = params.toJson();
+    final Map<String, dynamic> res = await api.get('/users',params: p);
     return Paginated(
       data: (res['data'] as List? ?? []).map((e) => User.fromJson(e)).toList(),
       pagination: Pagination.fromJson(res['pagination']),

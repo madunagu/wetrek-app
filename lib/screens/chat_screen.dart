@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/chat.bloc.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
@@ -16,10 +17,12 @@ import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/messagable.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/model.dart';
+import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
+import 'package:wetrek/repositories/socket_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
@@ -32,23 +35,41 @@ class ChatScreen extends StatelessWidget {
 
   ChatScreen({required this.to});
   final Messagable to;
+
+//   @override
+//   _ChatScreenState createState() => _ChatScreenState();
+// }
+
+// class _ChatScreenState extends State<ChatScreen> {
+//   late final String token;
+//   late final SocketRepository socketRepository;
+
+  // @override
+  // void initState() {
+  //   token = RepositoryProvider.of<AuthenticationRepository>(context).token!;
+  //   socketRepository = RepositoryProvider.of<SocketRepository>(context);
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
-    String token =
-        RepositoryProvider.of<AuthenticationRepository>(context).token!;
-    return Scaffold(
-      appBar: MyAppBar(
-        title: to.name,
-        rightIcon: Icons.search,
-      ),
-      bottomSheet: ChatTextInput(
-        to: to,
-      ),
-      body: BlocProvider(
-        create: (BuildContext context) =>
-            ChatBloc(repository: MessageRepository(token), token: token)
-              ..add(ChatFetched()),
-        child: Container(
+    return BlocProvider(
+      create: (BuildContext context) => ChatBloc(
+        repository: MessageRepository(
+            RepositoryProvider.of<AuthenticationRepository>(context).token!),
+        socketRepository: RepositoryProvider.of<SocketRepository>(context),
+        params: Parameters(id: to.id, where: {'isGroup': to.isGroup}),
+      )..add(ChatFetched()),
+      child: Scaffold(
+        appBar: MyAppBar(
+          title: to.name,
+          rightIcon: Icons.search,
+          hasSearch: false,
+        ),
+        bottomSheet: ChatTextInput(
+          to: to,
+        ),
+        body: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: ChatMessageList(),
@@ -72,12 +93,15 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
   final _scrollController = ScrollController();
   late final ChatBloc _chatBloc;
+  late final User me;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _chatBloc = BlocProvider.of<ChatBloc>(context);
+
+    me = BlocProvider.of<AuthenticationBloc>(context).state.user!;
   }
 
   @override
@@ -126,6 +150,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
                       : ChatItem(
                           message: state.models[index] as Message,
                           size: size,
+                          isSender:
+                              me.id == (state.models[index] as Message).to.id,
                         );
                 },
                 separatorBuilder: (BuildContext context, int index) {

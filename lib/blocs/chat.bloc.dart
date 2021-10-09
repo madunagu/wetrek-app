@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:laravel_echo/laravel_echo.dart';
+import 'package:pusher_client/pusher_client.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/blocs/states/chat.state.dart';
 import 'package:wetrek/models/message.dart';
@@ -8,90 +10,82 @@ import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/network/api.dart';
-import 'package:wetrek/pusher/pusher.dart';
+// import 'package:wetrek/pusher/pusher.dart';
+import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/repository.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:wetrek/repositories/socket_repository.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
-  final Repository repository;
-  final String token;
+  final MessageRepository repository;
+  final SocketRepository socketRepository;
+  Parameters params;
 
-  StreamController<Message> _messagesStreamController = StreamController();
-  Stream<Message> get messages => _messagesStreamController.stream;
+  late final StreamSubscription<Message> messagesStreamSubscription;
 
   ChatBloc({
     required this.repository,
-    required this.token,
+    required this.socketRepository,
+    this.params = const Parameters(),
   }) : super(const ChatState()) {
     {
-      // Create echo instance
-      PusherOptions options = PusherOptions(
-        host: API.host,
-        port: 6001,
-        encrypted: false,
-        auth: PusherAuth(API.host, headers: {'Authorization': 'Bearer $token'}),
-      );
-
-      FlutterPusher pusher = FlutterPusher('app', options, enableLogging: true);
-
-      Echo echo = new Echo(
-        broadcaster: EchoBroadcasterType.SocketIO,
-        client: pusher,
-      );
-      // pusher.on('connect', (_) => print('connect'));
-      // pusher.on('disconnect', (_) => print('disconnect'));
-
-      echo.channel('chat-channel').listen('PublicEvent', _addMessage);
+      messagesStreamSubscription =
+          socketRepository.messageSubscription.listen((event) {
+        this.add(ChatAdded(message: event));
+      });
     }
   }
 
   void dispose() {
-    _messagesStreamController.close();
+    messagesStreamSubscription.cancel();
   }
 
   //TODO: work on navigation in infinite list
   @override
   Stream<ChatState> mapEventToState(ChatEvent event) async* {
     if (event is ChatFetched) {
-      yield await _mapPostFetchedToState(state);
+      yield await _mapPostFetchedToState(state, event);
     }
     if (event is ChatAdded) {
       yield await _mapSocketAdditionToState(state, event);
     }
   }
 
-  Future<ChatState> _mapPostFetchedToState(ChatState state) async {
+  Future<ChatState> _mapPostFetchedToState(
+      ChatState state, ChatFetched event) async {
     if (state.hasReachedMax) return state;
     try {
       if (state.status == ChatStatus.initial) {
-        final Paginated<Model> paginatedList = await repository.list(
-          Parameters(
+        final Paginated<Model> paginatedList = await repository.getMessages(
+          params.copyWith(
             page: 0,
             length: 20,
-            q: '',
+            q: event.query ?? '',
           ),
         );
 
         return state.copyWith(
           status: ChatStatus.success,
           models: paginatedList.data,
-          hasReachedMax: false,
+          hasReachedMax: paginatedList.pagination.isLastPage(),
         );
       }
-      final Paginated<Model> paginatedList = await repository.list(
-        Parameters(
-          page: 0,
+      final Paginated<Model> paginatedList = await repository.getMessages(
+        params.copyWith(
+          page: state.pagination.currentPage + 1,
           length: 20,
-          q: '',
+          q: event.query ?? '',
         ),
       );
-      return paginatedList.data.isEmpty
-          ? state.copyWith(hasReachedMax: true)
-          : state.copyWith(
-              status: ChatStatus.success,
-              models: List.of(state.models)..addAll(paginatedList.data),
-              hasReachedMax: false,
-            );
+
+      return state.copyWith(
+        status: ChatStatus.success,
+        models: event.query != null
+            ? List.of(paginatedList.data)
+            : List.of(state.models)
+          ..addAll(paginatedList.data),
+        hasReachedMax: paginatedList.pagination.isLastPage(),
+      );
     } on Exception {
       return state.copyWith(status: ChatStatus.failure);
     }
@@ -108,11 +102,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     } on Exception {
       return state.copyWith(status: ChatStatus.failure);
     }
-  }
-
-  void _addMessage(e) {
-    //TODO: may need to parse the json to a message model...
-    this.add(ChatAdded(message: e));
   }
 
   @override

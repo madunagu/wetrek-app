@@ -1,13 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
-import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/user.dart';
-import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/chats_screen.dart';
 import 'package:wetrek/screens/edit_profile.dart';
+import 'package:wetrek/screens/notifications_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
@@ -26,6 +28,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late final bool isMyProfile;
+  late final User myself;
   chatTapped() {
     if (isMyProfile) {
       Navigator.push(context, ChatsScreen.route());
@@ -34,21 +37,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  locationTapped() {}
-  accompanyTapped() {}
   String readableAddress() {
-    return "An address";
+    if (isMyProfile) {
+      return 'My Location';
+    }
+    Location userLocation = widget.user.locations.isEmpty
+        ? Location(lat: 0, lng: 0)
+        : widget.user.locations.last;
+    Location myLocation = myself.locations.isEmpty
+        ? Location(lat: 0, lng: 0)
+        : myself.locations.last;
+
+    const R = 6371e3; // metres
+    double fi1 = myLocation.lat * math.pi / 180; // φ, λ in radians
+    double fi2 = userLocation.lat * math.pi / 180;
+    double dLat = (userLocation.lat - myLocation.lat) * math.pi / 180;
+    double dLon = (userLocation.lng - myLocation.lng) * math.pi / 180;
+
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(fi1) * math.cos(fi2) * math.sin(dLon / 2) * math.sin(dLon / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    int distance = (R * c / 100).round(); // in Kilometres
+
+    return "${distance}Km away";
   }
+
+  locationTapped() {}
+
+  accompanyTapped() {}
 
   @override
   void initState() {
-    User user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
-    isMyProfile = user == widget.user;
+    myself = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    isMyProfile = myself.id == widget.user.id;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Stack(
         children: [
@@ -57,6 +85,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             height: 400,
             color: Colors.black26,
+          ),
+          Positioned(
+            top: 56,
+            child: Container(
+              width: size.width,
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: MyAppBarNavigation(
+                fontColor: Colors.white,
+                rightIcon: Icons.edit,
+                onPressed: () {
+                  Navigator.push(context, EditProfile.route());
+                },
+              ),
+            ),
           ),
           DraggableScrollableSheet(
               initialChildSize: 0.5,
@@ -296,8 +338,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           flex: 1,
                                           child: GestureDetector(
                                             onTap: () {
-                                              Navigator.push(
-                                                  context, EditProfile.route());
+                                              Navigator.push(context,
+                                                  NotificationScreen.route());
                                             },
                                             child: Column(
                                               mainAxisAlignment:
@@ -551,6 +593,89 @@ class UserActionsBox extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FollowersCounter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Color(0x14455B63))],
+      ),
+      child: Row(
+        children: [
+          Flexible(
+            flex: 1,
+            child: Container(
+              child: Column(
+                children: [
+                  Text(
+                    '125',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff454F63),
+                    ),
+                  ),
+                  Text(
+                    'FOLLOWERS',
+                    style:
+                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Flexible(
+            flex: 1,
+            child: Container(
+              child: Column(
+                children: [
+                  Text(
+                    '125',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff454F63),
+                    ),
+                  ),
+                  Text(
+                    'FOLLOWERS',
+                    style:
+                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Flexible(
+            flex: 1,
+            child: Container(
+              child: Column(
+                children: [
+                  Text(
+                    '125',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff454F63),
+                    ),
+                  ),
+                  Text(
+                    'FOLLOWERS',
+                    style:
+                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

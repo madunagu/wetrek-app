@@ -107,7 +107,7 @@ class GradientLine extends StatelessWidget {
   }
 }
 
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
+class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final Widget? child;
   final VoidCallback? onPressed;
@@ -116,6 +116,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color fontColor;
   @override
   final Size preferredSize;
+  final bool hasSearch;
   MyAppBar({
     required this.title,
     this.child,
@@ -123,80 +124,95 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.rightIcon = Icons.filter_list,
     this.color = Colors.white,
     this.fontColor = const Color(0xff454F63),
+    this.hasSearch = false,
   }) : preferredSize = Size.fromHeight(child == null ? 136.0 : 176);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 198,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 12),
-            color: Color(0xff2a455B63),
-            blurRadius: 16,
-          )
-        ],
-        color: color,
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(left: 24, top: 46, right: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MyAppBarNavigation(
-                  fontColor: fontColor,
-                  onPressed: onPressed ?? () {},
-                  rightIcon: rightIcon,
-                ),
-                SizedBox(height: 14),
-                Text(
-                  title,
-                  style: TextStyles.title.copyWith(
-                    color: fontColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 19),
-          child ?? Container(),
-        ],
-      ),
-    );
-  }
+  _MyAppBarState createState() => _MyAppBarState();
 }
 
-class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final Color color;
-  final Color fontColor;
-  @override
-  final Size preferredSize;
-  SearchAppBar({
-    this.color = Colors.white,
-    this.fontColor = const Color(0xff454F63),
-  }) : preferredSize = Size.fromHeight(136.0);
-
-  @override
-  _SearchAppBarState createState() => _SearchAppBarState();
-}
-
-class _SearchAppBarState extends State<SearchAppBar> {
+class _MyAppBarState extends State<MyAppBar> {
   late TextEditingController _controller;
   late final SearchBloc searchBloc;
+  bool isSearching = false;
   @override
   initState() {
-    _controller = TextEditingController();
-    searchBloc = context.read<SearchBloc>();
+    if (widget.hasSearch) {
+      _controller = TextEditingController();
+      searchBloc = context.read<SearchBloc>();
+    }
     super.initState();
   }
 
   onBackPressed() {}
 
+  onSearchPressed() {
+    setState(() {
+      isSearching = true;
+    });
+  }
+
   search(String s) {
     searchBloc.add(SearchFetched(query: s));
+  }
+
+  List<Widget> whatType() {
+    if (isSearching) {
+      return [
+        Container(
+          height: 26,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () => onBackPressed,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  color: Colors.transparent,
+                  child: Icon(Icons.arrow_back, color: widget.fontColor),
+                ),
+              ),
+              TextField(
+                controller: _controller,
+                onChanged: search,
+                style: TextStyle(color: Color(0xff454F63)),
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: Color(0xffF4F4F6),
+                    ),
+                  ),
+                  hintText: 'Search',
+                  hintStyle: TextStyle(color: Color(0xff959DAD)),
+                ),
+              ),
+              // GestureDetector(
+              //   onTap: search,
+              //   child: Icon(Icons.search, color: widget.fontColor),
+              // )
+            ],
+          ),
+        )
+      ];
+    }
+    return [
+      MyAppBarNavigation(
+        fontColor: widget.fontColor,
+        onPressed: widget.hasSearch ? onSearchPressed : widget.onPressed,
+        rightIcon: widget.rightIcon,
+      ),
+      SizedBox(height: 14),
+      Text(
+        widget.title,
+        style: TextStyles.title.copyWith(
+          color: widget.fontColor,
+        ),
+      ),
+      SizedBox(height: 19),
+      widget.child ?? Container(),
+    ];
   }
 
   @override
@@ -213,47 +229,12 @@ class _SearchAppBarState extends State<SearchAppBar> {
         ],
         color: widget.color,
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(left: 24, top: 46, right: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 26,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () => onBackPressed,
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          color: Colors.transparent,
-                          child:
-                              Icon(Icons.arrow_back, color: widget.fontColor),
-                        ),
-                      ),
-                      TextField(
-                        controller: _controller,
-                        onChanged: search,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Search',
-                        ),
-                      ),
-                      // GestureDetector(
-                      //   onTap: search,
-                      //   child: Icon(Icons.search, color: widget.fontColor),
-                      // )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: Container(
+        padding: EdgeInsets.only(left: 24, top: 46, right: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: whatType(),
+        ),
       ),
     );
   }
@@ -281,19 +262,26 @@ class ReviewBar extends StatelessWidget {
   }
 }
 
-class MyAppBarNavigation extends StatelessWidget {
+class MyAppBarNavigation extends StatelessWidget
+// implements PreferredSizeWidget
+{
   const MyAppBarNavigation({
     Key? key,
     this.onPressed,
     this.onBackPressed,
     this.rightIcon,
     this.fontColor = const Color(0xff454F63),
-  }) : super(key: key);
+  })
+  //  : preferredSize = const Size.fromHeight(16.0)
+  ;
 
   final Color fontColor;
   final VoidCallback? onPressed;
   final VoidCallback? onBackPressed;
   final IconData? rightIcon;
+
+  // @override
+  // final Size preferredSize;
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +301,7 @@ class MyAppBarNavigation extends StatelessWidget {
               child: Icon(Icons.arrow_back, color: fontColor),
             ),
           ),
-          rightIcon == null
+          rightIcon != null
               ? GestureDetector(
                   onTap: onPressed,
                   child: Icon(rightIcon, color: fontColor),
@@ -1168,6 +1156,25 @@ class HistoryItem extends StatelessWidget {
             ],
           )
         ],
+      ),
+    );
+  }
+}
+
+class RefreshButton extends StatelessWidget {
+  const RefreshButton({Key? key, required this.onClick}) : super(key: key);
+  final Function() onClick;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onClick,
+      child: Container(
+        child: Column(
+          children: [
+            Text('Failed to fetch items'),
+            Icon(Icons.refresh),
+          ],
+        ),
       ),
     );
   }

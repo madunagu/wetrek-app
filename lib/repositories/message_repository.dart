@@ -11,7 +11,7 @@ class MessageRepository extends Repository {
 
   MessageRepository(token) : super(token);
 
-  Future<Paginated<Message>> list(Parameters params) async {
+  Future<Paginated<Message>> getMessages(Parameters params) async {
     final Map<String, dynamic> res =
         await api.get("/messages", params: params.toJson());
 
@@ -22,12 +22,9 @@ class MessageRepository extends Repository {
     );
   }
 
-  Future<Paginated<Message>> getChats(Parameters params) async {
-    final Map<String, dynamic> res = await api.get("/chats", params: {
-      "page": params.page.toString(),
-      "length": params.length.toString(),
-      "q": params.q,
-    });
+  Future<Paginated<Message>> list(Parameters params) async {
+    final Map<String, dynamic> p = params.toJson();
+    final Map<String, dynamic> res = await api.get("/chats", params: p);
     return Paginated(
       data:
           (res['data'] as List? ?? []).map((e) => Message.fromJson(e)).toList(),
