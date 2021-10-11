@@ -18,7 +18,7 @@ import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
-class ChatsScreen extends StatelessWidget {
+class ChatsScreen extends StatefulWidget {
   static MaterialPageRoute route() {
     return MaterialPageRoute(
       builder: (context) => ChatsScreen(),
@@ -26,17 +26,30 @@ class ChatsScreen extends StatelessWidget {
   }
 
   @override
+  _ChatsScreenState createState() => _ChatsScreenState();
+}
+
+class _ChatsScreenState extends State<ChatsScreen> {
+  late final SearchBloc chatsBloc;
+  @override
+  initState() {
+    String token =
+        RepositoryProvider.of<AuthenticationRepository>(context).token!;
+    chatsBloc = SearchBloc(repository: MessageRepository(token))
+      ..add(SearchFetched());
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => SearchBloc(
-          repository: MessageRepository(
-              RepositoryProvider.of<AuthenticationRepository>(context).token!))
-        ..add(SearchFetched()),
+      create: (BuildContext context) => chatsBloc,
       child: Scaffold(
         appBar: MyAppBar(
           title: 'Chats',
           rightIcon: Icons.search,
           hasSearch: true,
+          bloc: chatsBloc,
         ),
         body: Container(
           width: MediaQuery.of(context).size.width,
@@ -82,7 +95,6 @@ class _MessageListState extends State<MessageList> {
     _searchBloc = context.read<SearchBloc>();
     me = BlocProvider.of<AuthenticationBloc>(context).state.user!;
   }
-
 
   @override
   void dispose() {

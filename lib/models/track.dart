@@ -35,12 +35,12 @@ class Track {
   );
   
   Map<String, dynamic> toJson() => {
-    'bounds': bounds,
+    'bounds': bounds.toJson(),
     'copyrights': copyrights,
-    'legs': legs.map((e) => e.toString()).toList(),
-    'overview_polyline': overviewPolyline,
+    'legs': legs.map((e) => e.toJson()).toList(),
+    'overview_polyline': overviewPolyline.toJson(),
     'summary': summary,
-    'warnings': warnings.map((e) => e.toString()).toList(),
+    'warnings': warnings.map((e) => e.toJson()).toList(),
     'waypoint_order': waypointOrder.map((e) => e.toString()).toList()
   };
 

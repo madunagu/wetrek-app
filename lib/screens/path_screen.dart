@@ -132,16 +132,12 @@ class DestinationPath extends StatelessWidget {
   String addressFromInstructions(String htmlInstructions) {
 //    int stop = htmlInstructions.indexOf(',');
     int stop = 8;
-    return htmlInstructions.substring(3, stop);
-
+    String htmlText = removeAllHtmlTags(htmlInstructions);
+    return htmlText.substring(3, stop);
   }
-  
-String removeAllHtmlTags(String htmlText) {
-    RegExp exp = RegExp(
-      r"<[^>]*>",
-      multiLine: true,
-      caseSensitive: true
-    );
+
+  String removeAllHtmlTags(String htmlText) {
+    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
 
     return htmlText.replaceAll(exp, '');
   }
@@ -157,9 +153,12 @@ String removeAllHtmlTags(String htmlText) {
             for (var step in direction.routes[0].legs[0].steps)
               Container(
                 height: 84,
+                width: 60,
                 alignment: Alignment.topCenter,
-                child: Icon(transportIcons[step.travelMode],
-                    color: Color(0xff78849E)),
+                child: Icon(
+                  transportIcons[step.travelMode],
+                  color: Color(0xff78849E),
+                ),
               ),
 //            Container(
 //              alignment: Alignment.topCenter,

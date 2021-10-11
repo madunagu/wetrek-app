@@ -36,13 +36,13 @@ class Step {
       travelMode: json['travel_mode'] as String);
 
   Map<String, dynamic> toJson() => {
-        'distance': distance,
-        'duration': duration,
-        'end_location': endLocation,
+        'distance': distance.toJson(),
+        'duration': duration.toJson(),
+        'end_location': endLocation.toJson(),
         'html_instructions': htmlInstructions,
-        'polyline': polyline,
+        'polyline': polyline.toJson(),
         'maneuver': maneuver,
-        'start_location': startLocation,
+        'start_location': startLocation.toJson(),
         'travel_mode': travelMode
       };
 

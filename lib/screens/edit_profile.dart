@@ -99,6 +99,7 @@ class _EditProfileState extends State<EditProfile> {
       appBar: MyAppBar(title: 'Edit Profile'),
       body: SingleChildScrollView(
         child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
               SizedBox(height: 18),

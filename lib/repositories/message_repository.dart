@@ -44,8 +44,7 @@ class MessageRepository extends Repository {
 
   Future<bool> delete(int id) async {
     final Map<String, dynamic> res = await api.delete("/messages/$id");
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return res['data'] == 'true';
   }
 
   // static Message dummy({i = 0}) {

@@ -44,13 +44,13 @@ class Leg {
           .toList());
 
   Map<String, dynamic> toJson() => {
-        'distance': distance,
-        'duration': duration,
+        'distance': distance.toJson(),
+        'duration': duration.toJson(),
         'end_address': endAddress,
-        'end_location': endLocation,
+        'end_location': endLocation.toJson(),
         'start_address': startAddress,
-        'start_location': startLocation,
-        'steps': steps.map((e) => e.toString()).toList(),
+        'start_location': startLocation.toJson(),
+        'steps': steps.map((e) => e.toJson()).toList(),
         'traffic_speed_entry':
             trafficSpeedEntry.map((e) => e.toString()).toList(),
         'via_waypoint': viaWaypoint.map((e) => e.toString()).toList()

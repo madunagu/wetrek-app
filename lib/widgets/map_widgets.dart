@@ -14,16 +14,23 @@ import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/controllers/home_controller.dart';
 import 'package:wetrek/models/address.dart';
+import 'package:wetrek/models/direction.dart';
+import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/option.dart';
 import 'package:wetrek/models/trek.dart';
+import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
+import 'package:wetrek/screens/login_screen.dart';
+import 'package:wetrek/screens/map_screen.dart';
 import 'package:wetrek/screens/path_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
-import 'widgets.dart';
+import 'package:wetrek/widgets/widgets.dart';
+
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:wetrek/widgets/avatar_list.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -100,12 +107,12 @@ class _TrekFormState extends State<TrekForm> {
     setState(() {
       isLoading = true;
     });
-    Map<String, String> data = {
+    Map<String, dynamic> data = {
       "starting_at": _startingAtController.value.text,
       "name": _titleController.value.text,
-      "start_address": widget.controller.originAddress!.toJson().toString(),
-      "end_address": widget.controller.originAddress!.toJson().toString(),
-      "directions": widget.controller.direction!.toJson().toString(),
+      "start_address": widget.controller.originAddress!.toJson(),
+      "end_address": widget.controller.originAddress!.toJson(),
+      "directions": widget.controller.direction!.toJson(),
     };
     print(data);
     try {
@@ -1142,6 +1149,7 @@ class _SearchResultsState extends State<SearchResults> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Container(
       color: Color(0xffF7F7FA),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -1177,7 +1185,7 @@ class _SearchResultsState extends State<SearchResults> {
                                 onTap: () => widget.controller.selectAddress(
                                     state.models[index] as Address),
                                 child: SearchResultRow(
-                                    state.models[index] as Address),
+                                    state.models[index] as Address, size),
                               );
                       },
                       itemCount: state.hasReachedMax
@@ -1198,8 +1206,9 @@ class _SearchResultsState extends State<SearchResults> {
 }
 
 class SearchResultRow extends StatelessWidget {
-  SearchResultRow(this.address);
+  SearchResultRow(this.address, this.size);
   final Address address;
+  final Size size;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -1214,16 +1223,136 @@ class SearchResultRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
+            width: size.width - 56,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(address.description, style: TextStyles.darkNormal),
+                Text(
+                  address.description,
+                  style: TextStyles.darkNormal,
+                  overflow: TextOverflow.ellipsis,
+                ),
 //                Text('2Km.', style: TextStyles.darkMinor),
               ],
             ),
           ),
           Icon(Icons.arrow_forward_ios, color: Color(0xff454F63)),
         ],
+      ),
+    );
+  }
+}
+
+class MapContainer extends StatefulWidget {
+  MapContainer({required this.direction});
+  final Direction direction;
+  @override
+  _MapContainerState createState() => _MapContainerState();
+}
+
+class _MapContainerState extends State<MapContainer> with GoogleMapMixin {
+  // late StreamSubscription<Location> _locationSub;
+
+  late final String mapStyle;
+  late final GoogleMapController _mapController;
+  Completer<GoogleMapController> _controller = Completer();
+
+  Map<MarkerId, Marker> _markers = {};
+  Map<PolylineId, Polyline> _polyLines = {};
+
+  @override
+  void initState() {
+    _loadMapStyle();
+    super.initState();
+  }
+
+  showError(Exception e) {
+    if (e is AuthenticationException) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => DialogPopup(
+          title: 'Error Occurred!',
+          body: e.toString(),
+          okFunction: () => Navigator.of(context).push(LoginScreen.route()),
+          okText: 'LOGOUT',
+        ),
+      );
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ErrorPopup(
+        title: 'Error Occurred!',
+        body: e.toString(),
+      ),
+    );
+  }
+
+  void onMapCreated(GoogleMapController controller) async {
+    _controller.complete(controller);
+    log('map created');
+    _mapController = await _controller.future;
+    placeMarkers();
+    _mapController.setMapStyle(mapStyle);
+  }
+
+  void _loadMapStyle() {
+    rootBundle.loadString('assets/map_style.txt').then((string) {
+      mapStyle = string;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onMapTap(LatLng point) {
+//    if (isTouchable) {
+//      _showPointDialog(point);
+//    }
+  }
+
+  void placeMarkers() async {
+    if (!_controller.isCompleted) {
+      showError(UnknownException(message: 'Google Maps Failure Occurred'));
+      return;
+    }
+    _mapController.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        widget.direction.routes[0].bounds.toLatLng(),
+        1,
+      ),
+    );
+    setState(() {
+      Polyline poly = getPolyline(widget.direction);
+      _polyLines[poly.polylineId] = poly;
+      _markers.addAll(getMarkers(poly));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Size view = MediaQuery.of(context).size;
+    return Container(
+      height: view.height-200,
+      width: view.width,
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(6.4544837, 3.2519754),
+          zoom: 15,
+        ),
+        zoomControlsEnabled: false,
+        myLocationEnabled: true,
+        tiltGesturesEnabled: false,
+        compassEnabled: true,
+        scrollGesturesEnabled: true,
+        zoomGesturesEnabled: true,
+        onMapCreated: onMapCreated,
+        rotateGesturesEnabled: false,
+        markers: Set<Marker>.of(_markers.values),
+        polylines: Set<Polyline>.of(_polyLines.values),
+        onTap: _onMapTap,
       ),
     );
   }

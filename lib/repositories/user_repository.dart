@@ -38,7 +38,7 @@ class UserRepository extends Repository {
 
   Future<bool> follow(User user) async {
     final Map<String, dynamic> res = await api.post('/users/${user.id}', {});
-    return res['success'] == 'true';
+    return res['data'] == 'true';
   }
 
   Future<User> update(Model user) async {

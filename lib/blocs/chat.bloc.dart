@@ -40,7 +40,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     messagesStreamSubscription.cancel();
   }
 
-  //TODO: work on navigation in infinite list
+
   @override
   Stream<ChatState> mapEventToState(ChatEvent event) async* {
     if (event is ChatFetched) {

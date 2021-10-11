@@ -18,7 +18,7 @@ class Bounds {
       );
 
   Map<String, dynamic> toJson() =>
-      {'northeast': northeast, 'southwest': southwest};
+      {'northeast': northeast.toJson(), 'southwest': southwest.toJson()};
 
   Bounds clone() => Bounds(northeast: northeast, southwest: southwest);
 

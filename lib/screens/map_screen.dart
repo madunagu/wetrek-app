@@ -145,10 +145,10 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
       String token =
           RepositoryProvider.of<AuthenticationRepository>(context).token!;
       Paginated<Trek> treks = await TrekRepository(token).list(Parameters());
-      BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: ui.Size(63, 58), devicePixelRatio: 2),
-        'assets/marker.png',
-      );
+      // BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+      //   ImageConfiguration(size: ui.Size(63, 58), devicePixelRatio: 2),
+      //   'assets/marker.png',
+      // );
       List<LatLng> _positions = [];
       for (Trek trek in treks.data) {
         MarkerId markerId = MarkerId(trek.id.toString());
@@ -157,7 +157,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
         _markers[markerId] = Marker(
           markerId: markerId,
           onTap: () => Navigator.push(context, TrekScreen.route(trek)),
-          icon: customIcon,
+          // icon: customIcon,
           infoWindow: InfoWindow(
             title: trek.name,
             snippet: trek.description,

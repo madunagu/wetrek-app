@@ -90,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             top: 56,
             child: Container(
               width: size.width,
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: MyAppBarNavigation(
                 fontColor: Colors.white,
                 rightIcon: Icons.edit,
@@ -626,8 +626,7 @@ class FollowersCounter extends StatelessWidget {
                   ),
                   Text(
                     'FOLLOWERS',
-                    style:
-                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                    style: TextStyle(color: Color(0xff78849E), fontSize: 11),
                   ),
                 ],
               ),
@@ -648,8 +647,7 @@ class FollowersCounter extends StatelessWidget {
                   ),
                   Text(
                     'FOLLOWERS',
-                    style:
-                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                    style: TextStyle(color: Color(0xff78849E), fontSize: 11),
                   ),
                 ],
               ),
@@ -670,8 +668,7 @@ class FollowersCounter extends StatelessWidget {
                   ),
                   Text(
                     'FOLLOWERS',
-                    style:
-                        TextStyle(color: Color(0xff78849E), fontSize: 11),
+                    style: TextStyle(color: Color(0xff78849E), fontSize: 11),
                   ),
                 ],
               ),

@@ -49,8 +49,7 @@ class AddressRepository extends Repository {
 
   Future<bool> delete(int id) async {
     final Map<String, dynamic> res = await api.delete("/addresses/$id");
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return res['data'] == 'true';
   }
 
 

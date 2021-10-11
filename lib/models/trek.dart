@@ -24,11 +24,12 @@ class Trek extends Messagable {
     this.locations,
     required this.startingAt,
     required this.userId,
-    required this.description,
+    this.description,
     required this.usersCount,
     this.pictures,
-    required this.duration,
+    this.duration,
     this.endingAt,
+    this.isAttending,
     required this.createdAt,
     required this.updatedAt,
   }) : super(id: id, name: name, picture: picture, isGroup: true);
@@ -46,13 +47,14 @@ class Trek extends Messagable {
   final List<Location>? locations;
   final DateTime startingAt;
   final String userId;
-  final String description;
+  final String? description;
   final String? usersCount;
   final List<Picture>? pictures;
-  final String duration;
+  final String? duration;
   final DateTime? endingAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool? isAttending;
 
   factory Trek.fromJson(Map<String, dynamic> json) => Trek(
       id: json['id'] as int,
@@ -74,17 +76,18 @@ class Trek extends Messagable {
           : null,
       startingAt: DateTime.parse(json['starting_at'] as String),
       userId: json['user_id'] as String,
-      description: json['description'] as String,
+      description: (json['description'] as String?),
       usersCount: json['users_count'] as String?,
       pictures: json['pictures'] != null
           ? (json['pictures'] as List? ?? [])
               .map((e) => Picture.fromJson(e))
               .toList()
           : null,
-      duration: json['duration'] as String,
+      duration: json['duration'] as String?,
       endingAt: json['ending_at'] != null
           ? DateTime.parse(json['ending_at'] as String)
           : null,
+      isAttending: json['is_attending'] as bool?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String));
 

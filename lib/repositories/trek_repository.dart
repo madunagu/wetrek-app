@@ -38,19 +38,16 @@ class TrekRepository extends Repository {
   Future<Trek> update(Model trek) async {
     final Map<String, dynamic> res =
         await api.put('/treks', jsonEncode(trek.toJson()));
-    //TODO: chech if boolean true is parsed already
     return Trek.fromJson(res['data']);
   }
 
   Future<bool> delete(int id) async {
     final Map<String, dynamic> res = await api.delete("/treks/$id");
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return res['data'] == true;
   }
 
   Future<bool> join(int id) async {
     final Map<String, dynamic> res = await api.post("/treks/$id",{});
-    //TODO: chech if boolean true is parsed already
-    return res['success'] == 'true';
+    return res['data'] == true;
   }
 }

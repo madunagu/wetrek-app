@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
@@ -114,6 +116,7 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   final IconData rightIcon;
   final Color color;
   final Color fontColor;
+  final SearchBloc? bloc;
   @override
   final Size preferredSize;
   final bool hasSearch;
@@ -125,6 +128,7 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.color = Colors.white,
     this.fontColor = const Color(0xff454F63),
     this.hasSearch = false,
+    this.bloc,
   }) : preferredSize = Size.fromHeight(child == null ? 136.0 : 176);
 
   @override
@@ -133,13 +137,13 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _MyAppBarState extends State<MyAppBar> {
   late TextEditingController _controller;
-  late final SearchBloc searchBloc;
+  // late final SearchBloc searchBloc;
   bool isSearching = false;
   @override
   initState() {
     if (widget.hasSearch) {
       _controller = TextEditingController();
-      searchBloc = context.read<SearchBloc>();
+      // searchBloc = context.read<SearchBloc>();
     }
     super.initState();
   }
@@ -153,14 +157,17 @@ class _MyAppBarState extends State<MyAppBar> {
   }
 
   search(String s) {
-    searchBloc.add(SearchFetched(query: s));
+    log('searching..' + s);
+    widget.bloc?.add(SearchFetched(query: s));
   }
 
-  List<Widget> whatType() {
+  List<Widget> whatType(Size size) {
     if (isSearching) {
       return [
         Container(
+          padding: EdgeInsets.only(left: 24, top: 46, right: 24),
           height: 26,
+          width: size.width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -173,41 +180,61 @@ class _MyAppBarState extends State<MyAppBar> {
                   child: Icon(Icons.arrow_back, color: widget.fontColor),
                 ),
               ),
-              TextField(
-                controller: _controller,
-                onChanged: search,
-                style: TextStyle(color: Color(0xff454F63)),
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      width: 1,
-                      color: Color(0xffF4F4F6),
+              SizedBox(width: 20),
+              Container(
+                height: 26,
+                width: size.width - 150,
+                child: TextField(
+                  controller: _controller,
+                  onChanged: search,
+                  style: TextStyle(color: Color(0xff454F63)),
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: Color(0xffF4F4F6),
+                      ),
                     ),
+                    hintText: 'Search',
+                    hintStyle: TextStyle(color: Colors.black),
                   ),
-                  hintText: 'Search',
-                  hintStyle: TextStyle(color: Color(0xff959DAD)),
                 ),
               ),
-              // GestureDetector(
-              //   onTap: search,
-              //   child: Icon(Icons.search, color: widget.fontColor),
-              // )
+              SizedBox(width: 20),
+              GestureDetector(
+                onTap: () {
+                  search(_controller.value.text);
+                },
+                child: Container(
+                    width: 30,
+                    height: 30,
+                    color: Colors.transparent,
+                    child: Icon(Icons.search, color: widget.fontColor)),
+              )
             ],
           ),
         )
       ];
     }
     return [
-      MyAppBarNavigation(
-        fontColor: widget.fontColor,
-        onPressed: widget.hasSearch ? onSearchPressed : widget.onPressed,
-        rightIcon: widget.rightIcon,
-      ),
-      SizedBox(height: 14),
-      Text(
-        widget.title,
-        style: TextStyles.title.copyWith(
-          color: widget.fontColor,
+      Container(
+        padding: EdgeInsets.only(left: 24, top: 46, right: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MyAppBarNavigation(
+              fontColor: widget.fontColor,
+              onPressed: widget.hasSearch ? onSearchPressed : widget.onPressed,
+              rightIcon: widget.rightIcon,
+            ),
+            SizedBox(height: 14),
+            Text(
+              widget.title,
+              style: TextStyles.title.copyWith(
+                color: widget.fontColor,
+              ),
+            ),
+          ],
         ),
       ),
       SizedBox(height: 19),
@@ -217,6 +244,7 @@ class _MyAppBarState extends State<MyAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Container(
       height: 198,
       decoration: BoxDecoration(
@@ -229,12 +257,9 @@ class _MyAppBarState extends State<MyAppBar> {
         ],
         color: widget.color,
       ),
-      child: Container(
-        padding: EdgeInsets.only(left: 24, top: 46, right: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: whatType(),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: whatType(size),
       ),
     );
   }
@@ -476,6 +501,37 @@ class Popup extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingPopup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        color: Colors.white60,
+        alignment: Alignment.center,
+        child: Container(
+          width: MediaQuery.of(context).size.width - 48,
+//        height: 200,
+          constraints: BoxConstraints(
+            minHeight: 200,
+            maxHeight: 330,
+          ),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 16,
+            bottom: 24,
+          ),
+          decoration: BoxDecoration(
+            color: Color(0xff2A2E43),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       ),
     );
