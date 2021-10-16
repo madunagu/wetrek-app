@@ -9,19 +9,23 @@ import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/models/where.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class UsersScreen extends StatefulWidget {
+  UsersScreen({required this.conditions});
+  final List<Where> conditions;
   @override
   _UsersScreenState createState() => _UsersScreenState();
 
-  static MaterialPageRoute route() {
+  static MaterialPageRoute route(List<Where> conditions) {
     return MaterialPageRoute(
-      builder: (context) => UsersScreen(),
+      builder: (context) => UsersScreen(conditions: conditions),
     );
   }
 }
@@ -45,7 +49,7 @@ class _UsersScreenState extends State<UsersScreen> {
         ),
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 24),
-          child: UserList(),
+          child: UserList(conditions: widget.conditions),
         ),
       ),
     );
@@ -53,10 +57,9 @@ class _UsersScreenState extends State<UsersScreen> {
 }
 
 class UserList extends StatefulWidget {
-  const UserList({
-    Key? key,
-  }) : super(key: key);
+  const UserList({Key? key, required this.conditions}) : super(key: key);
 
+  final List<Where> conditions;
   @override
   _UserListState createState() => _UserListState();
 }
@@ -70,7 +73,7 @@ class _UserListState extends State<UserList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _searchBloc = context.read<SearchBloc>();
-    _searchBloc.add(SearchFetched());
+    _searchBloc.add(SearchFetched(conditions: widget.conditions));
   }
 
   @override
@@ -80,7 +83,8 @@ class _UserListState extends State<UserList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _searchBloc.add(SearchFetched());
+    if (_isBottom)
+      _searchBloc.add(SearchFetched(conditions: widget.conditions));
   }
 
   bool get _isBottom {
@@ -92,7 +96,8 @@ class _UserListState extends State<UserList> {
 
   void onSearch(String query) {
     if (query.length > 3) {
-      _searchBloc.add(SearchFetched(query: query));
+      _searchBloc
+          .add(SearchFetched(query: query, conditions: widget.conditions));
     }
   }
 

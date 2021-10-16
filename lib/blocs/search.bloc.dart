@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
@@ -17,47 +18,62 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   //TODO: work on navigation in infinite list
   @override
   Stream<SearchState> mapEventToState(SearchEvent event) async* {
+    log('searching from bloc');
     if (event is SearchFetched) {
-      yield await _mapPostFetchedToState(event, state);
+      yield* _mapPostFetchedToState(event, state);
     }
   }
 
-  Future<SearchState> _mapPostFetchedToState(
-      SearchFetched event, SearchState state) async {
-    if (state.hasReachedMax) return state;
-    try {
-      if (state.status == SearchStatus.initial) {
+  Stream<SearchState> _mapPostFetchedToState(
+      SearchFetched event, SearchState state) async* {
+    bool searchChanged = state.query != event.query;
+    log('searching from searchfetched');
+    if (!searchChanged && state.hasReachedMax) {
+      log('maximum number of elements reached');
+      yield state;
+    } else if (searchChanged) {
+      yield state.copyWith(status: SearchStatus.initial, models: []);
+
+      try {
         final Paginated<Model> paginatedList = await repository.list(
           Parameters(
-            page: 0,
+            page: 1,
             length: 20,
             q: event.query ?? '',
+            conditions: event.conditions ?? [],
           ),
         );
-
-        return state.copyWith(
+        yield state.copyWith(
           status: SearchStatus.success,
-          models: paginatedList.data,
+          models: List.of(paginatedList.data),
           hasReachedMax: paginatedList.pagination.isLastPage(),
         );
+      } on Exception {
+        yield state.copyWith(status: SearchStatus.failure);
       }
-      final Paginated<Model> paginatedList = await repository.list(
-        Parameters(
-          page: state.pagination.currentPage + 1,
-          length: 20,
-          q: event.query ?? '',
-        ),
-      );
-      return state.copyWith(
-        status: SearchStatus.success,
-        models: event.query != null
-            ? List.of(paginatedList.data)
-            : List.of(state.models)
-          ..addAll(paginatedList.data),
-        hasReachedMax: paginatedList.pagination.isLastPage(),
-      );
-    } on Exception {
-      return state.copyWith(status: SearchStatus.failure);
+    } else {
+      yield state.copyWith(status: SearchStatus.initial, models: []);
+
+      try {
+        final Paginated<Model> paginatedList = await repository.list(
+          Parameters(
+            page: state.pagination.currentPage + 1,
+            length: 20,
+            q: event.query ?? '',
+            conditions: event.conditions ?? [],
+          ),
+        );
+        yield state.copyWith(
+          status: SearchStatus.success,
+          models: searchChanged
+              ? List.of(paginatedList.data)
+              : List.of(state.models)
+            ..addAll(paginatedList.data),
+          hasReachedMax: paginatedList.pagination.isLastPage(),
+        );
+      } on Exception {
+        yield state.copyWith(status: SearchStatus.failure);
+      }
     }
   }
 

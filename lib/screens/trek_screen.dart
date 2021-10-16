@@ -5,8 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/mixins/popup_mixin.dart';
 import 'package:wetrek/models/trek.dart';
-import 'package:wetrek/models/user.dart';
+import 'package:wetrek/models/where.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
@@ -34,52 +35,31 @@ class TrekScreen extends StatefulWidget {
   _TrekScreenState createState() => _TrekScreenState();
 }
 
-class _TrekScreenState extends State<TrekScreen> {
-  bool isJoining = false;
+class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
+  bool isJoining = true;
   late bool isAttending = false;
+  late Trek trek;
+  late final String token;
+
   @override
   void initState() {
+    trek = widget.trek;
+    token = RepositoryProvider.of<AuthenticationRepository>(context).token!;
+    getTrek();
     super.initState();
   }
 
-  showError(Exception e) {
-    if (e is AuthenticationException) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => DialogPopup(
-          title: 'Error Occurred!',
-          body: e.toString(),
-          okFunction: () => Navigator.of(context).push(LoginScreen.route()),
-          okText: 'LOGOUT',
-        ),
-      );
-      return;
-    }
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => ErrorPopup(
-        title: 'Error Occurred!',
-        body: e.toString(),
-      ),
-    );
-  }
+  getTrek() async {
+    trek = await TrekRepository(token).get(widget.trek.id);
 
-  void showLoader() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => LoadingPopup(),
-    );
-  }
-
-  void hideLoader() {
-    Navigator.pop(context);
+    setState(() {
+      isJoining = false;
+      isAttending = trek.isAttending ?? false;
+    });
   }
 
   _joinTrek() async {
     showLoader();
-    String token =
-        RepositoryProvider.of<AuthenticationRepository>(context).token!;
     bool _isAttending = await TrekRepository(token).join(widget.trek.id);
     log(_isAttending.toString());
     setState(() {
@@ -127,68 +107,102 @@ class _TrekScreenState extends State<TrekScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text(widget.trek.name, style: TextStyles.darkLarge),
+                        Text(trek.name, style: TextStyles.darkLarge),
                         SizedBox(height: 16),
                         Text(
-                          widget.trek.name,
+                          trek.name,
                           style: TextStyles.darkMinor,
                         ),
                         SizedBox(height: 16),
-                        TrekItem(
-                          subTitle: "${widget.trek.usersCount ?? 0} Trekkers",
-                          title: 'Trekkers',
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(context, UsersScreen.route());
-                            },
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              UsersScreen.route([
+                                Where(
+                                  column: 'trek',
+                                  val: trek.id.toString(),
+                                ),
+                              ]),
+                            );
+                          },
+                          child: TrekItem(
+                            size: size,
+                            subTitle: "${trek.usersCount ?? 0} Trekkers",
+                            title: 'Trekkers',
+                            icon: Icons.people_outline,
                             child: AvatarList(
-                              imgSrcs: widget.trek.users
-                                      ?.map((e) => e.picture.small)
-                                      .toList() ??
-                                  [],
-                            ),
-                          ),
-                          icon: Icons.people_outline,
-                        ),
-                        TrekItem(
-                          subTitle: 'Group Messages',
-                          title: 'Chats',
-                          icon: Icons.chat_bubble_outline,
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                ChatScreen.route(widget.trek),
-                              );
-                            },
-                            child: AvatarList(
-                              imgSrcs: widget.trek.users
+                              imgSrcs: trek.users
                                       ?.map((e) => e.picture.small)
                                       .toList() ??
                                   [],
                             ),
                           ),
                         ),
-                        TrekItem(
-                          subTitle: widget.trek.direction.routes.first.summary,
-                          title: 'Direction Details',
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(context,
-                                  PathScreen.route(widget.trek.direction));
-                            },
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              ChatScreen.route(widget.trek),
+                            );
+                          },
+                          child: TrekItem(
+                            size: size,
+                            subTitle: 'Group Messages',
+                            title: 'Chats',
+                            icon: Icons.chat_bubble_outline,
+                            child: AvatarList(
+                              imgSrcs: trek.users
+                                      ?.map((e) => e.picture.small)
+                                      .toList() ??
+                                  [],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(context,
+                                PathScreen.route(widget.trek.direction));
+                          },
+                          child: TrekItem(
+                            size: size,
+                            subTitle:
+                                widget.trek.direction.routes.first.summary,
+                            title: 'Direction Details',
+                            icon: Icons.directions_walk,
                             child: Container(
                               height: 44,
                               width: size.width - 136,
-                              child: Text(
-                                "Start At ${widget.trek.startAddress.description} and move on to ${widget.trek.endAddress.description}",
-                                style: TextStyles.darkMinor,
+                              child: Row(
+                                children: [
+                                  MovementDrawingForDestination(2, width: 20),
+                                  Container(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Start At ${widget.trek.startAddress.description}",
+                                          style: TextStyles.darkMinor,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          "To ${widget.trek.endAddress.description}",
+                                          style: TextStyles.darkMinor,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          icon: Icons.directions_walk,
                         ),
                         TrekItem(
+                          size: size,
                           subTitle:
                               "${widget.trek.pictures?.length ?? 1} pictures",
                           title: 'Pictures',
@@ -209,11 +223,15 @@ class _TrekScreenState extends State<TrekScreen> {
                         SizedBox(height: 16),
 //                      for(var step in )
 
-                        MyButton(
-                          isAttending ? 'LEAVE TREK' : 'JOIN TREK',
-                          onTap: _joinTrek,
-                          color: isAttending ? Colors.grey : WeTrekColors.blue1,
-                        ),
+                        isJoining
+                            ? CircularProgressIndicator()
+                            : MyButton(
+                                isAttending ? 'LEAVE TREK' : 'JOIN TREK',
+                                onTap: _joinTrek,
+                                color: isAttending
+                                    ? Colors.grey
+                                    : WeTrekColors.blue1,
+                              ),
                       ],
                     ),
                   ),
@@ -230,9 +248,11 @@ class TrekItem extends StatelessWidget {
   final subTitle;
   final String title;
   final Widget? child;
+  final Size size;
   const TrekItem({
     Key? key,
     required this.icon,
+    required this.size,
     required this.subTitle,
     required this.title,
     this.child,
@@ -270,21 +290,26 @@ class TrekItem extends StatelessWidget {
             ),
           ),
           SizedBox(width: 40),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subTitle,
-                style: TextStyles.darkMinor,
-              ),
-              Text(
-                title,
-                style: TextStyles.darkNormal,
-              ),
-              SizedBox(height: 11),
-              child ?? Container(),
-              SizedBox(height: 26),
-            ],
+          Container(
+            width: size.width - 136,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  subTitle,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyles.darkMinor,
+                ),
+                Text(
+                  title,
+                  style: TextStyles.darkNormal,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 11),
+                child ?? Container(),
+                SizedBox(height: 26),
+              ],
+            ),
           )
         ],
       ),

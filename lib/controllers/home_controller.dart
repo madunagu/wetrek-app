@@ -29,7 +29,7 @@ class HomeController extends ChangeNotifier {
       StreamController<HomePageStatus>.broadcast();
   final _searchQueryController = StreamController<String>.broadcast();
   final _errorMessageController = StreamController<Exception>.broadcast();
-  final _mapLocationController = StreamController<Location>.broadcast();
+  final _mapLocationController = StreamController<LatLng>.broadcast();
 
   Stream<SearchBarStatus> get searchBarStatus =>
       _searchBarStatusController.stream;
@@ -38,7 +38,7 @@ class HomeController extends ChangeNotifier {
 
   Stream<Exception> get errorMessageStream => _errorMessageController.stream;
 
-  Stream<Location> get mapLocationStream => _mapLocationController.stream;
+  Stream<LatLng> get mapLocationStream => _mapLocationController.stream;
 
   Stream<String> get searchQueryStream => _searchQueryController.stream;
 

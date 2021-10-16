@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:wetrek/models/messagable.dart';
+import 'package:wetrek/models/settings.dart';
 import 'picture.dart';
 import 'location.dart';
 
@@ -15,6 +16,7 @@ class User extends Messagable {
     this.following,
     this.followers,
     required this.locations,
+    required this.settings,
   }) : super(id: id, name: name, picture: picture);
 
   final int id;
@@ -26,6 +28,7 @@ class User extends Messagable {
   final List<int>? following;
   final List<int>? followers;
   final List<Location> locations;
+  final Settings settings;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
       id: json['id'] as int,
@@ -34,6 +37,7 @@ class User extends Messagable {
       token: json['token'] != null ? json['token'] as String : null,
       phone: json['phone'] != null ? json['phone'] as String : null,
       picture: Picture.fromJson(json['picture']),
+      settings: Settings.fromJson(json['settings']),
       following: json['following'] != null
           ? (json['following'] as List? ?? []).map((e) => e as int).toList()
           : null,
@@ -63,6 +67,7 @@ class User extends Messagable {
       token: token,
       phone: phone,
       picture: picture,
+      settings: settings,
       following: following?.toList(),
       followers: followers?.toList(),
       locations: locations.toList());
@@ -74,6 +79,7 @@ class User extends Messagable {
           String? token,
           String? phone,
           Picture? picture,
+          Settings? settings,
           List<int>? following,
           List<int>? followers,
           List<Location>? locations}) =>
@@ -84,6 +90,7 @@ class User extends Messagable {
         token: token ?? this.token,
         phone: phone ?? this.phone,
         picture: picture ?? this.picture,
+        settings: settings ?? this.settings,
         following: following ?? this.following,
         followers: followers ?? this.followers,
         locations: locations ?? this.locations,

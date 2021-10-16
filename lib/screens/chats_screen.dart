@@ -31,25 +31,24 @@ class ChatsScreen extends StatefulWidget {
 
 class _ChatsScreenState extends State<ChatsScreen> {
   late final SearchBloc chatsBloc;
+  late final String token;
   @override
   initState() {
-    String token =
-        RepositoryProvider.of<AuthenticationRepository>(context).token!;
-    chatsBloc = SearchBloc(repository: MessageRepository(token))
-      ..add(SearchFetched());
+    token = RepositoryProvider.of<AuthenticationRepository>(context).token!;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => chatsBloc,
+      create: (BuildContext context) =>
+          SearchBloc(repository: MessageRepository(token))
+            ..add(SearchFetched()),
       child: Scaffold(
         appBar: MyAppBar(
           title: 'Chats',
           rightIcon: Icons.search,
           hasSearch: true,
-          bloc: chatsBloc,
         ),
         body: Container(
           width: MediaQuery.of(context).size.width,
@@ -59,7 +58,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
         ),
         floatingActionButton: GestureDetector(
           onTap: () {
-            Navigator.of(context).push(UsersScreen.route());
+            Navigator.of(context).push(UsersScreen.route([]));
           },
           child: Container(
             decoration: BoxDecoration(

@@ -32,24 +32,26 @@ class TripsScreen extends StatefulWidget {
 class _TripsScreenState extends State<TripsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController tabController;
-
+  late final SearchBloc _searchBloc;
   @override
   initState() {
     tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    _searchBloc = SearchBloc(
+        repository: TrekRepository(
+            RepositoryProvider.of<AuthenticationRepository>(context).token!));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SearchBloc>(
-      create: (context) => SearchBloc(
-          repository: TrekRepository(
-              RepositoryProvider.of<AuthenticationRepository>(context).token!)),
+      create: (context) => _searchBloc,
       child: Scaffold(
         appBar: MyAppBar(
           title: 'Trips',
           rightIcon: Icons.search,
           hasSearch: true,
+          bloc: _searchBloc,
           child: MyTabBar(tabController: tabController),
         ),
         body: TrekList(),
@@ -70,7 +72,7 @@ class MyTabBar extends StatefulWidget {
   _MyTabBarState createState() => _MyTabBarState();
 }
 
-class _MyTabBarState extends State<MyTabBar>  {
+class _MyTabBarState extends State<MyTabBar> {
   late final SearchBloc _searchBloc;
   initState() {
     _searchBloc = context.read<SearchBloc>();

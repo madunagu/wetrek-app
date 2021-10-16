@@ -19,6 +19,7 @@ import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/models/where.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
@@ -58,7 +59,7 @@ class ChatScreen extends StatelessWidget {
         repository: MessageRepository(
             RepositoryProvider.of<AuthenticationRepository>(context).token!),
         socketRepository: RepositoryProvider.of<SocketRepository>(context),
-        params: Parameters(id: to.id, where: {'isGroup': to.isGroup}),
+        params: Parameters(id: to.id, conditions:[Where(column:'isGroup',val:to.isGroup.toString())]),
       )..add(ChatFetched()),
       child: Scaffold(
         appBar: MyAppBar(

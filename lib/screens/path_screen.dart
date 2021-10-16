@@ -205,14 +205,16 @@ class DestinationPath extends StatelessWidget {
 }
 
 class MovementDrawingForDestination extends StatelessWidget {
-  MovementDrawingForDestination(this.steps);
+  MovementDrawingForDestination(this.steps, {this.width=84,this.stepHeight =77});
   final int steps;
+  final double width;
+  final double stepHeight;
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 84,
-      padding: EdgeInsets.symmetric(horizontal: 42),
-      height: 77.0 * steps,
+      width: width,
+      // alignment: Alignment.topCenter,
+      height: stepHeight * steps,
       child: CustomPaint(
         foregroundPainter: MovementPainter(),
       ),

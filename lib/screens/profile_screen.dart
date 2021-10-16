@@ -6,10 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/user.dart';
+import 'package:wetrek/models/where.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/chats_screen.dart';
 import 'package:wetrek/screens/edit_profile.dart';
 import 'package:wetrek/screens/notifications_screen.dart';
+import 'package:wetrek/screens/settings_screen.dart';
+import 'package:wetrek/screens/statistics_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
@@ -65,7 +68,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   locationTapped() {}
 
-  accompanyTapped() {}
+  statisticsTapped() {
+    Navigator.push(context, StatisticsScreen.route());
+  }
 
   @override
   void initState() {
@@ -151,7 +156,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                               SizedBox(width: 32),
-                              FollowButton(widget.user),
+                              isMyProfile
+                                  ? Container()
+                                  : FollowButton(widget.user),
                             ],
                           ),
                         ),
@@ -182,86 +189,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
-                                  Expanded(
-                                    flex: 1,
-                                    child: GestureDetector(
-                                      onTap: chatTapped,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.chat_bubble_outline,
-                                            color: Color(0xff3ACCE1),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text(
-                                            'Chat',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Color(0xff78849e),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  ProfileButton(
+                                    onTap: chatTapped,
+                                    icon: Icons.chat_bubble_outline,
+                                    color: Color(0xff3ACCE1),
+                                    label: 'Chat',
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: GestureDetector(
-                                      onTap: accompanyTapped,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.dock_outlined,
-                                            color: Color(0xff3497FD),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text(
-                                            'Accompany',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Color(0xff78849e),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  ProfileButton(
+                                    onTap: statisticsTapped,
+                                    icon: Icons.dock_outlined,
+                                    color: Color(0xff3497FD),
+                                    label: 'Statistics',
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: GestureDetector(
-                                      onTap: locationTapped,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.location_on,
-                                            color: Color(0xff665EFF),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text(
-                                            'Location',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Color(0xff78849e),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  ProfileButton(
+                                    onTap: locationTapped,
+                                    icon: Icons.location_on,
+                                    color: Color(0xff665EFF),
+                                    label: 'Location',
                                   ),
                                 ],
                               ),
@@ -274,95 +218,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ? Row(
                                       mainAxisSize: MainAxisSize.max,
                                       children: <Widget>[
-                                        Expanded(
-                                          flex: 1,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                  context, UsersScreen.route());
-                                            },
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: <Widget>[
-                                                Icon(
-                                                  Icons.people_outline,
-                                                  color: Color(0xffC840E9),
+                                        ProfileButton(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              UsersScreen.route([
+                                                Where(
+                                                  column: 'following',
+                                                  val: "${widget.user.id}",
                                                 ),
-                                                SizedBox(
-                                                  height: 12,
-                                                ),
-                                                Text(
-                                                  'Friends',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Color(0xff78849e),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                              ]),
+                                            );
+                                          },
+                                          icon: Icons.people_outline,
+                                          color: Color(0xffC840E9),
+                                          label: 'Friends',
                                         ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                  context, EditProfile.route());
-                                            },
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: <Widget>[
-                                                Icon(
-                                                  Icons.settings,
-                                                  color: Color(0xffFF4F9A),
-                                                ),
-                                                SizedBox(
-                                                  height: 12,
-                                                ),
-                                                Text(
-                                                  'Edit Profile',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Color(0xff78849e),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                        ProfileButton(
+                                          onTap: () {
+                                            Navigator.push(context,
+                                                SettingsScreen.route());
+                                          },
+                                          icon: Icons.settings,
+                                          color: Color(0xffFF4F9A),
+                                          label: 'Settings',
                                         ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(context,
-                                                  NotificationScreen.route());
-                                            },
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: <Widget>[
-                                                Icon(
-                                                  Icons.chat,
-                                                  color: Color(0xffFF9057),
-                                                ),
-                                                SizedBox(
-                                                  height: 12,
-                                                ),
-                                                Text(
-                                                  'Notifications',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Color(0xff78849e),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                        ProfileButton(
+                                          onTap: () {
+                                            Navigator.push(context,
+                                                NotificationScreen.route());
+                                          },
+                                          icon: Icons.chat,
+                                          color: Color(0xffFF9057),
+                                          label: 'Notifications',
                                         ),
                                       ],
                                     )
@@ -411,189 +299,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 );
               }),
-        ],
-      ),
-    );
-  }
-}
-
-class UserActionsBox extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
-      padding: EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 32,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(
-          Radius.circular(40),
-        ),
-        color: Color(0xFFFFFFFF),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xff455B63),
-            offset: Offset(0, 16),
-            blurRadius: 16,
-          )
-        ],
-      ),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Container(
-            color: Color(0x23998fa2),
-            height: 1,
-            margin: EdgeInsets.symmetric(vertical: 32),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Icon(
-                      Icons.chat,
-                      color: Color(0xff9599b3),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xff78849e),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -675,6 +380,50 @@ class FollowersCounter extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ProfileButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final Function() onTap;
+  ProfileButton({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 1,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Icon(
+                icon,
+                color: color,
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xff78849e),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

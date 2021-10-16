@@ -148,7 +148,7 @@ class PlaceScreen extends StatelessWidget {
                 SizedBox(height: 12),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, UsersScreen.route());
+                    Navigator.push(context, UsersScreen.route([]));
                   },
                   child: Row(
                     children: [

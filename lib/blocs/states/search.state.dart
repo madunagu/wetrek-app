@@ -9,11 +9,12 @@ class SearchState extends Equatable {
     this.status = SearchStatus.initial,
     this.models = const <Model>[],
     this.hasReachedMax = false,
+    this.query,
     this.pagination = const Pagination(
       total: 20,
       count: 20,
       perPage: 20,
-      currentPage: 1,
+      currentPage: 0,
       totalPages: 100,
     ),
   });
@@ -22,24 +23,27 @@ class SearchState extends Equatable {
   final List<Model> models;
   final bool hasReachedMax;
   final Pagination pagination;
+  final String? query;
 
   SearchState copyWith({
     SearchStatus? status,
     List<Model>? models,
     Pagination? pagination,
     bool? hasReachedMax,
+    String? query,
   }) {
     return SearchState(
       status: status ?? this.status,
       models: models ?? this.models,
       pagination: pagination ?? this.pagination,
+      query: query ?? this.query,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
   @override
   String toString() {
-    return '''PostState { status: $status, hasReachedMax: $hasReachedMax, posts: ${models.length} }''';
+    return '''SearchState { status: $status, hasReachedMax: $hasReachedMax, posts: ${models.length} }''';
   }
 
   @override

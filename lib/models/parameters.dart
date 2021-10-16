@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:wetrek/models/where.dart';
 
 @immutable
 class Parameters {
@@ -7,46 +8,51 @@ class Parameters {
     this.q = '',
     this.length = 15,
     this.page = 1,
-    this.where = const {},
+    this.conditions = const [],
   });
 
   final int? id;
   final String q;
   final int length;
   final int page;
-  final Map<String, dynamic> where;
+  final List<Where> conditions;
 
-  factory Parameters.fromJson(Map<String, dynamic> json) => Parameters(
-        id: json['id'] != null ? json['id'] as int : null,
-        q: json['q'] as String,
-        length: json['length'] as int,
-        page: json['page'] as int,
-//    where: (json['where'] as List? ?? []).map((e) => e as String).toList()
-      );
+  // factory Parameters.fromJson(Map<String, dynamic> json) => Parameters(
+  //       id: json['id'] != null ? json['id'] as int : null,
+  //       q: json['q'] as String,
+  //       length: json['length'] as int,
+  //       page: json['page'] as int,
+  //       //  where: (json['where'] as List? ?? []).map((e) => Where.fromJson(e)).toList()
+  //     );
 
-  Map<String, dynamic> toJson() => {
-        'id': id.toString(),
-        'q': q,
-        'length': length.toString(),
-        'page': page.toString(),
-//    'where': where.map((e) => e.toString()).toList()
-      };
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> fp = {
+      'id': id.toString(),
+      'q': q,
+      'length': length.toString(),
+      'page': page.toString(),
+    };
+    for (Where w in conditions) {
+      fp[w.column] = w.val;
+    }
+    return fp;
+  }
 
-  Parameters clone() =>
-      Parameters(id: id, q: q, length: length, page: page, where: where);
+  Parameters clone() => Parameters(
+      id: id, q: q, length: length, page: page, conditions: conditions);
 
   Parameters copyWith(
           {int? id,
           String? q,
           int? length,
           int? page,
-          Map<String, dynamic>? where}) =>
+          List<Where>? conditions}) =>
       Parameters(
         id: id ?? this.id,
         q: q ?? this.q,
         length: length ?? this.length,
         page: page ?? this.page,
-        where: where ?? this.where,
+        conditions: conditions ?? this.conditions,
       );
 
   @override
@@ -57,7 +63,7 @@ class Parameters {
           q == other.q &&
           length == other.length &&
           page == other.page &&
-          where == other.where;
+          conditions == other.conditions;
 
   @override
   int get hashCode =>
@@ -65,5 +71,5 @@ class Parameters {
       q.hashCode ^
       length.hashCode ^
       page.hashCode ^
-      where.hashCode;
+      conditions.hashCode;
 }

@@ -294,6 +294,7 @@ class _PlacesNearbyState extends State<PlacesNearby> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _searchBloc = BlocProvider.of<SearchBloc>(context);
+    _searchBloc.add(SearchFetched());
 //    _postBloc.add(ListFetched());
     subscription = widget.controller.searchQueryStream.listen((query) {
       onSearch(query);
@@ -626,14 +627,11 @@ class TrekCard extends StatelessWidget {
               child: Row(
                 children: [
                   AvatarList(
-                    imgSrcs: [
-                      'images/avatar1.jpg',
-                      'images/avatar2.jpg',
-                      'images/avatar3.jpg',
-                    ],
+                    imgSrcs:
+                        trek.users?.map((e) => e.picture.small).toList() ?? [],
                   ),
                   Text(
-                    'Ekene is attending',
+                    "${trek.users?.first.name ?? 'Nobody'} is attending",
                     style: TextStyles.darkMinor,
                   ),
                 ],
@@ -1335,7 +1333,7 @@ class _MapContainerState extends State<MapContainer> with GoogleMapMixin {
   Widget build(BuildContext context) {
     Size view = MediaQuery.of(context).size;
     return Container(
-      height: view.height-200,
+      height: view.height - 200,
       width: view.width,
       child: GoogleMap(
         initialCameraPosition: CameraPosition(

@@ -137,18 +137,23 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _MyAppBarState extends State<MyAppBar> {
   late TextEditingController _controller;
-  // late final SearchBloc searchBloc;
+  late final SearchBloc? searchBloc;
   bool isSearching = false;
   @override
   initState() {
     if (widget.hasSearch) {
       _controller = TextEditingController();
-      // searchBloc = context.read<SearchBloc>();
+      searchBloc = context.read<SearchBloc>();
     }
     super.initState();
   }
 
-  onBackPressed() {}
+  onBackPressed() {
+    searchBloc?.add(SearchFetched());
+    setState(() {
+      isSearching = false;
+    });
+  }
 
   onSearchPressed() {
     setState(() {
@@ -158,21 +163,21 @@ class _MyAppBarState extends State<MyAppBar> {
 
   search(String s) {
     log('searching..' + s);
-    widget.bloc?.add(SearchFetched(query: s));
+    searchBloc?.add(SearchFetched(query: s));
   }
 
   List<Widget> whatType(Size size) {
     if (isSearching) {
       return [
         Container(
-          padding: EdgeInsets.only(left: 24, top: 46, right: 24),
-          height: 26,
+          padding: EdgeInsets.only(left: 24, top: 56, right: 24),
+          // height: 26,
           width: size.width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               GestureDetector(
-                onTap: () => onBackPressed,
+                onTap: onBackPressed,
                 child: Container(
                   width: 30,
                   height: 30,
@@ -206,10 +211,11 @@ class _MyAppBarState extends State<MyAppBar> {
                   search(_controller.value.text);
                 },
                 child: Container(
-                    width: 30,
-                    height: 30,
-                    color: Colors.transparent,
-                    child: Icon(Icons.search, color: widget.fontColor)),
+                  width: 30,
+                  height: 30,
+                  color: Colors.transparent,
+                  child: Icon(Icons.search, color: widget.fontColor),
+                ),
               )
             ],
           ),
@@ -228,10 +234,15 @@ class _MyAppBarState extends State<MyAppBar> {
               rightIcon: widget.rightIcon,
             ),
             SizedBox(height: 14),
-            Text(
-              widget.title,
-              style: TextStyles.title.copyWith(
-                color: widget.fontColor,
+            Container(
+              width: size.width - 48,
+              height: 40,
+              child: Text(
+                widget.title,
+                style: TextStyles.title.copyWith(
+                  color: widget.fontColor,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -246,7 +257,7 @@ class _MyAppBarState extends State<MyAppBar> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Container(
-      height: 198,
+      height: isSearching ? 116 : 198,
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -428,7 +439,8 @@ class _BlueGradientPainter extends BoxPainter {
 }
 
 class MovementPainter extends CustomPainter {
-  MovementPainter();
+  MovementPainter({this.horizontal = false});
+  final bool horizontal;
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
@@ -439,15 +451,27 @@ class MovementPainter extends CustomPainter {
     final bigCirclePaint = Paint()..color = Color(0xff78849E);
     final smallCirclePaint = Paint()..color = Color(0x4a78849E);
 
-    canvas.drawCircle(Offset(0, 4), 4, bigCirclePaint);
+    if (horizontal) {
+      canvas.drawCircle(Offset(4, 0), 4, bigCirclePaint);
 
-    double startY = 17;
-    while (startY < size.height - 17) {
-      canvas.drawCircle(Offset(0, startY), 1.5, smallCirclePaint);
-      startY += 9;
+      double startX = 17;
+      while (startX < size.width - 17) {
+        canvas.drawCircle(Offset(startX, 0), 1.5, smallCirclePaint);
+        startX += 9;
+      }
+
+      canvas.drawCircle(Offset(size.width - 4, 0), 4, bigCirclePaint);
+    } else {
+      canvas.drawCircle(Offset(0, 4), 4, bigCirclePaint);
+
+      double startY = 17;
+      while (startY < size.height - 17) {
+        canvas.drawCircle(Offset(0, startY), 1.5, smallCirclePaint);
+        startY += 9;
+      }
+
+      canvas.drawCircle(Offset(0, size.height - 4), 4, bigCirclePaint);
     }
-
-    canvas.drawCircle(Offset(0, size.height - 4), 4, bigCirclePaint);
   }
 }
 
@@ -890,6 +914,7 @@ class PlacedCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
