@@ -37,7 +37,7 @@ class User extends Messagable {
       token: json['token'] != null ? json['token'] as String : null,
       phone: json['phone'] != null ? json['phone'] as String : null,
       picture: Picture.fromJson(json['picture']),
-      settings: Settings.fromJson(json['settings']),
+      settings: Settings.fromJson(json['setting']),
       following: json['following'] != null
           ? (json['following'] as List? ?? []).map((e) => e as int).toList()
           : null,

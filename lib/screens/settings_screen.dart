@@ -25,7 +25,11 @@ class _SettingsScreenState extends State<SettingsScreen> with MyPopupMixin {
 
   void saveSettings() {
     showLoader();
-    
+  }
+
+  initState() {
+    // this
+    super.initState();
   }
 
   void changed(int i, bool val) {

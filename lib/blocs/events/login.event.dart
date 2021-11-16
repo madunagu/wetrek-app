@@ -8,17 +8,62 @@ abstract class LoginEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoginUsernameChanged extends LoginEvent {
-  const LoginUsernameChanged(this.username);
+class LoginEmailChanged extends LoginEvent {
+  const LoginEmailChanged(this.email);
 
-  final String username;
+  final String email;
 
   @override
-  List<Object> get props => [username];
+  List<Object> get props => [email];
 }
 
 class LoginPasswordChanged extends LoginEvent {
   const LoginPasswordChanged(this.password);
+
+  final String password;
+
+  @override
+  List<Object> get props => [password];
+}
+
+class RegisterFirstNameChanged extends LoginEvent {
+  const RegisterFirstNameChanged(this.firstName);
+
+  final String firstName;
+
+  @override
+  List<Object> get props => [firstName];
+}
+
+class RegisterLastNameChanged extends LoginEvent {
+  const RegisterLastNameChanged(this.lastName);
+
+  final String lastName;
+
+  @override
+  List<Object> get props => [lastName];
+}
+
+class RegisterEmailChanged extends LoginEvent {
+  const RegisterEmailChanged(this.email);
+
+  final String email;
+
+  @override
+  List<Object> get props => [email];
+}
+
+class RegisterPasswordChanged extends LoginEvent {
+  const RegisterPasswordChanged(this.password);
+
+  final String password;
+
+  @override
+  List<Object> get props => [password];
+}
+
+class RegisterConfirmPasswordChanged extends LoginEvent {
+  const RegisterConfirmPasswordChanged(this.password);
 
   final String password;
 
@@ -31,22 +76,5 @@ class LoginSubmitted extends LoginEvent {
 }
 
 class RegisterSubmitted extends LoginEvent {
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String password;
-
-  const RegisterSubmitted({
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.password,
-  });
-
-  @override
-  List<Object> get props => [firstName, lastName, email];
-
-  @override
-  String toString() =>
-      'RegisterSubmitted { name: $firstName $lastName, email: $email }';
+  const RegisterSubmitted();
 }

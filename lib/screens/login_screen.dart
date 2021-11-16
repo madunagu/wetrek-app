@@ -106,15 +106,19 @@ class _LoginButton extends StatelessWidget {
         return state.status.isSubmissionInProgress
             ? const CircularProgressIndicator()
             : GestureDetector(
-                onTap: state.status.isValidated
-                    ? () {
-                        onTap();
-                      }
-                    : null,
+                onTap:
+                    //  state.status.isValidated ?
+                    () {
+                  onTap();
+                }
+                // : null
+                ,
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Color(0xff3ACCE1),
+                    color: state.status.isValidated
+                        ? Color(0xff3ACCE1)
+                        : Color(0xffE9EBEF),
                   ),
                   padding: EdgeInsets.all(16),
                   width: double.infinity,
@@ -138,14 +142,34 @@ class _EmailInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginBloc, LoginState>(
-      buildWhen: (previous, current) => previous.username != current.username,
+      buildWhen: (previous, current) => previous.email != current.email,
       builder: (context, state) {
         return MyInput(
-          key: const Key('loginForm_usernameInput_textField'),
-          onChanged: (username) =>
-              context.read<LoginBloc>().add(LoginUsernameChanged(username)),
-          errorText: state.username.invalid
-              ? state.validationErrors['email'] ?? state.username.error
+          key: const Key('loginForm_emailInput_textField'),
+          onChanged: (email) =>
+              context.read<LoginBloc>().add(LoginEmailChanged(email)),
+          errorText: state.email.invalid
+              ? state.validationErrors['email'] ?? state.email.error
+              : null,
+          hintText: 'Email',
+        );
+      },
+    );
+  }
+}
+
+class _RegisterEmailInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) => previous.email != current.email,
+      builder: (context, state) {
+        return MyInput(
+          key: const Key('loginForm_emailInput_textField'),
+          onChanged: (email) =>
+              context.read<LoginBloc>().add(RegisterEmailChanged(email)),
+          errorText: state.email.invalid
+              ? state.validationErrors['email'] ?? state.email.error
               : null,
           hintText: 'Email',
         );
@@ -169,6 +193,91 @@ class _PasswordInput extends StatelessWidget {
           errorText: state.password.invalid
               ? state.validationErrors['password'] ?? state.password.error
               : null,
+        );
+      },
+    );
+  }
+}
+
+class _RegisterPasswordInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) => previous.password != current.password,
+      builder: (context, state) {
+        return MyInput(
+          key: const Key('loginForm_passwordInput_textField'),
+          onChanged: (password) =>
+              context.read<LoginBloc>().add(RegisterPasswordChanged(password)),
+          obscureText: true,
+          hintText: 'Password',
+          errorText: state.password.invalid
+              ? state.validationErrors['password'] ?? state.password.error
+              : null,
+        );
+      },
+    );
+  }
+}
+
+class _FirstNameInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) => previous.firstName != current.firstName,
+      builder: (context, state) {
+        return MyInput(
+          key: const Key('loginForm_firstNameInput_textField'),
+          onChanged: (firstName) => context
+              .read<LoginBloc>()
+              .add(RegisterFirstNameChanged(firstName)),
+          errorText: state.firstName.invalid
+              ? state.validationErrors['first_name'] ?? state.firstName.error
+              : null,
+          hintText: 'First Name',
+        );
+      },
+    );
+  }
+}
+
+class _LastNameInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) => previous.lastName != current.lastName,
+      builder: (context, state) {
+        return MyInput(
+          key: const Key('loginForm_lastNameInput_textField'),
+          onChanged: (lastName) =>
+              context.read<LoginBloc>().add(RegisterLastNameChanged(lastName)),
+          errorText: state.lastName.invalid
+              ? state.validationErrors['last_name'] ?? state.lastName.error
+              : null,
+          hintText: 'Last Name',
+        );
+      },
+    );
+  }
+}
+
+class _ConfirmPasswordInput extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LoginBloc, LoginState>(
+      buildWhen: (previous, current) =>
+          previous.confirmPassword != current.confirmPassword,
+      builder: (context, state) {
+        return MyInput(
+          key: const Key('loginForm_confirmPasswordInput_textField'),
+          obscureText: true,
+          onChanged: (password) => context
+              .read<LoginBloc>()
+              .add(RegisterConfirmPasswordChanged(password)),
+          errorText: state.confirmPassword.invalid
+              ? state.validationErrors['password'] ?? state.password.error
+              : null,
+          hintText: 'Confirm Password',
         );
       },
     );
@@ -252,80 +361,55 @@ class LoginForm extends StatelessWidget {
   }
 }
 
-class RegisterForm extends StatefulWidget {
-  @override
-  _RegisterFormState createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<RegisterForm> {
-  late TabController tabController;
-  late final TextEditingController firstNameController;
-  late final TextEditingController lastNameController;
-  late final TextEditingController emailController;
-  late final TextEditingController passwordController;
-
-  @override
-  void initState() {
-    firstNameController = TextEditingController();
-    lastNameController = TextEditingController();
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    super.dispose();
-  }
-
-  _onRegisterPressed() {
-    context.read<LoginBloc>().add(
-          RegisterSubmitted(
-            firstName: firstNameController.value.text,
-            lastName: lastNameController.value.text,
-            email: emailController.value.text,
-            password: passwordController.value.text,
-          ),
-        );
-  }
-
+class RegisterForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
-      return SingleChildScrollView(
+    return BlocListener<LoginBloc, LoginState>(
+      listener: (BuildContext context, LoginState state) {
+        if (state.status.isSubmissionFailure) {
+          switch (state.error.runtimeType) {
+            case SocketException:
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => ErrorPopup(
+                  title: 'NETWORK ERROR OCCURED',
+                  body: state.error.toString(),
+                ),
+              );
+              break;
+            default:
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => ErrorPopup(
+                  title: 'REGISTRATION FAILED!',
+                  body: state.error.toString(),
+                ),
+              );
+          }
+        }
+      },
+      child: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 44),
           color: Color(0xffF7F7FA),
           width: MediaQuery.of(context).size.width,
           child: Column(children: [
-            MyInput(
-              hintText: 'First Name',
-              controller: firstNameController,
-            ),
-            MyInput(
-              hintText: 'Last Name',
-              controller: lastNameController,
-            ),
-            MyInput(
-              hintText: 'Email',
-              controller: emailController,
-            ),
-            MyInput(
-              hintText: 'Password',
-              obscureText: true,
-              controller: passwordController,
-            ),
+            _FirstNameInput(),
+            _LastNameInput(),
+            _RegisterEmailInput(),
+            _RegisterPasswordInput(),
+            _ConfirmPasswordInput(),
             SizedBox(
               height: 23,
             ),
-            _LoginButton(onTap: _onRegisterPressed),
+            _LoginButton(
+              onTap: () {
+                context.read<LoginBloc>().add(const RegisterSubmitted());
+              },
+            ),
           ]),
         ),
-      );
-    });
+      ),
+    );
   }
 }

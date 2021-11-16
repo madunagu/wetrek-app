@@ -20,26 +20,25 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   Stream<LoginState> mapEventToState(
     LoginEvent event,
   ) async* {
-    if (event is LoginUsernameChanged) {
-      yield _mapUsernameChangedToState(event, state);
+    if (event is LoginEmailChanged) {
+      yield _mapEmailChangedToState(event, state);
+    } else if (event is RegisterEmailChanged) {
+      yield _mapRegisterEmailChangedToState(event, state);
     } else if (event is LoginPasswordChanged) {
       yield _mapPasswordChangedToState(event, state);
+    } else if (event is RegisterPasswordChanged) {
+      yield _mapRegisterPasswordChangedToState(event, state);
+    } else if (event is RegisterFirstNameChanged) {
+      yield _mapFirstNameChangedToState(event, state);
+    } else if (event is RegisterLastNameChanged) {
+      yield _mapLastNameChangedToState(event, state);
+    } else if (event is RegisterConfirmPasswordChanged) {
+      yield _mapConfirmPasswordChangedToState(event, state);
     } else if (event is LoginSubmitted) {
       yield* _mapLoginSubmittedToState(event, state);
     } else if (event is RegisterSubmitted) {
       yield* _mapRegisterSubmittedToState(event, state);
     }
-  }
-
-  LoginState _mapUsernameChangedToState(
-    LoginUsernameChanged event,
-    LoginState state,
-  ) {
-    final username = Username.dirty(event.username);
-    return state.copyWith(
-      username: username,
-      status: Formz.validate([state.password, username]),
-    );
   }
 
   LoginState _mapPasswordChangedToState(
@@ -49,7 +48,103 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     final password = Password.dirty(event.password);
     return state.copyWith(
       password: password,
-      status: Formz.validate([password, state.username]),
+      status: Formz.validate([password, state.email]),
+    );
+  }
+
+  LoginState _mapRegisterPasswordChangedToState(
+    RegisterPasswordChanged event,
+    LoginState state,
+  ) {
+    final password = Password.dirty(event.password);
+    return state.copyWith(
+      password: password,
+      status: Formz.validate([
+        password,
+        state.firstName,
+        state.lastName,
+        // state.email,
+        // state.confirmPassword
+      ]),
+    );
+  }
+
+  LoginState _mapFirstNameChangedToState(
+    RegisterFirstNameChanged event,
+    LoginState state,
+  ) {
+    final firstName = FirstName.dirty(event.firstName);
+    return state.copyWith(
+      firstName: firstName,
+      status: Formz.validate([
+        firstName,
+        state.lastName,
+        state.email,
+        state.password,
+        // state.confirmPassword
+      ]),
+    );
+  }
+
+  LoginState _mapLastNameChangedToState(
+    RegisterLastNameChanged event,
+    LoginState state,
+  ) {
+    final lastName = LastName.dirty(event.lastName);
+    return state.copyWith(
+      lastName: lastName,
+      status: Formz.validate([
+        lastName,
+        state.firstName,
+        state.email,
+        state.password,
+        // state.confirmPassword
+      ]),
+    );
+  }
+
+  LoginState _mapEmailChangedToState(
+    LoginEmailChanged event,
+    LoginState state,
+  ) {
+    final email = Email.dirty(event.email);
+    return state.copyWith(
+      email: email,
+      status: Formz.validate([email, state.password]),
+    );
+  }
+
+  LoginState _mapRegisterEmailChangedToState(
+    RegisterEmailChanged event,
+    LoginState state,
+  ) {
+    final email = Email.dirty(event.email);
+    return state.copyWith(
+      email: email,
+      status: Formz.validate([
+        email,
+        state.firstName,
+        state.lastName,
+        state.password,
+        // state.confirmPassword
+      ]),
+    );
+  }
+
+  LoginState _mapConfirmPasswordChangedToState(
+    RegisterConfirmPasswordChanged event,
+    LoginState state,
+  ) {
+    final confirmPassword = ConfirmPassword.dirty(event.password);
+    return state.copyWith(
+      confirmPassword: confirmPassword,
+      status: Formz.validate([
+        confirmPassword,
+        // state.firstName,
+        // state.lastName,
+        // state.email,
+        // state.password,
+      ]),
     );
   }
 
@@ -61,7 +156,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield state.copyWith(status: FormzStatus.submissionInProgress);
       try {
         await _authenticationRepository.logIn(
-          email: state.username.value,
+          email: state.email.value,
           password: state.password.value,
         );
         yield state.copyWith(
@@ -76,6 +171,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         log(e.toString());
         yield state.copyWith(status: FormzStatus.submissionFailure, error: e);
       }
+    } else {
+      yield state.copyWith(status: FormzStatus.submissionFailure);
     }
   }
 
@@ -83,21 +180,24 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     RegisterSubmitted event,
     LoginState state,
   ) async* {
+    log('registering ');
     if (state.status.isValidated) {
       yield state.copyWith(status: FormzStatus.submissionInProgress);
       try {
         await _authenticationRepository.signUp(
-          firstName: event.firstName,
-          lastName: event.lastName,
-          email: event.email,
-          password: event.password,
+          firstName: state.firstName.value,
+          lastName: state.lastName.value,
+          email: state.email.value,
+          password: state.password.value,
         );
         yield state.copyWith(
             status: FormzStatus.submissionSuccess, error: null);
       } on ValidationErrorException catch (e, _) {
         log(e.errors.toString());
         yield state.copyWith(
-            status: FormzStatus.invalid, validationErrors: e.errors);
+          status: FormzStatus.invalid,
+          validationErrors: e.errors,
+        );
       } on MyException catch (e, _) {
         yield state.copyWith(status: FormzStatus.submissionFailure, error: e);
       } on Exception catch (e) {
