@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/screens/map_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
-class TermsScreen extends StatelessWidget {
+class TermsScreen extends StatefulWidget {
+  static MaterialPageRoute route() {
+    return MaterialPageRoute(
+      builder: (context) => TermsScreen(),
+    );
+  }
+
+  @override
+  _TermsScreenState createState() => _TermsScreenState();
+}
+
+class _TermsScreenState extends State<TermsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -710,7 +724,18 @@ class TermsScreen extends StatelessWidget {
                 style: TextStyles.darkNormal,
               ),
               SizedBox(height: 21),
-              MyButton('CONTINUE & AGREE', color: Color(0xff3ACCE1)),
+              MyButton(
+                'CONTINUE & AGREE',
+                color: Color(0xff3ACCE1),
+                onTap: () async {
+                  AuthenticationRepository rep =
+                      RepositoryProvider.of<AuthenticationRepository>(context);
+                  await rep.saveCookie('privacy_policy');
+                  Future.delayed(Duration.zero, () {
+                    Navigator.push(context, MapScreen.route());
+                  });
+                },
+              ),
             ],
           ),
         ),

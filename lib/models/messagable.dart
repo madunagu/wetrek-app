@@ -14,5 +14,4 @@ class Messagable extends Model {
   final bool isGroup;
   final Picture picture;
 
-
 }

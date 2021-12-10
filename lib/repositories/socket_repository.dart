@@ -19,11 +19,14 @@ class SocketRepository {
 
   SocketRepository({required this.authenticationRepository}) {
     _pusher = new PusherClient(
-      "app-key",
+      "4ac7dd96bc51f1f345344381230f2644737d",
       PusherOptions(
         // if local on android use 10.0.2.2
-        host: API.host,
-        encrypted: false,
+        // host: API.host,
+        // encrypted: false,
+        cluster: "mt1",
+        // wsPort: 6001,
+        // wssPort: 6001,
         auth: PusherAuth(
           API.host,
           headers: {

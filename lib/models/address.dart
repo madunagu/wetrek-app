@@ -11,6 +11,7 @@ class Address extends Model {
     required this.reference,
     this.matchedSubstrings,
     this.structuredFormatting,
+    // this.distance,
     this.terms,
     this.types,
   });
@@ -18,6 +19,7 @@ class Address extends Model {
   final String description;
   final String placeId;
   final String reference;
+  // final String? distance;
   final List<Match>? matchedSubstrings;
   final StructuredFormatting? structuredFormatting;
   final List<Term>? terms;

@@ -1,24 +1,40 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/models/trek.dart';
-import 'package:wetrek/screens/users_screen.dart';
+import 'package:wetrek/models/address.dart';
+import 'package:wetrek/repositories/maps_repository.dart';
 import '../widgets/widgets.dart';
-import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
-class PlaceScreen extends StatelessWidget {
-  static route(Trek trek) {
+class PlaceScreen extends StatefulWidget {
+  PlaceScreen({required this.place});
+  static route(Address place) {
     return MaterialPageRoute(
-      builder: (context) => PlaceScreen(
-        trek: trek,
-      ),
+      builder: (context) => PlaceScreen(place: place),
     );
   }
 
-  PlaceScreen({required this.trek});
-  final Trek trek;
+  final Address place;
+
+  @override
+  _PlaceScreenState createState() => _PlaceScreenState();
+}
+
+class _PlaceScreenState extends State<PlaceScreen> {
+  // late Address place;
+  @override
+  void initState() {
+    getPlace();
+    super.initState();
+  }
+
+  getPlace() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => LoadingPopup(),
+    );
+    var place = MapsRepository('not').getPlace(widget.place.placeId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,14 +44,11 @@ class PlaceScreen extends StatelessWidget {
             SliverAppBar(
               expandedHeight: 340.0,
               floating: false,
-              actions: [
-                GestureDetector(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Icon(Icons.filter_list, color: Colors.white),
-                  ),
-                ),
-              ],
+              title: MyAppBarNavigation(
+                fontColor: Colors.white,
+                rightIcon: Icons.filter_list,
+                onPressed: () {},
+              ),
               pinned: true,
               backgroundColor: Color(0xff2a2e43),
               bottom: PreferredSize(
@@ -47,7 +60,7 @@ class PlaceScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        trek.name,
+                        "Sushi Place",
                         style: TextStyles.title.copyWith(color: Colors.white),
                       ),
                       Row(
@@ -69,7 +82,7 @@ class PlaceScreen extends StatelessWidget {
                   child: Stack(
                     children: [
                       Image.asset(
-                        "images/dark_map.png",
+                        "images/sushi.jpg",
                         fit: BoxFit.cover,
                         width: double.infinity,
                       ),
@@ -108,28 +121,20 @@ class PlaceScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 15),
                 Text(
-                  'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
-                  style: TextStyles.base,
-                ),
+                    'The restaurant has an extensive selection of fresh fish flown in daily from the Sea of Japan as well as both the Atlantic and Pacific oceans.',
+                    style: TextStyles.base),
                 SizedBox(height: 41),
-                Text('Time', style: TextStyles.base),
-                SizedBox(height: 12),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      MyIconButton(icon: Icons.access_time),
-                      SizedBox(width: 16),
-                      Text(
-                        "${trek.startingAt.hour}:${trek.startingAt.minute}",
-                        style: TextStyles.normal,
-                      )
-                    ],
+                Text(
+                  'Treks',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
                   ),
                 ),
-                SizedBox(height: 16),
-                Text('Phone', style: TextStyles.base),
-                SizedBox(height: 12),
+                // SubTripRow(place),
+                DestinationCard(
+                    originAddress: 'Yaba', destinationAddress: 'Abule Ado'),
+                SizedBox(height: 41),
                 Container(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -144,39 +149,13 @@ class PlaceScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16),
-                Text('Attending', style: TextStyles.base),
-                SizedBox(height: 12),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context, UsersScreen.route([]));
-                  },
-                  child: Row(
-                    children: [
-                      AvatarList(imgSrcs: [
-                        'images/avatar1.jpg',
-                        'images/avatar2.jpg',
-                        'images/avatar3.jpg',
-                      ]),
-                      Spacer(),
-                      Icon(Icons.arrow_forward_ios, color: Colors.white),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text('Path Details', style: TextStyles.base),
-                SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'images/dark_map.png',
-                        height: 128,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'images/map.png',
+                    height: 128,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 SizedBox(height: 30),

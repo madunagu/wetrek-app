@@ -50,12 +50,17 @@ class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
   }
 
   getTrek() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => LoadingPopup(),
+    );
     trek = await TrekRepository(token).get(widget.trek.id);
 
     setState(() {
       isJoining = false;
       isAttending = trek.isAttending ?? false;
     });
+    Navigator.pop(context);
   }
 
   _joinTrek() async {
@@ -77,7 +82,7 @@ class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
         children: [
           Container(
               width: size.width,
-              child: MapContainer(direction: widget.trek.direction)),
+              child: MapContainer(direction: widget.trek.direction!)),
           Positioned(
             top: 56,
             child: Container(
@@ -167,7 +172,7 @@ class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
                           child: TrekItem(
                             size: size,
                             subTitle:
-                                widget.trek.direction.routes.first.summary,
+                                widget.trek.direction!.routes.first.summary,
                             title: 'Direction Details',
                             icon: Icons.directions_walk,
                             child: Container(

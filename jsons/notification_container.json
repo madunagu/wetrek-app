@@ -1,0 +1,9 @@
+{
+    "id": 1,
+    "type": "sts",
+    "data": "$Notification",
+    "notifiable": "$User",
+    "read_at": "@datetime",
+    "created_at": "@datetime",
+    "updated_at": "@datetime"
+}

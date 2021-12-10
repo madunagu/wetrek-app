@@ -7,8 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
+import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
+import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/controllers/home_controller.dart';
+import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/direction.dart';
 import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/paginated.dart';
@@ -20,6 +23,10 @@ import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/login_screen.dart';
+import 'package:wetrek/screens/nearby_screen.dart';
+import 'package:wetrek/screens/phone_screen.dart';
+import 'package:wetrek/screens/place_screen.dart';
+import 'package:wetrek/screens/terms_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/app_navigation_bar.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
@@ -43,11 +50,30 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
+    // checkPhoneNumberSaved();
+    checkPrivacyPolicyAccepted();
     LatLng loc = user.locations.isNotEmpty
         ? user.locations.last.toLatLng()
         : LatLng(6.4584252, 3.2721445);
     homeController = HomeController(loc);
     super.initState();
+  }
+
+  checkPhoneNumberSaved() async {
+    if (user.phone == null || user.phone!.isEmpty) {
+      Future.delayed(Duration.zero, () {
+        Navigator.push(context, PhoneScreen.route());
+      });
+    }
+  }
+
+  checkPrivacyPolicyAccepted() async {
+    AuthenticationRepository rep =
+        RepositoryProvider.of<AuthenticationRepository>(context);
+    bool isPolicyAccepted = await rep.isCookieSaved('privacy_policy');
+    if (!isPolicyAccepted) {
+      Navigator.push(context, TermsScreen.route());
+    }
   }
 
   @override
@@ -70,15 +96,25 @@ class _MapScreenState extends State<MapScreen> {
       ),
       child: Scaffold(
         drawer: AppNavigationDrawer(),
-        bottomSheet: BottomSheetContainer(controller: homeController),
-        extendBodyBehindAppBar: true,
         primary: true,
-        appBar: PlaceSearchBar(controller: homeController),
-        floatingActionButton: InkWell(
-          onTap: showUserLocation,
-          child: LocationButton(),
+        body: Stack(
+          children: [
+            GoogleMapContainer(controller: homeController),
+            PlaceSearchBar(controller: homeController),
+            DraggableScrollableSheet(
+                initialChildSize: 0.185,
+                minChildSize: 0.185,
+                builder: (BuildContext context, ScrollController controller) {
+                  return SingleChildScrollView(
+                    controller: controller,
+                    child: BottomSheetContainer(
+                      controller: homeController,
+                      scrollController: controller,
+                    ),
+                  );
+                }),
+          ],
         ),
-        body: GoogleMapContainer(controller: homeController),
       ),
     );
   }
@@ -95,6 +131,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     with GoogleMapMixin {
   late final String _mapStyle;
   late StreamSubscription<HomePageStatus> _sub;
+  late StreamSubscription<LatLng> _latLngSub;
   late StreamSubscription<Exception> _errorSub;
   late StreamSubscription<Location> _locationSub;
 
@@ -138,6 +175,11 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
     log('map created');
     _mapController = await _controller.future;
     _sub = widget.controller.homePageStatus.listen(refreshMap);
+    _latLngSub = widget.controller.mapLocationStream.listen((LatLng location) {
+      _mapController.animateCamera(
+        CameraUpdate.newLatLng(location),
+      );
+    });
   }
 
   _getCloseTreks() async {
@@ -266,9 +308,11 @@ class BottomSheetContainer extends StatefulWidget {
   const BottomSheetContainer({
     Key? key,
     required this.controller,
+    required this.scrollController,
   }) : super(key: key);
 
   final HomeController controller;
+  final ScrollController scrollController;
 
   @override
   _BottomSheetContainerState createState() => _BottomSheetContainerState();
@@ -277,6 +321,7 @@ class BottomSheetContainer extends StatefulWidget {
 class _BottomSheetContainerState extends State<BottomSheetContainer> {
   HomePageStatus homePageStatus = HomePageStatus.initial;
   late StreamSubscription<HomePageStatus> sub;
+  bool isExpanded = false;
   @override
   void initState() {
     super.initState();
@@ -284,6 +329,21 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
       setState(() {
         homePageStatus = status;
       });
+    });
+    widget.scrollController.addListener(() {
+      final maxScroll = widget.scrollController.position.maxScrollExtent;
+      final currentScroll = widget.scrollController.offset;
+      log(widget.scrollController.position.pixels.toString());
+      // if (currentScroll >= (maxScroll * 0.8) && isExpanded == false) {
+      //   setState(() {
+      //     isExpanded = true;
+      //   });
+      // }
+      //  else if (currentScroll <= (maxScroll * 0.3) && isExpanded == true) {
+      //   setState(() {
+      //     isExpanded = false;
+      //   });
+      // }
     });
   }
 
@@ -296,44 +356,79 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
   @override
   Widget build(BuildContext context) {
     // mapState = mapController.
+    Size size = MediaQuery.of(context).size;
     switch (homePageStatus) {
       case HomePageStatus.initial:
         return MapSheet(
-          child: MapSheetDetails(
-            controller: widget.controller,
-            rightContent: Text(
-              '18',
-              style: TextStyle(
-                color: Color(0xff3D4255),
-                fontSize: 62,
-                fontWeight: FontWeight.w500,
+          controller: widget.controller,
+          color: Color(0xff2A2E43),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MapSheetDetails(
+                controller: widget.controller,
+                rightContent: Text(
+                  '18',
+                  style: TextStyle(
+                    color: Color(0xff3D4255),
+                    fontSize: 62,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-            ),
+              BlocProvider<SearchBloc>(
+                create: (BuildContext context) => SearchBloc(
+                  repository: MapsRepository(
+                      RepositoryProvider.of<AuthenticationRepository>(context)
+                          .token),
+                ),
+                child: PlacesNearby(controller: widget.controller),
+              )
+            ],
           ),
         );
+
       case HomePageStatus.creating:
         return MapSheet(
-          height: 297,
+          controller: widget.controller,
           child: TrekForm(controller: widget.controller),
         );
       case HomePageStatus.loading:
-        return MapSheet(child: CircularProgressIndicator());
+        return MapSheet(
+            controller: widget.controller,
+            child: Container(height: 200, child: CircularProgressIndicator()));
       case HomePageStatus.searching:
         return Container(
-          height: 200,
-          child: PlacesNearby(
-            controller: widget.controller,
+          child: BlocProvider<SearchBloc>(
+            create: (BuildContext context) => SearchBloc(
+              repository: MapsRepository(
+                  RepositoryProvider.of<AuthenticationRepository>(context)
+                      .token),
+            ),
+            child: PlacesNearby(
+              controller: widget.controller,
+            ),
           ),
         );
       case HomePageStatus.waiting:
-        return MapSheet(child: TripInfo());
+        return MapSheet(controller: widget.controller, child: TripInfo());
       case HomePageStatus.showing:
+        if (isExpanded) {
+          return PlaceScreen(
+            place: Address(
+                description: 'somewhere', placeId: 'kkk', reference: 'kkk'),
+          );
+        }
         return MapSheet(
-          height: 125,
+          controller: widget.controller,
           child: MapSheetDetails(
             controller: widget.controller,
-            child: PlaceDetailsPreview(
-              trek: widget.controller.trek!,
+            title:
+                widget.controller.destinationAddress?.description ?? 'A Place',
+            child: Container(
+              child: PlaceDetailsPreview(
+                place: widget.controller.destinationAddress!,
+              ),
             ),
           ),
         );
@@ -347,7 +442,10 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
         );
 
       default:
-        return MapSheet(child: MapSheetDetails(controller: widget.controller));
+        return MapSheet(
+          controller: widget.controller,
+          child: MapSheetDetails(controller: widget.controller),
+        );
     }
   }
 }
@@ -372,7 +470,7 @@ mixin GoogleMapMixin<T extends StatefulWidget> on State<T> {
     if (trek.locations != null && trek.locations!.isNotEmpty) {
       _lat = trek.locations!.last.lat;
       _lng = trek.locations!.last.lng;
-    } else {
+    } else if (trek.direction.routes.isNotEmpty) {
       _lat = trek.direction.routes.first.legs.first.startLocation.lat;
       _lng = trek.direction.routes.first.legs.first.startLocation.lng;
     }

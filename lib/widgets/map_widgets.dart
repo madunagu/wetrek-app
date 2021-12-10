@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
@@ -22,11 +23,13 @@ import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/location_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/login_screen.dart';
 import 'package:wetrek/screens/map_screen.dart';
 import 'package:wetrek/screens/path_screen.dart';
+import 'package:wetrek/screens/place_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
@@ -35,41 +38,46 @@ import 'package:wetrek/widgets/avatar_list.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PlaceDetailsPreview extends StatelessWidget {
-  PlaceDetailsPreview({required this.trek});
-  final Trek trek;
+  PlaceDetailsPreview({required this.place});
+  final Address place;
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width - 72,
       padding: EdgeInsets.only(top: 8, bottom: 16),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
+      child: Column(
         children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: trek.pictures != null && trek.pictures!.isNotEmpty
-                    ? trek.pictures!
-                        .map((e) => Image.network(e.small, height: 44))
-                        .toList()
-                    : [],
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 44,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    // children: trek.pictures != null && trek.pictures!.isNotEmpty
+                    //     ? trek.pictures!
+                    //         .map((e) => Image.network(e.small, height: 44))
+                    //         .toList()
+                    //     : [],
+                  ),
+                ),
               ),
-            ),
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigator.of(context).push(TrekScreen.route(trek));
+                    // Navigator.of(context).push(PlaceScreen.route());
+                  },
+                  child: Container(
+                    child: MyButton('GO THERE'),
+                  ),
+                ),
+              )
+            ],
           ),
-          Expanded(
-            flex: 1,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(TrekScreen.route(trek));
-              },
-              child: Container(
-                child: MyButton('GO THERE'),
-              ),
-            ),
-          )
         ],
       ),
     );
@@ -157,60 +165,83 @@ class _TrekFormState extends State<TrekForm> {
 class MapSheet extends StatelessWidget {
   MapSheet({
     required this.child,
-    this.height = 101,
-    this.topBorder = const GradientLine(),
+    required this.controller,
+    this.color = const Color(0xff353A50),
   });
   final Widget child;
-  final Widget topBorder;
-  final double height;
+  final Color color;
+  final HomeController controller;
   @override
   Widget build(BuildContext context) {
     final Size view = MediaQuery.of(context).size;
-    return Container(
-      width: view.width,
-      alignment: Alignment.bottomCenter,
-      height: height,
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(6),
-          topRight: Radius.circular(6),
-        ),
-        child: Column(
-          children: [
-            topBorder,
-            Container(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        LocationButton(controller: controller),
+        SizedBox(height: 16),
+        ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(6),
+            topRight: Radius.circular(6),
+          ),
+          child: Container(
+            padding: EdgeInsets.only(top: 6),
+            width: view.width,
+            decoration: BottomSheetDecoration(),
+            constraints: BoxConstraints(
+              minHeight: 800,
+            ),
+            child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              width: view.width,
-              alignment: Alignment.bottomCenter,
-              color: Color(0xff2A2E43),
+              color: color,
               child: child,
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
 
-class LocationButton extends StatelessWidget {
+class LocationButton extends StatefulWidget {
+  LocationButton({required this.controller});
+  final HomeController controller;
+  @override
+  _LocationButtonState createState() => _LocationButtonState();
+}
+
+class _LocationButtonState extends State<LocationButton> {
+  panToLocation() async {
+    LocationRepository locationRepository =
+        RepositoryProvider.of<LocationRepository>(context);
+    Position myPos = await locationRepository.determinePosition();
+
+    //TODO: catch all possible excepitons
+    LatLng latLng = LatLng(myPos.latitude, myPos.longitude);
+    widget.controller.setLocation(latLng);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 92,
-      height: 52,
-      alignment: Alignment.center,
-      padding: EdgeInsets.only(left: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12),
-          bottomLeft: Radius.circular(12),
+    return InkWell(
+      onTap: panToLocation,
+      child: Container(
+        width: 92,
+        height: 52,
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(left: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+          ),
         ),
-      ),
-      child: Icon(
-        Icons.my_location,
-        color: Color(0xff454F63),
-        size: 18,
+        child: Icon(
+          Icons.my_location,
+          color: Color(0xff454F63),
+          size: 18,
+        ),
       ),
     );
   }
@@ -327,8 +358,14 @@ class _PlacesNearbyState extends State<PlacesNearby> {
     return '200km';
   }
 
+  selectPlace(Address place) {
+    widget.controller.selectDestinationAddress(place);
+    widget.controller.setHomeStatus(HomePageStatus.showing);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String _mapsKey = 'AIzaSyAXYH6jQZSQ6vr6WWgTVpx_Bph2TzEYOY8';
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 200,
@@ -347,11 +384,10 @@ class _PlacesNearbyState extends State<PlacesNearby> {
                   return index >= state.models.length
                       ? BottomLoader()
                       : GestureDetector(
-                          onTap: () => widget.controller
-                              .selectTrek(state.models[index] as Trek),
+                          onTap: () =>
+                              selectPlace(state.models[index] as Address),
                           child: PlacedCard(
-                            title: (state.models[index] as Trek).name,
-                            subTitle: distance(state.models[index] as Trek),
+                            place: state.models[index] as Address,
                           ),
                         );
                 },
@@ -388,10 +424,10 @@ class TripInfo extends StatelessWidget {
             ),
           ),
           SizedBox(height: 23),
-          SubTripRow(),
+          // SubTripRow(),
           // this is the underline
           Container(),
-          SubTripRow(),
+          // SubTripRow(),
           SizedBox(height: 12),
           MyButton(
             'CANCEL',
@@ -404,6 +440,8 @@ class TripInfo extends StatelessWidget {
 }
 
 class SubTripRow extends StatelessWidget {
+  SubTripRow(this.trek);
+  final Trek trek;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -414,25 +452,26 @@ class SubTripRow extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset('images/avatar2.jpg', width: 48, height: 48),
+            child: Image.network(trek.picture.small, width: 48, height: 48),
           ),
           SizedBox(width: 16),
-          Column(children: [
-            Text('Alexa', style: TextStyles.normal),
-            Text('4.5 stars', style: TextStyles.minor),
+          MovementDrawing(height: 43, width: 10),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(trek.startAddress.description, style: TextStyles.minor),
+            SizedBox(height: 16),
+            Text(trek.endAddress.description, style: TextStyles.minor),
           ]),
           Spacer(),
-          MyIconButton(),
-          SizedBox(width: 8),
           Container(
             alignment: Alignment.center,
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Color(0xff353A50),
+              // color: Color(0xff353A50),
+              border: Border.all(color: Colors.white),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.message, color: Colors.white, size: 16),
+            child: Text(trek.name, style: TextStyles.normal),
           ),
         ],
       ),
@@ -597,6 +636,13 @@ class TrekCard extends StatelessWidget {
   TrekCard({this.onTap, required this.trek});
   final VoidCallback? onTap;
   final Trek trek;
+  attendees() {
+    if (trek.users != null && trek.users!.isNotEmpty) {
+      return trek.users?.first.name;
+    }
+    return 'Nobody';
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -619,10 +665,10 @@ class TrekCard extends StatelessWidget {
         padding: EdgeInsets.only(left: 20, right: 16, top: 13, bottom: 15),
         child: Column(
           children: [
-            LocationPairCard(
-              originAddress: trek.startAddress.description,
-              destinationAddress: trek.endAddress.description,
-            ),
+            // LocationPairCard(
+            //   originAddress: trek.startAddress.description,
+            //   destinationAddress: trek.endAddress.description,
+            // ),
             Container(
               child: Row(
                 children: [
@@ -631,7 +677,7 @@ class TrekCard extends StatelessWidget {
                         trek.users?.map((e) => e.picture.small).toList() ?? [],
                   ),
                   Text(
-                    "${trek.users?.first.name ?? 'Nobody'} is attending",
+                    "${attendees()} is attending",
                     style: TextStyles.darkMinor,
                   ),
                 ],
@@ -686,7 +732,50 @@ class LocationPairCard extends StatelessWidget {
   }
 }
 
-class PlaceSearchBar extends StatefulWidget implements PreferredSizeWidget {
+class DestinationCard extends StatelessWidget {
+  DestinationCard(
+      {required this.originAddress, required this.destinationAddress});
+  final String originAddress;
+  final String destinationAddress;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        MovementDrawing(height: 43, width: 10),
+        SizedBox(width: 20),
+        Expanded(
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Text('Start Location', style: TextStyles.darkMinor),
+                Text(originAddress, style: TextStyles.darkNormal),
+                // Container(
+                //   margin: EdgeInsets.symmetric(vertical: 15),
+                //   height: 1,
+                //   color: Color(0xffF4F4F6),
+                // ),
+                SizedBox(height: 25),
+                // Text(
+                //   'Destination Location',
+                //   style: TextStyles.darkMinor,
+                // ),
+                Text(destinationAddress, style: TextStyles.darkNormal),
+                // Container(
+                //   margin: EdgeInsets.symmetric(vertical: 6),
+                //   height: 1,
+                //   color: Color(0xffF4F4F6),
+                // ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class PlaceSearchBar extends StatefulWidget {
   PlaceSearchBar({
     required this.controller,
   });
@@ -694,10 +783,6 @@ class PlaceSearchBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   _PlaceSearchBarState createState() => _PlaceSearchBarState();
-
-  @override
-  // TODO: implement preferredSize
-  Size get preferredSize => Size.fromHeight(200);
 }
 
 class _PlaceSearchBarState extends State<PlaceSearchBar> {
@@ -721,26 +806,30 @@ class _PlaceSearchBarState extends State<PlaceSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 36),
-        searchBarStatus == SearchBarStatus.expanded
-            ? Padding(
-                padding:
-                    const EdgeInsets.only(left: 16.0, right: 16, bottom: 6),
-                child: MyAppBarNavigation(
-                    onBackPressed: widget.controller.collapseSearchBar),
-              )
-            : Container(),
-        Container(
-          margin: EdgeInsets.only(left: 16, right: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      height: 201,
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        children: [
+          SizedBox(height: 36),
+          searchBarStatus == SearchBarStatus.expanded
+              ? Padding(
+                  padding:
+                      const EdgeInsets.only(left: 16.0, right: 16, bottom: 6),
+                  child: MyAppBarNavigation(
+                      onBackPressed: widget.controller.collapseSearchBar),
+                )
+              : Container(),
+          Container(
+            margin: EdgeInsets.only(left: 16, right: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: currentSearchWidget(),
           ),
-          child: currentSearchWidget(),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1105,7 +1194,7 @@ class SearchResults extends StatefulWidget {
 }
 
 class _SearchResultsState extends State<SearchResults> {
-  final _scrollController = ScrollController();
+  // final _scrollController = ScrollController();
   late SearchBloc _searchBloc;
 
   late final StreamSubscription<String> searchSubscription;
@@ -1130,7 +1219,7 @@ class _SearchResultsState extends State<SearchResults> {
   @override
   void dispose() {
     searchSubscription.cancel();
-    _scrollController.dispose();
+    // _scrollController.dispose();
     super.dispose();
   }
 
@@ -1149,9 +1238,11 @@ class _SearchResultsState extends State<SearchResults> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Container(
+      constraints: BoxConstraints(
+        minHeight: 800,
+      ),
       color: Color(0xffF7F7FA),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      height: 228,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1164,7 +1255,7 @@ class _SearchResultsState extends State<SearchResults> {
             ),
           ),
           Container(
-            height: 180,
+            height: 280,
             child: BlocBuilder<SearchBloc, SearchState>(
               builder: (context, state) {
                 switch (state.status) {
@@ -1175,21 +1266,14 @@ class _SearchResultsState extends State<SearchResults> {
                     if (state.models.isEmpty) {
                       return const Center(child: Text('no suggestions'));
                     }
-                    return ListView.builder(
-                      itemBuilder: (BuildContext context, int index) {
-                        return index >= state.models.length
-                            ? BottomLoader()
-                            : GestureDetector(
-                                onTap: () => widget.controller.selectAddress(
-                                    state.models[index] as Address),
-                                child: SearchResultRow(
-                                    state.models[index] as Address, size),
-                              );
-                      },
-                      itemCount: state.hasReachedMax
-                          ? state.models.length
-                          : state.models.length + 1,
-                      controller: _scrollController,
+                    return Column(
+                      children: state.models
+                          .map((e) => GestureDetector(
+                                onTap: () => widget.controller
+                                    .selectAddress(e as Address),
+                                child: SearchResultRow(e as Address, size),
+                              ))
+                          .toList(),
                     );
                   default:
                     return const Center(child: CircularProgressIndicator());

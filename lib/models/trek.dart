@@ -20,7 +20,7 @@ class Trek extends Messagable {
     this.repeat,
     this.users,
     required this.picture,
-    required this.direction,
+    this.direction,
     this.locations,
     required this.startingAt,
     required this.userId,
@@ -43,7 +43,7 @@ class Trek extends Messagable {
   final String? repeat;
   final List<User>? users;
   final Picture picture;
-  final Direction direction;
+  final Direction? direction;
   final List<Location>? locations;
   final DateTime startingAt;
   final String userId;
@@ -68,7 +68,9 @@ class Trek extends Messagable {
           ? (json['users'] as List? ?? []).map((e) => User.fromJson(e)).toList()
           : null,
       picture: Picture.fromJson(json['picture']),
-      direction: Direction.fromJson(jsonDecode(json['direction'])),
+      direction: json['direction'] != null
+          ? Direction.fromJson(jsonDecode(json['direction']))
+          : null,
       locations: json['locations'] != null
           ? (json['locations'] as List? ?? [])
               .map((e) => Location.fromJson(e))

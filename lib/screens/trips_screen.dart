@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
-import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
-import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/models/where.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
-import 'package:wetrek/widgets/avatar_list.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 
 import 'package:timeago/timeago.dart' as timeago;
@@ -92,7 +87,9 @@ class _MyTabBarState extends State<MyTabBar> {
             .animateTo(i, duration: Duration(milliseconds: 500));
         if (i > 0) {
           _searchBloc.add(
-            SearchFetched(conditions: [Where(column: 'p', val: 'anything')]),
+            SearchFetched(
+              conditions: [Where(column: 'post_dated', val: 'true')],
+            ),
           );
         } else {
           _searchBloc.add(SearchFetched());
@@ -200,7 +197,7 @@ class _TrekListState extends State<TrekList> {
                 itemBuilder: (BuildContext context, int index) {
                   return index >= state.models.length
                       ? BottomLoader()
-                      : SingleTrek(trek: state.models[index] as Trek);
+                      : SingleTrek(trek:state.models[index] as Trek);
                 },
                 itemCount: state.hasReachedMax
                     ? state.models.length

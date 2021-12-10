@@ -128,6 +128,11 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  selectDestinationAddress(Address address) {
+    destinationAddress = address;
+    notifyListeners();
+  }
+
   resetAddress() {
     originAddress = null;
     destinationAddress = null;

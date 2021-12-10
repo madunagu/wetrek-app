@@ -28,6 +28,7 @@ dependencies:
   rxdart: ^0.27.1
   timeago: ^3.1.0
   image_picker: 
+  photo_view:
 #  geolocator: ^7.0.3
 #  geocoding: ^2.0.0
 

@@ -17,6 +17,10 @@ class User extends Messagable {
     this.followers,
     required this.locations,
     required this.settings,
+    this.isFollowing = false,
+    this.followersCount,
+    this.followingCount,
+    this.notificationsCount,
   }) : super(id: id, name: name, picture: picture);
 
   final int id;
@@ -29,6 +33,10 @@ class User extends Messagable {
   final List<int>? followers;
   final List<Location> locations;
   final Settings settings;
+  final bool isFollowing;
+  final String? followersCount;
+  final String? followingCount;
+  final String? notificationsCount;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
       id: json['id'] as int,
@@ -38,6 +46,12 @@ class User extends Messagable {
       phone: json['phone'] != null ? json['phone'] as String : null,
       picture: Picture.fromJson(json['picture']),
       settings: Settings.fromJson(json['setting']),
+      isFollowing: json['is_following_count'] != null
+          ? json['is_following_count'] == 1
+          : false,
+      followersCount: json['followers_count'] as String?,
+      followingCount: json['following_count'] as String?,
+      notificationsCount: json['notifications_count'] as String?,
       following: json['following'] != null
           ? (json['following'] as List? ?? []).map((e) => e as int).toList()
           : null,
@@ -45,7 +59,7 @@ class User extends Messagable {
           ? (json['followers'] as List? ?? []).map((e) => e as int).toList()
           : null,
       locations: (json['locations'] as List? ?? [])
-          .map((e) =>Location.fromJson(e))
+          .map((e) => Location.fromJson(e))
           .toList());
 
   Map<String, dynamic> toJson() => {

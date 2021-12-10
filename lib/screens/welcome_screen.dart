@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/repositories/authentication_repository.dart';
 import '../widgets/widgets.dart';
 import 'package:wetrek/widgets/dotted_tab_bar.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+
+  static MaterialPageRoute<WelcomeScreen> route() {
+    return MaterialPageRoute(builder: (context) => WelcomeScreen());
+  }
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    registerWelcome();
+    super.initState();
+  }
+
+  registerWelcome() async {
+    AuthenticationRepository rep =
+        RepositoryProvider.of<AuthenticationRepository>(context);
+    await rep.saveCookie('user_welcomed');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

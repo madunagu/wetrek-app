@@ -1,3 +1,9 @@
 {
-  "id": 1
+  "object_type": "something",
+  "object_id": 1,
+  "body": "this is the story of it",
+  "notify_at?": "@datetime",
+  "reccuring": false,
+  "messagable": "$Messagable",
+  "repeat_after?": 400
 }

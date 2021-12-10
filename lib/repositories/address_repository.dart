@@ -42,8 +42,7 @@ class AddressRepository extends Repository {
   }
 
   Future<Address> create(Map<String, dynamic> address) async {
-    final Map<String, dynamic> res =
-        await api.post('/addresses', address);
+    final Map<String, dynamic> res = await api.post('/addresses', address);
     return Address.fromJson(res['data']);
   }
 

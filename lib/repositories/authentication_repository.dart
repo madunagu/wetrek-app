@@ -14,7 +14,6 @@ class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
   late String _token;
 
-
   Stream<AuthenticationStatus> get status async* {
     String? token = await storage.read(key: 'token');
 //    token = 'akkyyad12kidlz';
@@ -72,6 +71,18 @@ class AuthenticationRepository {
     return;
   }
 
+  Future<bool> isCookieSaved(String key) async {
+    String? savedCookie = await storage.read(key: key);
+    if (savedCookie != null) {
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> saveCookie(String key) async {
+    await storage.write(key: key, value: 'accepted');
+    return;
+  }
   void logOut() async {
     await delete();
     _controller.add(AuthenticationStatus.unauthenticated);
@@ -85,7 +96,7 @@ class AuthenticationRepository {
     return await UserRepository(token).current();
   }
 
-  void refresh(User u){
+  void refresh(User u) {
     _controller.add(AuthenticationStatus.authenticated);
   }
 

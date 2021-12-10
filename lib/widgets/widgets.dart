@@ -7,6 +7,7 @@ import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
+import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
@@ -438,6 +439,53 @@ class _BlueGradientPainter extends BoxPainter {
   }
 }
 
+class BottomSheetDecoration extends Decoration {
+  final BoxPainter _painter;
+
+  BottomSheetDecoration() : _painter = _BottomSheetDecorationPainter();
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) => _painter;
+}
+
+class _BottomSheetDecorationPainter extends BoxPainter {
+  final Paint _paint;
+  // final double height;
+  _BottomSheetDecorationPainter()
+      : _paint = Paint()
+          ..color = WeTrekColors.blue4
+          ..strokeWidth = 12
+          ..isAntiAlias = true;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration cfg) {
+    _paint.color = WeTrekColors.blue4;
+    canvas.drawLine(
+      offset + Offset(0, 0),
+      offset + Offset(cfg.size!.width / 4, 0),
+      _paint,
+    );
+    _paint.color = WeTrekColors.blue3;
+    canvas.drawLine(
+      offset + Offset(cfg.size!.width / 4, 0),
+      offset + Offset(cfg.size!.width / 2, 0),
+      _paint,
+    );
+    _paint.color = WeTrekColors.blue2;
+    canvas.drawLine(
+      offset + Offset(cfg.size!.width / 2, 0),
+      offset + Offset(cfg.size!.width / 4 * 3, 0),
+      _paint,
+    );
+    _paint.color = WeTrekColors.blue1;
+    canvas.drawLine(
+      offset + Offset(cfg.size!.width / 4 * 3, 0),
+      offset + Offset(cfg.size!.width, 0),
+      _paint,
+    );
+  }
+}
+
 class MovementPainter extends CustomPainter {
   MovementPainter({this.horizontal = false});
   final bool horizontal;
@@ -697,9 +745,16 @@ class _FollowButtonState extends State<FollowButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        UserRepository userRepository =
-            RepositoryProvider.of<UserRepository>(context);
-        isFollowing = await userRepository.follow(widget.user);
+        setState(() {
+          isFollowing = !isFollowing;
+        });
+        String token =
+            RepositoryProvider.of<AuthenticationRepository>(context).token!;
+        UserRepository userRepository = UserRepository(token);
+        bool isF = await userRepository.follow(widget.user);
+        setState(() {
+          isFollowing = isF;
+        });
       },
       child: Container(
         height: 32,
@@ -871,64 +926,64 @@ class OverlayPlacedCard extends StatelessWidget {
 
 class PlacedCard extends StatelessWidget {
   PlacedCard({
-    required this.title,
-    required this.subTitle,
-    this.coverImage,
+    required this.place,
     this.active = false,
   });
 
-  final String title;
-  final String subTitle;
-  final String? coverImage;
+  final Address place;
   final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        margin: EdgeInsets.only(right: 12),
-        height: active ? 200 : 50,
-        width: 152,
-        child: Stack(
-          children: [
-            Image.asset(
-              'images/sushi.jpg',
-              height: active ? 200 : 172,
-              fit: BoxFit.cover,
-            ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                height: 60,
-                width: 152,
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 12,
-                  bottom: 6,
-                ),
-                color: active ? WeTrekColors.blue1 : Color(0xff353A50),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+    final String _mapsKey = 'AIzaSyAXYH6jQZSQ6vr6WWgTVpx_Bph2TzEYOY8';
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: active ? 200 : 50,
+          width: 152,
+          child: Stack(
+            children: [
+              // Image.network(
+              //   // this.coverImage,
+              // "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.reference}&key=$_mapsKey",
+              //   height: active ? 200 : 172,
+              //   fit: BoxFit.cover,
+              // ),
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  height: 60,
+                  width: 152,
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 12,
+                    bottom: 6,
+                  ),
+                  color: active ? WeTrekColors.blue1 : Color(0xff353A50),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        place.description,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    Opacity(
-                      opacity: 0.56,
-                      child: Text(subTitle, style: TextStyles.minor),
-                    )
-                  ],
+                      Opacity(
+                        opacity: 0.56,
+                        child: Text(place.description, style: TextStyles.minor),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

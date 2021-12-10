@@ -13,7 +13,7 @@ class AvatarList extends StatelessWidget {
             padding: EdgeInsets.only(right: 8),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(50),
-              child: Image.asset(src, width: 32, height: 32),
+              child: Image.network(src, width: 32, height: 32),
             ),
           ),
         )

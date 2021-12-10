@@ -9,6 +9,7 @@ import 'package:wetrek/blocs/states/login.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
+import 'package:wetrek/screens/welcome_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 import 'package:formz/formz.dart';
 
@@ -22,6 +23,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    checkUserWelcomed();
+    super.initState();
+  }
+
+  checkUserWelcomed() async {
+    AuthenticationRepository rep =
+        RepositoryProvider.of<AuthenticationRepository>(context);
+    bool isUserWelcomed = await rep.isCookieSaved('user_welcomed');
+    if (!isUserWelcomed) {
+      Navigator.push(context, WelcomeScreen.route());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;

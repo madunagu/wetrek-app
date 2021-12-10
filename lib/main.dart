@@ -5,6 +5,7 @@ import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/blocs/login.bloc.dart';
 import 'package:wetrek/blocs/states/authentication.state.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/location_repository.dart';
 import 'package:wetrek/repositories/socket_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
@@ -57,14 +58,23 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: RepositoryProvider(
+      child: MultiRepositoryProvider(providers: [
+        RepositoryProvider(
           create: (context) => SocketRepository(
-              authenticationRepository:
-                  RepositoryProvider.of<AuthenticationRepository>(context)),
-          child: ViewNavigator()),
+            authenticationRepository:
+                RepositoryProvider.of<AuthenticationRepository>(context),
+          ),
+        ),
+        RepositoryProvider(
+          create: (context) => LocationRepository(),
+        ),
+      ], child: ViewNavigator()),
     );
   }
 }
+// create: (context) => SocketRepository(
+//         authenticationRepository:
+//             RepositoryProvider.of<AuthenticationRepository>(context)),
 
 class ViewNavigator extends StatefulWidget {
   @override

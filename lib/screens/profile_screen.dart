@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -15,6 +16,7 @@ import 'package:wetrek/screens/settings_screen.dart';
 import 'package:wetrek/screens/statistics_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({required this.user});
@@ -32,16 +34,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late final bool isMyProfile;
   late final User myself;
-  chatTapped() {
-    if (isMyProfile) {
-      Navigator.push(context, ChatsScreen.route());
-    } else {
-      Navigator.push(context, ChatScreen.route(widget.user));
-    }
-  }
 
   String readableAddress() {
-    if (isMyProfile) {
+    if (widget.user.id == myself.id) {
       return 'My Location';
     }
     Location userLocation = widget.user.locations.isEmpty
@@ -66,10 +61,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return "${distance}Km away";
   }
 
-  locationTapped() {}
+  void submitButtonPressed() async {
+    File? image = await _imgFromGallery();
+    if (image != null)
+      Map<String, List<dynamic>> obj = {'picture': image.readAsBytesSync()};
+  }
 
-  statisticsTapped() {
-    Navigator.push(context, StatisticsScreen.route());
+  Future<File?> _imgFromGallery() async {
+    XFile? image = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (image != null)
+      return File(image.path);
+    else
+      return null;
   }
 
   @override
@@ -119,181 +123,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: Column(
                       children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 38),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: <Widget>[
-                                    Text(
-                                      widget.user.name,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 32,
-                                        color: Color(0xFF454f63),
-                                      ),
-                                    ),
-                                    Text(
-                                      readableAddress(),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Color(0xff78849E),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 32),
-                              isMyProfile
-                                  ? Container()
-                                  : FollowButton(widget.user),
-                            ],
-                          ),
+                        NameContainer(
+                          user: widget.user,
+                          subTitle: readableAddress(),
+                          isMyProfile: isMyProfile,
                         ),
                         SizedBox(
                           height: 24,
                         ),
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 16),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 32,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(40),
-                            ),
-                            color: Color(0xFFFFFFFF),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0x14455B63),
-                                offset: Offset(0, 4),
-                                blurRadius: 16,
-                              )
-                            ],
-                          ),
-                          child: Column(
-                            children: <Widget>[
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  ProfileButton(
-                                    onTap: chatTapped,
-                                    icon: Icons.chat_bubble_outline,
-                                    color: Color(0xff3ACCE1),
-                                    label: 'Chat',
-                                  ),
-                                  ProfileButton(
-                                    onTap: statisticsTapped,
-                                    icon: Icons.dock_outlined,
-                                    color: Color(0xff3497FD),
-                                    label: 'Statistics',
-                                  ),
-                                  ProfileButton(
-                                    onTap: locationTapped,
-                                    icon: Icons.location_on,
-                                    color: Color(0xff665EFF),
-                                    label: 'Location',
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                color: Color(0x23998fa2),
-                                height: 1,
-                                margin: EdgeInsets.symmetric(vertical: 32),
-                              ),
-                              isMyProfile
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: <Widget>[
-                                        ProfileButton(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              UsersScreen.route([
-                                                Where(
-                                                  column: 'following',
-                                                  val: "${widget.user.id}",
-                                                ),
-                                              ]),
-                                            );
-                                          },
-                                          icon: Icons.people_outline,
-                                          color: Color(0xffC840E9),
-                                          label: 'Friends',
-                                        ),
-                                        ProfileButton(
-                                          onTap: () {
-                                            Navigator.push(context,
-                                                SettingsScreen.route());
-                                          },
-                                          icon: Icons.settings,
-                                          color: Color(0xffFF4F9A),
-                                          label: 'Settings',
-                                        ),
-                                        ProfileButton(
-                                          onTap: () {
-                                            Navigator.push(context,
-                                                NotificationScreen.route());
-                                          },
-                                          icon: Icons.chat,
-                                          color: Color(0xffFF9057),
-                                          label: 'Notifications',
-                                        ),
-                                      ],
-                                    )
-                                  : Container(),
-                            ],
-                          ),
+                        ProfileOptions(
+                          isMyProfile: isMyProfile,
+                          user: widget.user,
+                          myself: myself,
                         ),
                         SizedBox(
                           height: 20,
                         ),
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 16),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 32,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(40),
-                            ),
-                            color: Color(0xFFFFFFFF),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(50)),
-                                    child: Image.asset(
-                                      'images/avatar1.jpg',
-                                      height: 36,
-                                      width: 36,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(),
-                              Icon(Icons.keyboard_arrow_down),
-                            ],
-                          ),
-                        ),
+                        // Container(
+                        //   margin: EdgeInsets.symmetric(horizontal: 16),
+                        //   padding: EdgeInsets.symmetric(
+                        //     horizontal: 24,
+                        //     vertical: 32,
+                        //   ),
+                        //   decoration: BoxDecoration(
+                        //     borderRadius: BorderRadius.all(
+                        //       Radius.circular(40),
+                        //     ),
+                        //     color: Color(0xFFFFFFFF),
+                        //   ),
+                        //   child: Column(
+                        //     children: [
+                        //       Row(
+                        //         children: [
+                        //           Container(
+                        //             decoration: BoxDecoration(
+                        //                 borderRadius:
+                        //                     BorderRadius.circular(50)),
+                        //             child: Image.asset(
+                        //               'images/avatar1.jpg',
+                        //               height: 36,
+                        //               width: 36,
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //       Column(),
+                        //       Icon(Icons.keyboard_arrow_down),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -424,6 +302,179 @@ class ProfileButton extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class NameContainer extends StatelessWidget {
+  NameContainer(
+      {required this.user, required this.subTitle, this.isMyProfile = false});
+  final User user;
+  final String subTitle;
+  final bool isMyProfile;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 38),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text(
+                  user.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 32,
+                    color: Color(0xFF454f63),
+                  ),
+                ),
+                Text(
+                  subTitle,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xff78849E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 32),
+          isMyProfile ? Container() : FollowButton(user),
+        ],
+      ),
+    );
+  }
+}
+
+class ProfileOptions extends StatefulWidget {
+  ProfileOptions(
+      {required this.isMyProfile, required this.user, required this.myself});
+  final bool isMyProfile;
+  final User user;
+  final User myself;
+
+  @override
+  _ProfileOptionsState createState() => _ProfileOptionsState();
+}
+
+class _ProfileOptionsState extends State<ProfileOptions> {
+  chatTapped() {
+    if (widget.isMyProfile) {
+      Navigator.push(context, ChatsScreen.route());
+    } else {
+      Navigator.push(context, ChatScreen.route(widget.user));
+    }
+  }
+
+  locationTapped() {}
+
+  statisticsTapped() {
+    Navigator.push(context, StatisticsScreen.route());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 32,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(40),
+        ),
+        color: Color(0xFFFFFFFF),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x14455B63),
+            offset: Offset(0, 4),
+            blurRadius: 16,
+          )
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              ProfileButton(
+                onTap: chatTapped,
+                icon: Icons.chat_bubble_outline,
+                color: Color(0xff3ACCE1),
+                label: 'Chat',
+              ),
+              ProfileButton(
+                onTap: statisticsTapped,
+                icon: Icons.dock_outlined,
+                color: Color(0xff3497FD),
+                label: 'Statistics',
+              ),
+              ProfileButton(
+                onTap: locationTapped,
+                icon: Icons.location_on,
+                color: Color(0xff665EFF),
+                label: 'Location',
+              ),
+            ],
+          ),
+          Container(
+            color: Color(0x23998fa2),
+            height: 1,
+            margin: EdgeInsets.symmetric(vertical: 32),
+          ),
+          widget.isMyProfile
+              ? Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    ProfileButton(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          UsersScreen.route([
+                            Where(
+                              column: 'following',
+                              val: "${widget.user.id}",
+                            ),
+                          ]),
+                        );
+                      },
+                      icon: Icons.people_outline,
+                      color: Color(0xffC840E9),
+                      label: 'Friends',
+                    ),
+                    ProfileButton(
+                      onTap: () {
+                        Navigator.push(context, SettingsScreen.route());
+                      },
+                      icon: Icons.settings,
+                      color: Color(0xffFF4F9A),
+                      label: 'Settings',
+                    ),
+                    ProfileButton(
+                      onTap: () {
+                        Navigator.push(context, NotificationScreen.route());
+                      },
+                      icon: Icons.chat,
+                      color: Color(0xffFF9057),
+                      label: 'Notifications',
+                    ),
+                  ],
+                )
+              : Container(),
+        ],
       ),
     );
   }

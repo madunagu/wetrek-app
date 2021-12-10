@@ -44,6 +44,10 @@ class _PhoneScreenState extends State<PhoneScreen> {
   }
 
   void _submitForm() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => LoadingPopup(),
+    );
     user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
 
     UserRepository userRepository = UserRepository(
@@ -55,6 +59,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
       Navigator.push(context, MapScreen.route());
     } catch (e, _) {
       print(_);
+      Navigator.pop(context);
       catchExceptions(e);
     }
   }
