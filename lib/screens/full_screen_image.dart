@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-// import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view.dart';
 
 class FullScreenImage extends StatelessWidget {
   FullScreenImage(this.image);
   final String image;
+  static route(String image) {
+    return MaterialPageRoute(builder: (context) => FullScreenImage(image));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // child: PhotoView(
-        //   imageProvider: NetworkImage(image),
-        // ),
+        child: PhotoView(
+          imageProvider: NetworkImage(image),
+        ),
       ),
     );
   }

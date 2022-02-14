@@ -12,6 +12,7 @@ import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
+import 'package:wetrek/screens/full_screen_image.dart';
 import 'package:wetrek/screens/login_screen.dart';
 import 'package:wetrek/screens/path_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
@@ -219,7 +220,13 @@ class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
                                 children: (widget.trek.pictures ??
                                         [widget.trek.picture])
                                     .map(
-                                      (e) => Image.network(e.small, height: 44),
+                                      (e) => GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(context,
+                                                FullScreenImage.route(e.full));
+                                          },
+                                          child: Image.network(e.small,
+                                              height: 44)),
                                     )
                                     .toList()),
                           ),

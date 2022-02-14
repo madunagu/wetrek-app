@@ -33,7 +33,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       body: Stack(
         children: [
           Image.asset(
-            'images/car.jpg',
+            'images/avatar1.jpg',
             fit: BoxFit.cover,
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,

@@ -39,7 +39,9 @@ class Address extends Model {
                 json['structured_formatting'] as Map<String, dynamic>)
             : null,
         terms: json['terms'] != null
-            ? (json['terms'] as List? ?? []).map((e) => Term.fromJson(e)).toList()
+            ? (json['terms'] as List? ?? [])
+                .map((e) => Term.fromJson(e))
+                .toList()
             : null,
 //    types: json['types'] != null ? (json['types'] as List? ?? []).map((e) => e as String).toList() : null
       );
@@ -119,12 +121,15 @@ class StructuredFormatting {
 
   factory StructuredFormatting.fromJson(Map<String, dynamic> json) =>
       StructuredFormatting(
-          mainText: json['main_text'] as String,
-          mainTextMatchedSubstrings:
-              (json['main_text_matched_substrings'] as List? ?? [])
-                  .map((e) => Match.fromJson(e))
-                  .toList(),
-          secondaryText: json['secondary_text'] as String);
+        mainText: json['main_text'] as String,
+        mainTextMatchedSubstrings:
+            (json['main_text_matched_substrings'] as List? ?? [])
+                .map((e) => Match.fromJson(e))
+                .toList(),
+        secondaryText: json['secondary_text'] != null
+            ? (json['secondary_text'] as String)
+            : '',
+      );
 
   Map<String, dynamic> toJson() => {
         'main_text': mainText,

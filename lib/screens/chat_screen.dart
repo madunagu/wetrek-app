@@ -1,22 +1,13 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/chat.bloc.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
-import 'package:wetrek/blocs/events/list.event.dart';
-import 'package:wetrek/blocs/events/search.event.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
-import 'package:wetrek/blocs/search.bloc.dart';
 import 'package:wetrek/blocs/states/chat.state.dart';
-import 'package:wetrek/blocs/states/list.state.dart';
-import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/messagable.dart';
 import 'package:wetrek/models/message.dart';
-import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/models/where.dart';
@@ -24,7 +15,6 @@ import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/message_repository.dart';
 import 'package:wetrek/repositories/socket_repository.dart';
-import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {

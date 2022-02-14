@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -8,9 +10,11 @@ import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
+import 'package:wetrek/repositories/image_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfile extends StatefulWidget {
   static route() {
@@ -27,6 +31,7 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController emailController;
   late TextEditingController passwordController;
   late TextEditingController confirmPasswordController;
+  File? selectedFile;
 
   @override
   void initState() {
@@ -61,9 +66,34 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
+  _imgFromGallery() async {
+    XFile? image = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (image != null) selectedFile = File(image.path);
+  }
+
+  void submitImagePressed() async {
+    Map<String, dynamic> obj = {
+      'photos': [],
+      'type': 'user',
+      'parent_id': user.id
+    };
+    if (selectedFile != null) {
+      obj['photos']!.add(base64Encode(selectedFile!.readAsBytesSync()));
+    }
+    try {
+      ImageRepository imageRepository = ImageRepository(
+          RepositoryProvider.of<AuthenticationRepository>(context).token);
+      await imageRepository.create(obj);
+    } catch (e, _) {
+      print(_);
+      catchExceptions(e);
+    }
+  }
+
   void initControllers() {
     nameController = TextEditingController(text: user.name);
-//    lastNameController = TextEditingController(text: user.lastName);
+//  lastNameController = TextEditingController(text: user.lastName);
 
     emailController = TextEditingController(text: user.email);
     passwordController = TextEditingController();
@@ -103,12 +133,21 @@ class _EditProfileState extends State<EditProfile> {
           child: Column(
             children: [
               SizedBox(height: 18),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  user.picture.large,
-                  width: 128,
-                  height: 128,
+              GestureDetector(
+                onTap: _imgFromGallery,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: selectedFile != null
+                      ? Image.file(
+                          selectedFile!,
+                          width: 128,
+                          height: 128,
+                        )
+                      : Image.network(
+                          user.picture.large,
+                          width: 128,
+                          height: 128,
+                        ),
                 ),
               ),
               SizedBox(height: 20),

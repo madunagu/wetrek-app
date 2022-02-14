@@ -23,7 +23,6 @@ import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/login_screen.dart';
-import 'package:wetrek/screens/nearby_screen.dart';
 import 'package:wetrek/screens/phone_screen.dart';
 import 'package:wetrek/screens/place_screen.dart';
 import 'package:wetrek/screens/terms_screen.dart';
@@ -107,6 +106,7 @@ class _MapScreenState extends State<MapScreen> {
                 builder: (BuildContext context, ScrollController controller) {
                   return SingleChildScrollView(
                     controller: controller,
+
                     child: BottomSheetContainer(
                       controller: homeController,
                       scrollController: controller,
@@ -234,6 +234,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
   }
 
   void _onMapTap(LatLng point) {
+    //TODO: here show the treks bottom sheet
 //    if (isTouchable) {
 //      _showPointDialog(point);
 //    }
@@ -286,6 +287,7 @@ class _GoogleMapContainerState extends State<GoogleMapContainer>
       child: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: widget.controller.myLocation,
+          //TODO: move away from static zoom
           zoom: 15,
         ),
         zoomControlsEnabled: false,
@@ -395,13 +397,14 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
         );
       case HomePageStatus.loading:
         return MapSheet(
-            controller: widget.controller,
-            child: Container(height: 200, child: CircularProgressIndicator()));
+          controller: widget.controller,
+          child: Container(height: 200, child: CircularProgressIndicator()),
+        );
       case HomePageStatus.searching:
         return Container(
           child: BlocProvider<SearchBloc>(
             create: (BuildContext context) => SearchBloc(
-              repository: MapsRepository(
+              repository: TrekRepository(
                   RepositoryProvider.of<AuthenticationRepository>(context)
                       .token),
             ),

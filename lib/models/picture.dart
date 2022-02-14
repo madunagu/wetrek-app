@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:wetrek/models/model.dart';
 
 @immutable
-class Picture {
+class Picture extends Model {
   const Picture({
     required this.id,
     required this.small,

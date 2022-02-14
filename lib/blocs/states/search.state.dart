@@ -15,7 +15,7 @@ class SearchState extends Equatable {
       count: 20,
       perPage: 20,
       currentPage: 0,
-      totalPages: 100,
+      totalPages: 1,
     ),
   });
 

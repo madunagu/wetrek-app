@@ -150,7 +150,7 @@ class _MyAppBarState extends State<MyAppBar> {
   }
 
   onBackPressed() {
-    searchBloc?.add(SearchFetched());
+    searchBloc?.add(SearchFetched(query: ''));
     setState(() {
       isSearching = false;
     });

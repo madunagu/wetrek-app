@@ -970,7 +970,7 @@ class _NormalSearchBarState extends State<NormalSearchBar> {
             child: TextField(
               onChanged: widget.controller.search,
               onTap: () {
-                widget.controller.setHomeStatus(HomePageStatus.searching);
+                widget.controller.setHomeStatus(HomePageStatus.suggesting);
               },
               controller: searchToTextController,
               style: TextStyles.darkNormal,
@@ -1269,8 +1269,14 @@ class _SearchResultsState extends State<SearchResults> {
                     return Column(
                       children: state.models
                           .map((e) => GestureDetector(
-                                onTap: () => widget.controller
-                                    .selectAddress(e as Address),
+                                onTap: () {
+                                  widget.controller.selectAddress(e as Address);
+                                  SearchBarStatus _searchStatus =  widget.controller.lastSearchStatus;
+                                  if (_searchStatus == SearchBarStatus.normal) {
+                                    widget.controller
+                                        .setHomeStatus(HomePageStatus.showing);
+                                  } else {}
+                                },
                                 child: SearchResultRow(e as Address, size),
                               ))
                           .toList(),

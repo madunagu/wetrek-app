@@ -42,6 +42,10 @@ class HomeController extends ChangeNotifier {
 
   Stream<String> get searchQueryStream => _searchQueryController.stream;
 
+  SearchBarStatus get lastSearchStatus => _copyStatus;
+
+  SearchBarStatus _copyStatus = SearchBarStatus.normal;
+
   setLocation(location) => _mapLocationController.add(location);
 
   search(String? query) {
@@ -55,14 +59,17 @@ class HomeController extends ChangeNotifier {
 
   collapseSearchBar() {
     _searchBarStatusController.sink.add(SearchBarStatus.normal);
+    _copyStatus = SearchBarStatus.normal;
   }
 
   expandSearchBar() {
     _searchBarStatusController.sink.add(SearchBarStatus.expanded);
+    _copyStatus = SearchBarStatus.expanded;
   }
 
   compressSearchBar() {
     _searchBarStatusController.sink.add(SearchBarStatus.compressed);
+    _copyStatus = SearchBarStatus.compressed;
   }
 
   refresh() {

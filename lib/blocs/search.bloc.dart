@@ -47,12 +47,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           status: SearchStatus.success,
           models: List.of(paginatedList.data),
           hasReachedMax: paginatedList.pagination.isLastPage(),
+          pagination: paginatedList.pagination,
         );
       } on Exception {
         yield state.copyWith(status: SearchStatus.failure);
       }
     } else {
-      yield state.copyWith(status: SearchStatus.initial, models: []);
+      // yield state.copyWith(status: SearchStatus.initial, models: []);
 
       try {
         final Paginated<Model> paginatedList = await repository.list(
@@ -65,11 +66,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         );
         yield state.copyWith(
           status: SearchStatus.success,
-          models: searchChanged
-              ? List.of(paginatedList.data)
-              : List.of(state.models)
-            ..addAll(paginatedList.data),
+          models: List.of(state.models)..addAll(paginatedList.data),
           hasReachedMax: paginatedList.pagination.isLastPage(),
+          pagination: paginatedList.pagination,
         );
       } on Exception {
         yield state.copyWith(status: SearchStatus.failure);
