@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
@@ -51,11 +52,34 @@ class _MapScreenState extends State<MapScreen> {
     user = BlocProvider.of<AuthenticationBloc>(context).state.user!;
     // checkPhoneNumberSaved();
     checkPrivacyPolicyAccepted();
+    locationInit();
     LatLng loc = user.locations.isNotEmpty
         ? user.locations.last.toLatLng()
         : LatLng(6.4584252, 3.2721445);
     homeController = HomeController(loc);
     super.initState();
+  }
+
+  void locationInit() async {
+    //TODO: write code requesting permision
+
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
   }
 
   checkPhoneNumberSaved() async {
@@ -106,7 +130,6 @@ class _MapScreenState extends State<MapScreen> {
                 builder: (BuildContext context, ScrollController controller) {
                   return SingleChildScrollView(
                     controller: controller,
-
                     child: BottomSheetContainer(
                       controller: homeController,
                       scrollController: controller,
@@ -369,14 +392,14 @@ class _BottomSheetContainerState extends State<BottomSheetContainer> {
             children: [
               MapSheetDetails(
                 controller: widget.controller,
-                rightContent: Text(
-                  '18',
-                  style: TextStyle(
-                    color: Color(0xff3D4255),
-                    fontSize: 62,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                // rightContent: Text(
+                //   '18',
+                //   style: TextStyle(
+                //     color: Color(0xff3D4255),
+                //     fontSize: 62,
+                //     fontWeight: FontWeight.w500,
+                //   ),
+                // ),
               ),
               BlocProvider<SearchBloc>(
                 create: (BuildContext context) => SearchBloc(

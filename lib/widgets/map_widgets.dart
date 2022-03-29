@@ -5,19 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:wetrek/blocs/events/list.event.dart';
 import 'package:wetrek/blocs/events/search.event.dart';
-import 'package:wetrek/blocs/list.bloc.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
-import 'package:wetrek/blocs/states/list.state.dart';
 import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/controllers/home_controller.dart';
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/direction.dart';
-import 'package:wetrek/models/location.dart';
-import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/option.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/exceptions.dart';
@@ -37,9 +32,53 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:wetrek/widgets/avatar_list.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class PlaceDetailsPreview extends StatelessWidget {
+class PlaceDetailsPreview extends StatefulWidget {
   PlaceDetailsPreview({required this.place});
   final Address place;
+
+  @override
+  State<PlaceDetailsPreview> createState() => _PlaceDetailsPreviewState();
+}
+
+class _PlaceDetailsPreviewState extends State<PlaceDetailsPreview> {
+  List<String> images = [];
+  bool isLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getImages();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _getImages() async {
+    try {
+      Map<String, dynamic> res =
+          await MapsRepository.getPlace(widget.place.reference);
+      if (res['result']['photos'] != null &&
+          res['result']['photos'].isNotEmpty) {
+        List<dynamic> photos = (res['result']['photos'] as List<dynamic>);
+        for (var p in photos) {
+          images.add(MapsRepository.getPhoto(p['photo_reference']));
+        }
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        isLoaded = true;
+      });
+    }
+    setState(() {
+      print(images);
+      isLoaded = true;
+      log(images.toString(), name: 'herald');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -47,38 +86,137 @@ class PlaceDetailsPreview extends StatelessWidget {
       padding: EdgeInsets.only(top: 8, bottom: 16),
       child: Column(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  height: 44,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    // children: trek.pictures != null && trek.pictures!.isNotEmpty
-                    //     ? trek.pictures!
-                    //         .map((e) => Image.network(e.small, height: 44))
-                    //         .toList()
-                    //     : [],
+          Container(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  //snapshot.hasError     snapshot.connectionState == ConnectionState.waiting
+                  flex: 2,
+                  child: Container(
+                    height: 44,
+                    child: images.isEmpty
+                        ? isLoaded
+                            ? Center(
+                                child: Text('Error: no images'),
+                              )
+                            : Center(
+                                child: CircularProgressIndicator(),
+                              )
+                        : ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: images
+                                .map(
+                                  (e) => Image.network(
+                                    e,
+                                    height: 44,
+                                  ),
+                                )
+                                .toList(),
+                          ),
                   ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Navigator.of(context).push(TrekScreen.route(trek));
+                      Navigator.of(context)
+                          .push(PlaceScreen.route(widget.place));
+                    },
+                    child: Container(
+                      child: MyButton('GO THERE'),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          RelatedTreks(place: widget.place),
+          RelatedTreks(place: widget.place),
+          RelatedTreks(place: widget.place),
+        ],
+      ),
+    );
+  }
+}
+
+class RelatedTreks extends StatefulWidget {
+  RelatedTreks({Key? key, required this.place}) : super(key: key);
+
+  Address place;
+
+  @override
+  State<RelatedTreks> createState() => _RelatedTreksState();
+}
+
+class _RelatedTreksState extends State<RelatedTreks> {
+  bool _isOpen = false;
+  void _toggleDown() {
+    setState(() {
+      _isOpen = !_isOpen;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _toggleDown,
+      child: Container(
+        padding: EdgeInsets.only(
+          top: 16,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset('images/avatar1.jpg', width: 48, height: 48),
+            ),
+            SizedBox(width: 16),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Mile Trek', style: TextStyles.normal),
+              SizedBox(height: 3),
+              Text(
+                'Abule Ado',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0x86fffffff),
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigator.of(context).push(TrekScreen.route(trek));
-                    // Navigator.of(context).push(PlaceScreen.route());
-                  },
-                  child: Container(
-                    child: MyButton('GO THERE'),
-                  ),
-                ),
+              _isOpen
+                  ? Container(
+                      height: 139,
+                      width: MediaQuery.of(context).size.width - 136,
+                      child: Column(
+                        children: [
+                          SizedBox(height: 20),
+                          AvatarList(
+                            imgSrcs: [
+                              'https://picsum.photos/200',
+                              'https://picsum.photos/200',
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                          DestinationCard(
+                            originAddress: 'Yaba',
+                            destinationAddress: 'Abule Ado',
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(),
+              SizedBox(height: 20),
+              Container(
+                height: 1,
+                width: MediaQuery .of(context).size.width - 136,
+                // width: double.infinity,
+                color: Color(0x16ffffff),
               )
-            ],
-          ),
-        ],
+            ]),
+          ],
+        ),
       ),
     );
   }
@@ -283,18 +421,31 @@ class MapSheetDetails extends StatelessWidget {
           ),
           SizedBox(width: 16),
           Container(
+            width: MediaQuery.of(context).size.width - 72,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: TextStyles.normal,
+                Container(
+                  width: MediaQuery.of(context).size.width - 72,
+                  child: Text(
+                    title,
+                    style: TextStyles.normal,
+                  ),
                 ),
-                Text(
-                  subTitle,
-                  style: TextStyles.minor,
+                Container(
+                  width: MediaQuery.of(context).size.width - 72,
+                  child: Text(
+                    subTitle,
+                    style: TextStyles.minor,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                child != null ? child! : Container(),
+                child != null
+                    ? Container(
+                        width: MediaQuery.of(context).size.width - 72,
+                        child: child!)
+                    : Container(),
               ],
             ),
           ),
@@ -741,7 +892,7 @@ class DestinationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        MovementDrawing(height: 43, width: 10),
+        MovementDrawing(height: 64, width: 10),
         SizedBox(width: 20),
         Expanded(
           child: Container(
@@ -749,18 +900,18 @@ class DestinationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Text('Start Location', style: TextStyles.darkMinor),
-                Text(originAddress, style: TextStyles.darkNormal),
+                Text(originAddress, style: TextStyles.normal),
                 // Container(
                 //   margin: EdgeInsets.symmetric(vertical: 15),
                 //   height: 1,
                 //   color: Color(0xffF4F4F6),
                 // ),
-                SizedBox(height: 25),
+                SizedBox(height: 28),
                 // Text(
                 //   'Destination Location',
                 //   style: TextStyles.darkMinor,
                 // ),
-                Text(destinationAddress, style: TextStyles.darkNormal),
+                Text(destinationAddress, style: TextStyles.normal),
                 // Container(
                 //   margin: EdgeInsets.symmetric(vertical: 6),
                 //   height: 1,
@@ -1271,7 +1422,8 @@ class _SearchResultsState extends State<SearchResults> {
                           .map((e) => GestureDetector(
                                 onTap: () {
                                   widget.controller.selectAddress(e as Address);
-                                  SearchBarStatus _searchStatus =  widget.controller.lastSearchStatus;
+                                  SearchBarStatus _searchStatus =
+                                      widget.controller.lastSearchStatus;
                                   if (_searchStatus == SearchBarStatus.normal) {
                                     widget.controller
                                         .setHomeStatus(HomePageStatus.showing);

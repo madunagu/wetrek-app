@@ -44,17 +44,17 @@ class _TrekScreenState extends State<TrekScreen> with MyPopupMixin {
 
   @override
   void initState() {
+    super.initState();
     trek = widget.trek;
     token = RepositoryProvider.of<AuthenticationRepository>(context).token!;
     getTrek();
-    super.initState();
   }
 
   getTrek() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => LoadingPopup(),
-    );
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) => LoadingPopup(),
+    // );
     trek = await TrekRepository(token).get(widget.trek.id);
 
     setState(() {

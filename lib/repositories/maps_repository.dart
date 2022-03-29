@@ -46,7 +46,7 @@ class MapsRepository extends Repository {
     );
   }
 
-  Future<dynamic> getPlace(String placeId) async {
+  static Future<Map<String, dynamic>> getPlace(String placeId) async {
     final Map<String, dynamic> res = await API.getExternal(
       "https://maps.googleapis.com/maps/api/place/details/json",
       params: {
@@ -56,5 +56,12 @@ class MapsRepository extends Repository {
       },
     );
     return res;
+  }
+
+  static String getPhoto(String referenceId) {
+    return "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=" +
+        referenceId +
+        '&key=' +
+        _mapsKey;
   }
 }

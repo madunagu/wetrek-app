@@ -28,11 +28,11 @@ class _PlaceScreenState extends State<PlaceScreen> {
   }
 
   getPlace() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => LoadingPopup(),
-    );
-    var place = MapsRepository('not').getPlace(widget.place.placeId);
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) => LoadingPopup(),
+    // );
+    // var place = MapsRepository('not').getPlace(widget.place.placeId);
   }
 
   @override
