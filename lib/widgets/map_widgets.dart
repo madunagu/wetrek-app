@@ -23,7 +23,6 @@ import 'package:wetrek/repositories/maps_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/login_screen.dart';
 import 'package:wetrek/screens/map_screen.dart';
-import 'package:wetrek/screens/path_screen.dart';
 import 'package:wetrek/screens/place_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';

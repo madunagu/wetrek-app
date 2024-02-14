@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/blocs/states/authentication.state.dart';

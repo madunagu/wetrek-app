@@ -2,18 +2,15 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/mixins/popup_mixin.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/models/where.dart';
-import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/full_screen_image.dart';
-import 'package:wetrek/screens/login_screen.dart';
 import 'package:wetrek/screens/path_screen.dart';
 import 'package:wetrek/screens/users_screen.dart';
 import 'package:wetrek/widgets/map_widgets.dart';

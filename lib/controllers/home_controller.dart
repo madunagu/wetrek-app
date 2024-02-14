@@ -5,12 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/direction.dart';
-import 'package:wetrek/models/index.dart';
-import 'package:wetrek/models/location.dart';
 import 'package:wetrek/models/trek.dart';
 import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/maps_repository.dart';
-import 'package:wetrek/repositories/trek_repository.dart';
 
 class HomeController extends ChangeNotifier {
   HomeController(this.myLocation);

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/models/direction.dart';
-import 'package:wetrek/repositories/trek_repository.dart';
-import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 import 'package:wetrek/widgets/widgets.dart';
 

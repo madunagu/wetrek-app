@@ -6,7 +6,6 @@ import 'package:wetrek/blocs/chat.bloc.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/models/index.dart';
 import 'package:wetrek/models/message.dart';
-import 'package:wetrek/network/api.dart';
 
 class ChatService {
   StreamController<Message> _messagesStreamController = StreamController();

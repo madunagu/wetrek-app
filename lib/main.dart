@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
-import 'package:wetrek/blocs/events/authentication.event.dart';
 import 'package:wetrek/blocs/login.bloc.dart';
 import 'package:wetrek/blocs/states/authentication.state.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/location_repository.dart';
 import 'package:wetrek/repositories/socket_repository.dart';
-import 'package:wetrek/repositories/trek_repository.dart';
-import 'package:wetrek/repositories/user_repository.dart';
-import 'package:wetrek/screens/categories_screen.dart';
-import 'package:wetrek/screens/chat_screen.dart';
 import 'package:wetrek/screens/login_screen.dart';
 import 'package:wetrek/screens/map_screen.dart';
-import 'package:wetrek/screens/nearby_screen.dart';
-import 'package:wetrek/screens/notifications_screen.dart';
-import 'package:wetrek/screens/path_screen.dart';
-import 'package:wetrek/screens/phone_screen.dart';
-import 'package:wetrek/screens/place_screen.dart';
-import 'package:wetrek/screens/profile_screen.dart';
 import 'package:wetrek/screens/splash_screen.dart';
-import 'package:wetrek/screens/statistics_screen.dart';
-import 'package:wetrek/screens/terms_screen.dart';
-import 'package:wetrek/screens/trek_screen.dart';
-import 'package:wetrek/screens/trips_screen.dart';
-import 'package:wetrek/screens/users_screen.dart';
 
 // import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 void main() async {

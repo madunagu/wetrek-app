@@ -1,18 +1,13 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:laravel_echo/laravel_echo.dart';
-import 'package:pusher_client/pusher_client.dart';
 import 'package:wetrek/blocs/events/chat.event.dart';
 import 'package:wetrek/blocs/states/chat.state.dart';
 import 'package:wetrek/models/message.dart';
 import 'package:wetrek/models/model.dart';
 import 'package:wetrek/models/paginated.dart';
 import 'package:wetrek/models/parameters.dart';
-import 'package:wetrek/network/api.dart';
 // import 'package:wetrek/pusher/pusher.dart';
 import 'package:wetrek/repositories/message_repository.dart';
-import 'package:wetrek/repositories/repository.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:wetrek/repositories/socket_repository.dart';
 

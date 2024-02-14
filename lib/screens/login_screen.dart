@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/events/login.event.dart';
 import 'package:wetrek/blocs/login.bloc.dart';
 import 'package:wetrek/blocs/states/login.state.dart';
 import 'package:wetrek/constants/text_styles.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
-import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/welcome_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 import 'package:formz/formz.dart';

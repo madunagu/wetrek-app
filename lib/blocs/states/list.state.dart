@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:wetrek/models/model.dart';
-import 'package:wetrek/repositories/repository.dart';
 
 abstract class ListState extends Equatable {
   const ListState();

@@ -7,7 +7,6 @@ import 'package:wetrek/network/exceptions.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
 import 'package:wetrek/repositories/user_repository.dart';
 import 'package:wetrek/screens/map_screen.dart';
-import 'package:wetrek/screens/payment_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 class PhoneScreen extends StatefulWidget {

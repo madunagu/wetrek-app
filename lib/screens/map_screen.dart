@@ -8,9 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
-import 'package:wetrek/blocs/events/search.event.dart';
 import 'package:wetrek/blocs/search.bloc.dart';
-import 'package:wetrek/blocs/states/search.state.dart';
 import 'package:wetrek/controllers/home_controller.dart';
 import 'package:wetrek/models/address.dart';
 import 'package:wetrek/models/direction.dart';
@@ -31,7 +29,6 @@ import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/widgets/app_navigation_bar.dart';
 import 'package:wetrek/widgets/map_widgets.dart';
 import 'package:wetrek/widgets/widgets.dart';
-import 'dart:ui' as ui;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);

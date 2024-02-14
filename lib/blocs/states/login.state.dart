@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
-import 'package:wetrek/network/exceptions.dart';
 
 
 class Password extends FormzInput<String, String> {

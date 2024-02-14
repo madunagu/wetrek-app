@@ -2,13 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pusher_client/pusher_client.dart';
 import 'package:wetrek/models/message.dart';
-import 'package:wetrek/models/user.dart';
 import 'package:wetrek/network/api.dart';
 import 'package:wetrek/repositories/authentication_repository.dart';
-import 'package:wetrek/repositories/user_repository.dart';
 
 class SocketRepository {
   final _controller = StreamController<Message>.broadcast();

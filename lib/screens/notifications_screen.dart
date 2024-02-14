@@ -12,7 +12,6 @@ import 'package:wetrek/repositories/notification_repository.dart';
 import 'package:wetrek/repositories/trek_repository.dart';
 import 'package:wetrek/screens/splash_screen.dart';
 import 'package:wetrek/screens/trek_screen.dart';
-import 'package:wetrek/screens/welcome_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
 import 'package:timeago/timeago.dart' as timeago;

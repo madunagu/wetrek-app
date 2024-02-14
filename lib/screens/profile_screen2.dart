@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wetrek/models/user.dart';
-import 'package:wetrek/widgets/widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key, required this.user}) : super(key: key);

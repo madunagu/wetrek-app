@@ -1,11 +1,6 @@
 import 'dart:async';
-import 'package:wetrek/models/message.dart';
-import 'package:wetrek/models/paginated.dart';
-import 'package:wetrek/models/pagination.dart';
-import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/settings.dart';
 import 'package:wetrek/network/api.dart';
-import 'package:wetrek/repositories/repository.dart';
 
 class MessageRepository {
   late final API api;

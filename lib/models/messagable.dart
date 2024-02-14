@@ -1,4 +1,3 @@
-import 'package:wetrek/models/index.dart';
 import 'package:wetrek/models/picture.dart';
 import 'model.dart';
 

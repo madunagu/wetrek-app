@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:wetrek/models/parameters.dart';
 import 'package:wetrek/models/where.dart';
 
 abstract class SearchEvent extends Equatable {

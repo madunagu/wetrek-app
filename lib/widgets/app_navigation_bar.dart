@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wetrek/blocs/authentication.bloc.dart';
 import 'package:wetrek/blocs/events/authentication.event.dart';
-import 'package:wetrek/constants/colors.dart';
 import 'package:wetrek/models/user.dart';
 import 'package:wetrek/presentation/custom_icons.dart';
 import 'package:wetrek/screens/chats_screen.dart';
 import 'package:wetrek/screens/notifications_screen.dart';
 import 'package:wetrek/screens/profile_screen.dart';
-import 'package:wetrek/screens/trek_screen.dart';
 import 'package:wetrek/screens/trips_screen.dart';
 import 'package:wetrek/widgets/widgets.dart';
 
